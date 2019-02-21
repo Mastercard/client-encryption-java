@@ -1,0 +1,26 @@
+language: java
+git:
+  depth: false  # "Shallow clone detected during the analysis"
+matrix:
+  fast_finish: true
+  include:
+  - jdk: oraclejdk8
+    env: WITH_SONAR_ANALYSIS=true
+  - jdk: oraclejdk9
+  - jdk: openjdk8
+  - jdk: openjdk9
+  - jdk: openjdk10
+  - jdk: openjdk11
+  - jdk: openjdk12
+install: true
+script:
+  - mvn clean install "-Dgpg.signature.skip=$GPG_SIGNATURE_SKIP"
+after_success:
+  - |
+    test $WITH_SONAR_ANALYSIS && mvn sonar:sonar \
+        "-Dsonar.projectName=$SONAR_PROJECT_NAME" \
+        "-Dsonar.projectKey=$SONAR_PROJECT_KEY" \
+        "-Dsonar.organization=$SONAR_ORGANIZATION_KEY" \
+        "-Dsonar.host.url=$SONAR_URL" \
+        "-Dsonar.login=$SONAR_TOKEN" \
+        "-Dsonar.exclusions=**/*.xml" || echo 'Skipping Sonar execution'

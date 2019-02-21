@@ -1,0 +1,10 @@
+.idea
+*.iml
+target/**
+.DS_Store
+
+# VSCode directories and files
+.classpath
+.vscode/
+.project
+.settings/
