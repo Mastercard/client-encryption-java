@@ -3,12 +3,14 @@ package com.mastercard.developer.encryption;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.security.spec.MGF1ParameterSpec;
 
+import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.*;
 import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionConfigBuilder;
 import static org.junit.Assert.*;
 
@@ -41,6 +43,35 @@ public class FieldLevelEncryptionTest {
         assertNotNull(encryptedData.get("encryptedValue").getAsString());
         assertNotNull(encryptedData.get("encryptedKey").getAsString());
         assertNotNull(encryptedData.get("iv").getAsString());
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldSupportBase64FieldValueEncoding() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": {}, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withFieldValueEncoding(FieldValueEncoding.BASE64)
+                .withEncryptionCertificateFingerprint(null)
+                .withEncryptionKeyFingerprint(null)
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("data"));
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertNotNull(encryptedData);
+        assertEquals("SHA256", encryptedData.get("oaepHashingAlgorithm").getAsString());
+        assertEquals("dhsAPB6t46VJDlAA03iHuqXm7A4ibAdwblmUUfwDKnk=", encryptedData.get("encryptionKeyFingerprint").getAsString());
+        assertEquals("gIEPwTqDGfzw4uwyLIKkwwS3gsw85nEXY0PP6BYMInk=", encryptedData.get("encryptionCertificateFingerprint").getAsString());
+        assertTrue(Base64.isBase64(encryptedData.get("encryptedValue").getAsString()));
+        assertTrue(Base64.isBase64(encryptedData.get("encryptedKey").getAsString()));
+        assertTrue(Base64.isBase64(encryptedData.get("iv").getAsString()));
     }
 
     @Test
@@ -334,6 +365,35 @@ public class FieldLevelEncryptionTest {
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertNull(payloadObject.get("encryptedData"));
         assertEquals("\"string\"", payloadObject.get("data").toString());
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldSupportBase64FieldValueDecoding() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"uldLBySPY3VrznePihFYGQ==\"," +
+                "        \"encryptedKey\": \"Jmh/bQPScUVFHSC9qinMGZ4lM7uetzUXcuMdEpC5g4C0Pb9HuaM3zC7K/509n7RTBZUPEzgsWtgi7m33nhpXsUo8WMcQkBIZlKn3ce+WRyZpZxcYtVoPqNn3benhcv7cq7yH1ktamUiZ5Dq7Ga+oQCaQEsOXtbGNS6vA5Bwa1pjbmMiRIbvlstInz8XTw8h/T0yLBLUJ0yYZmzmt+9i8qL8KFQ/PPDe5cXOCr1Aq2NTSixe5F2K/EI00q6D7QMpBDC7K6zDWgAOvINzifZ0DTkxVe4EE6F+FneDrcJsj+ZeIabrlRcfxtiFziH6unnXktta0sB1xcszIxXdMDbUcJA==\"," +
+                "        \"encryptedValue\": \"KGfmdUWy89BwhQChzqZJ4w==\"," +
+                "        \"encryptionCertificateFingerprint\": \"gIEPwTqDGfzw4uwyLIKkwwS3gsw85nEXY0PP6BYMInk=\"," +
+                "        \"encryptionKeyFingerprint\": \"dhsAPB6t46VJDlAA03iHuqXm7A4ibAdwblmUUfwDKnk=\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withFieldValueEncoding(FieldValueEncoding.BASE64)
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
+        assertNull(payloadObject.get("encryptedData"));
+        assertEquals("{}", payloadObject.get("data").toString());
     }
 
     @Test
