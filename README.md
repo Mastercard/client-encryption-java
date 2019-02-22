@@ -91,17 +91,17 @@ Reading PEM encoded keys requires an additional step:
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
 The methods that do all the heavy lifting are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
-`encryptPayload` usage:
+* `encryptPayload` usage:
 ```java
 String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
 ```
 
-`decryptPayload` usage:
+* `decryptPayload` usage:
 ```java
 String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePayload, config);
 ```
 
-#### Configuring the Field Level Encryption
+#### Configuring the Field Level Encryption <a name="configuring-the-field-level-encryption"></a>
 Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
@@ -123,7 +123,7 @@ See also [FieldLevelEncryptionConfig.java](https://github.com/Mastercard/client-
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
-Example using the configuration above:
+Example using the configuration [above](#configuring-the-field-level-encryption):
 
 * Request payload:
 ```json
@@ -146,8 +146,8 @@ Example using the configuration above:
         "to": {
             "encryptedFoo": {
                 "iv": "7f1105fb0c684864a189fb3709ce3d28",
-                "encryptedKey": "67f467d1b653d98dddd7eea5ae411a0c6d3c(...)ffd4c09dd42f713b6b39313503be179bae18a51bff2b48f937c8",
-                "encryptedValue": "b73aabd267517f79c54e84ff01d8bc09ed72455c2(...)dffb5fa04bf4ca4fff907d67072a75b076e6ce9ade1ff514ed6141",
+                "encryptedKey": "67f467d1b653d98411a0c6d3c(...)ffd4c09dd42f713a51bff2b48f937c8",
+                "encryptedValue": "b73aabd267517fc09ed72455c2(...)dffb5fa04bf6e6ce9ade1ff514ed6141",
                 "oaepHashingAlgorithm": "SHA256"
             }
         }
@@ -159,15 +159,17 @@ Example using the configuration above:
 
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
-Encrypted response payload:
+Example using the configuration [above](#configuring-the-field-level-encryption):
+
+* Encrypted response payload:
 ```json
 {
     "path": {
         "to": {
             "encryptedFoo": {
                 "iv": "e5d313c056c411170bf07ac82ede78c9",
-                "encryptedKey": "e3a56746c0f9109d18b3a2d91619e6cac8c7b09652b76(...)f16d8af7e006440f17677eaaeff36b2479652f5c24ae7bd",
-                "encryptedValue": "809a09d78257af5379df0c454dfa9c32ecf5787430775ebcf(...)409d8d27ab29803353cded59fe72fd4a7735c69da4080e74f",
+                "encryptedKey": "e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd",
+                "encryptedValue": "809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f",
                 "oaepHashingAlgorithm": "SHA256"
             }
         }
@@ -175,7 +177,7 @@ Encrypted response payload:
 }
 ```
 
-Response payload:
+* Response payload:
 ```json
 {
     "path": {
