@@ -44,4 +44,15 @@ public final class EncryptionUtils {
                     "'openssl pkcs8 -topk8 -inform PEM -outform DER -in your_key.pem -out your_key.der -nocrypt'!", e);
         }
     }
+
+    /**
+     * Load a RSA decryption key out of a PKCS#12 container.
+     */
+    public static PrivateKey loadDecryptionKey(String pkcs12KeyFilePath,
+                                            String encryptionKeyAlias,
+                                            String encryptionKeyPassword) throws IOException, NoSuchProviderException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12", "SunJSSE");
+        pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), encryptionKeyPassword.toCharArray());
+        return (PrivateKey) pkcs12KeyStore.getKey(encryptionKeyAlias, encryptionKeyPassword.toCharArray());
+    }
 }

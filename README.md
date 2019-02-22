@@ -18,18 +18,21 @@
   * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
 
 ## Overview <a name="overview"></a>
-TODO.
+Zero dependency library for Mastercard API compliant encryption/decryption.
 
 ### Compatibility <a name="compatibility"></a>
 Java 7+
 
 ### References <a name="references"></a>
-* TODO
-* TODO
+* [Encryption of sensitive data guide](https://developer.mastercard.com/page/mdes-token-connect-encryption-of-sensitive-data)
 
 ## Usage <a name="usage"></a>
 ### Prerequisites <a name="prerequisites"></a>
-TODO
+Before using this library, you will need to set up a project in the [Mastercard Developers Portal](https://developer.mastercard.com). 
+
+As part of this set up, you'll receive:
+* A public request encryption certificate (aka "Client Encryption Keys")
+* A private response decryption key (aka "Mastercard Encryption Keys")
 
 ### Adding the Library to Your Project <a name="adding-the-library-to-your-project"></a>
 
@@ -53,10 +56,35 @@ dependencies {
 See: https://search.maven.org/artifact/com.mastercard.developer/client-encryption
 
 ### Loading the Encryption Certificate <a name="loading-the-encryption-certificate"></a>
-TODO
+
+A `Certificate` object can be created from a PEM file by calling the `EncryptionUtils.loadEncryptionCertificate` method:
+```java
+Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<insert PEM certificate file path>");
+```
 
 ### Loading the Decryption Key <a name="loading-the-decryption-key"></a>
-TODO
+
+#### From a PKCS#12 file
+
+A `PrivateKey` key object can be created from a PKCS#12 file by calling the `EncryptionUtils.loadDecryptionKey` method:
+```java
+PrivateKey signingKey = EncryptionUtils.loadDecryptionKey(
+						"<insert PKCS#12 key file path>", 
+						"<insert key alias>", 
+						"<insert key password>");
+```
+
+#### From a PKCS#8 (DER) encoded content
+
+A `PrivateKey` object can be created from a PKCS#8 key file by calling the `EncryptionUtils.loadDecryptionKey` method:
+```java
+PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert PKCS#8 file path>");
+```
+
+#### From a PEM file
+
+1. Convert the key using: `openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -out key.der -nocrypt`
+2. Call `EncryptionUtils.loadDecryptionKey` (see above)
 
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
 TODO
