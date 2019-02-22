@@ -31,8 +31,8 @@ Java 7+
 Before using this library, you will need to set up a project in the [Mastercard Developers Portal](https://developer.mastercard.com). 
 
 As part of this set up, you'll receive:
-* A public request encryption certificate (aka "Client Encryption Keys")
-* A private response decryption key (aka "Mastercard Encryption Keys")
+* A public request encryption certificate (aka _Client Encryption Keys_)
+* A private response decryption key (aka _Mastercard Encryption Keys_)
 
 ### Adding the Library to Your Project <a name="adding-the-library-to-your-project"></a>
 
@@ -68,7 +68,7 @@ Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<
 
 A `PrivateKey` key object can be created from a PKCS#12 file by calling the `EncryptionUtils.loadDecryptionKey` method:
 ```java
-PrivateKey signingKey = EncryptionUtils.loadDecryptionKey(
+PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
 						"<insert PKCS#12 key file path>", 
 						"<insert key alias>", 
 						"<insert key password>");
@@ -83,11 +83,107 @@ PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert PKCS#8 fil
 
 #### From a PEM file
 
+Reading PEM encoded keys requires an additional step:
+
 1. Convert the key using: `openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -out key.der -nocrypt`
 2. Call `EncryptionUtils.loadDecryptionKey` (see above)
 
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
-TODO
+The methods that do all the heavy lifting are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
+
+Usage:
+```java
+String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePayload, config);
+```
+
+#### Configuring the Field Level Encryption
+Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
+```java
+FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionCertificate(encryptionCertificate)
+                .withDecryptionKey(decryptionKey)
+                .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
+                .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
+                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(FieldValueEncoding.HEX)
+                .build();
+```
+
+See also: [FieldLevelEncryptionConfig.java](TODO)
+
+#### Performing Encryption
+
+Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
+
+Example using the configuration above:
+
+* Request payload:
+```json
+{
+    "path": {
+        "to": {
+            "foo": {
+                "sensitiveField1": "sensitiveValue1",
+                "sensitiveField2": "sensitiveValue2"
+            }
+        }
+    }
+}
+```
+
+* Encrypted request payload:
+```json
+{
+    "path": {
+        "to": {
+            "encryptedFoo": {
+                "iv": "7f1105fb0c684864a189fb3709ce3d28",
+                "encryptedKey": "67f467d1b653d98dddd7eea5ae411a0c6d3c(...)ffd4c09dd42f713b6b39313503be179bae18a51bff2b48f937c8",
+                "encryptedValue": "b73aabd267517f79c54e84ff01d8bc09ed72455c2(...)dffb5fa04bf4ca4fff907d67072a75b076e6ce9ade1ff514ed6141",
+                "oaepHashingAlgorithm": "SHA256"
+            }
+        }
+    }
+}
+```
+
+#### Performing Decryption
+
+Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
+
+Encrypted response payload:
+```json
+{
+    "path": {
+        "to": {
+            "encryptedFoo": {
+                "iv": "e5d313c056c411170bf07ac82ede78c9",
+                "encryptedKey": "e3a56746c0f9109d18b3a2d91619e6cac86bcc7b09652b76(...)f16d8af7e006440f17677eaaeff36b2479652f5c24ae7bd",
+                "encryptedValue": "809a09d78257af5379df0c454dfa9c3e2ecf5787430775ebcf(...)409d8d27ab29803353cded59fe72fd4a7735c69da4080e74f",
+                "oaepHashingAlgorithm": "SHA256"
+            }
+        }
+    }
+}
+```
+
+Response payload:
+```json
+{
+    "path": {
+        "to": {
+            "foo": {
+                "sensitiveField1": "sensitiveValue1",
+                "sensitiveField2": "sensitiveValue2"
+            }
+        }
+    }
+}
+```
 
 ### Integrating with OpenAPI Generator API Client Libraries <a name="integrating-with-openapi-generator-api-client-libraries"></a>
 
