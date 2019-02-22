@@ -2,7 +2,7 @@ package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.squareup.okhttp.*;
+import okhttp3.*;
 import okio.Buffer;
 import org.apache.commons.codec.DecoderException;
 
@@ -10,14 +10,14 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
- * An OkHttp2 interceptor for encrypting/decrypting parts of HTTP payloads.
+ * An OkHttp3 interceptor for encrypting/decrypting parts of HTTP payloads.
  * See: https://github.com/square/okhttp/wiki/Interceptors
  */
-public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
+public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
 
     private final FieldLevelEncryptionConfig config;
 
-    public OkHttp2FieldLevelEncryptionInterceptor(FieldLevelEncryptionConfig config) {
+    public OkHttpFieldLevelEncryptionInterceptor(FieldLevelEncryptionConfig config) {
         this.config = config;
     }
 

@@ -3,8 +3,8 @@ package com.mastercard.developer.interceptor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.OkHttp2FieldLevelEncryptionInterceptor;
-import com.squareup.okhttp.*;
+import com.mastercard.developer.interceptors.OkHttpFieldLevelEncryptionInterceptor;
+import okhttp3.*;
 import okio.Buffer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionCon
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class OkHttp2FieldLevelEncryptionInterceptorTest {
+public class OkHttpFieldLevelEncryptionInterceptorTest {
 
     private final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
@@ -27,9 +27,10 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
                 .withDecryptionPath("$.encryptedFoo", "$.foo")
                 .build();
-        OkHttpClient client = new OkHttpClient();
-        client.interceptors().add(new OkHttp2FieldLevelEncryptionInterceptor(config));
-        client.interceptors().add(new MockServiceInterceptor());
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config))
+                .addInterceptor(new MockServiceInterceptor())
+                .build();
 
         // WHEN
         String payload = "{\"foo\":\"bar\"}";
@@ -56,9 +57,10 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
                 .withDecryptionPath("$.encryptedFoo", "$.foo")
                 .build();
-        OkHttpClient client = new OkHttpClient();
-        client.interceptors().add(new OkHttp2FieldLevelEncryptionInterceptor(config));
-        client.interceptors().add(new MockServiceInterceptor());
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config))
+                .addInterceptor(new MockServiceInterceptor())
+                .build();
 
         // WHEN
         Request request = new Request.Builder()
@@ -94,7 +96,7 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
             }
         }
 
-        private Response mockResponse(Request request, MediaType mediaType, byte[] payloadBytes) throws IOException {
+        private Response mockResponse(Request request, MediaType mediaType, byte[] payloadBytes) {
             try (ResponseBody responseBody = ResponseBody.create(mediaType, payloadBytes)) {
                 return new Response.Builder()
                         .body(responseBody)

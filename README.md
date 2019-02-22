@@ -62,4 +62,85 @@ TODO
 TODO
 
 ### Integrating with OpenAPI Generator API Client Libraries <a name="integrating-with-openapi-generator-api-client-libraries"></a>
-TODO
+
+[OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) generates API client libraries from [OpenAPI Specs](https://github.com/OAI/OpenAPI-Specification). 
+It provides generators and library templates for supporting multiple languages and frameworks.
+
+The `com.mastercard.developer.interceptors` package will provide you with some interceptor classes you can use when configuring your API client. These classes will take care of encrypting/decrypting request and response payloads.
+
+Library options currently supported for the `java` generator:
++ [okhttp-gson](#okhttp-gson)
++ [retrofit](#retrofit)
++ [retrofit2](#retrofit2)
+
+See also:
+* [OpenAPI Generator (maven Plugin)](https://mvnrepository.com/artifact/org.openapitools/openapi-generator-maven-plugin) 
+* [CONFIG OPTIONS for java](https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/java.md)
+
+#### okhttp-gson <a name="okhttp-gson"></a>
+##### OpenAPI Generator Plugin Configuration
+```xml
+<configuration>
+    <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+    <generatorName>java</generatorName>
+    <library>okhttp-gson</library>
+    <!-- ... -->
+</configuration>
+```
+
+##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor`
+```java
+ApiClient client = new ApiClient();
+client.setBasePath("https://sandbox.api.mastercard.com");
+List<Interceptor> interceptors = client.getHttpClient().networkInterceptors();
+interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
+interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
+ServiceApi serviceApi = new ServiceApi(client);
+// ...
+```
+
+#### retrofit <a name="retrofit"></a>
+##### OpenAPI Generator Plugin Configuration
+```xml
+<configuration>
+    <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+    <generatorName>java</generatorName>
+    <library>retrofit</library>
+    <!-- ... -->
+</configuration>
+```
+
+##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor`
+```java
+ApiClient client = new ApiClient();
+RestAdapter.Builder adapterBuilder = client.getAdapterBuilder();
+adapterBuilder.setEndpoint("https://sandbox.api.mastercard.com"); 
+List<Interceptor> interceptors = client.getOkClient().networkInterceptors();
+interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
+interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
+ServiceApi serviceApi = client.createService(ServiceApi.class);
+// ...
+```
+
+#### retrofit2 <a name="retrofit2"></a>
+##### OpenAPI Generator Plugin Configuration
+```xml
+<configuration>
+    <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+    <generatorName>java</generatorName>
+    <library>retrofit2</library>
+    <!-- ... -->
+</configuration>
+```
+
+##### Usage of the `OkHttpFieldLevelEncryptionInterceptor`
+```java
+ApiClient client = new ApiClient();
+Retrofit.Builder adapterBuilder = client.getAdapterBuilder();
+adapterBuilder.baseUrl("https://sandbox.api.mastercard.com"); 
+OkHttpClient.Builder okBuilder = client.getOkBuilder();
+okBuilder.addNetworkInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config));
+okBuilder.addNetworkInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey));
+ServiceApi serviceApi = client.createService(ServiceApi.class);
+// ...
+```
