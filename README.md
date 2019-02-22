@@ -64,7 +64,7 @@ Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<
 
 ### Loading the Decryption Key <a name="loading-the-decryption-key"></a>
 
-#### From a PKCS#12 file
+#### From a PKCS#12 File
 
 A `PrivateKey` key object can be created from a PKCS#12 file by calling the `EncryptionUtils.loadDecryptionKey` method:
 ```java
@@ -74,14 +74,14 @@ PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
 						"<insert key password>");
 ```
 
-#### From a PKCS#8 (DER) encoded content
+#### From a PKCS#8 Formatted Key
 
 A `PrivateKey` object can be created from a PKCS#8 key file by calling the `EncryptionUtils.loadDecryptionKey` method:
 ```java
 PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert PKCS#8 file path>");
 ```
 
-#### From a PEM file
+#### From a PEM Formatted Key
 
 Reading PEM encoded keys requires an additional step:
 
@@ -91,9 +91,13 @@ Reading PEM encoded keys requires an additional step:
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
 The methods that do all the heavy lifting are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
-Usage:
+`encryptPayload` usage:
 ```java
 String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+```
+
+`decryptPayload` usage:
+```java
 String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePayload, config);
 ```
 
@@ -113,7 +117,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
                 .build();
 ```
 
-See also: [FieldLevelEncryptionConfig.java](TODO)
+See also [FieldLevelEncryptionConfig.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.java) for all config options.
 
 #### Performing Encryption
 
@@ -162,8 +166,8 @@ Encrypted response payload:
         "to": {
             "encryptedFoo": {
                 "iv": "e5d313c056c411170bf07ac82ede78c9",
-                "encryptedKey": "e3a56746c0f9109d18b3a2d91619e6cac86bcc7b09652b76(...)f16d8af7e006440f17677eaaeff36b2479652f5c24ae7bd",
-                "encryptedValue": "809a09d78257af5379df0c454dfa9c3e2ecf5787430775ebcf(...)409d8d27ab29803353cded59fe72fd4a7735c69da4080e74f",
+                "encryptedKey": "e3a56746c0f9109d18b3a2d91619e6cac8c7b09652b76(...)f16d8af7e006440f17677eaaeff36b2479652f5c24ae7bd",
+                "encryptedValue": "809a09d78257af5379df0c454dfa9c32ecf5787430775ebcf(...)409d8d27ab29803353cded59fe72fd4a7735c69da4080e74f",
                 "oaepHashingAlgorithm": "SHA256"
             }
         }
