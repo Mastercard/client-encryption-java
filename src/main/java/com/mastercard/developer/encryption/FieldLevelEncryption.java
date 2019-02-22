@@ -138,7 +138,7 @@ public class FieldLevelEncryption {
         addEncryptionKeyFingerprint(outJsonObject, config);
         addOaepDigestAlgorithm(outJsonObject, config);
 
-        // Update the original JSON payload
+        // Update the JSON payload by keeping encrypted data and encryption fields only
         payloadContext.delete(jsonPathIn);
         payloadContext.set(jsonPathOut, outJsonObject);
     }
@@ -166,13 +166,7 @@ public class FieldLevelEncryption {
         if (config.encryptionKeyFingerprintFieldName != null) {
             inJsonObject.remove(config.encryptionKeyFingerprintFieldName);
         }
-        if (inJsonObject.keySet().isEmpty()) {
-            // We don't have to keep the object
-            payloadContext.delete(jsonPathIn);
-        } else {
-            // Update the payload
-            payloadContext.set(jsonPathIn, inJsonObject);
-        }
+        payloadContext.set(jsonPathIn, inJsonObject);
 
         // Decrypt the AES secret key
         byte[] encryptedSecretKeyBytes = decodeValue(encryptedKeyJsonElement.getAsString(), config.fieldValueEncoding);
@@ -193,15 +187,21 @@ public class FieldLevelEncryption {
         JsonElement decryptedValueJsonElement = new Gson().fromJson(decryptedValue, JsonElement.class);
         JsonObject outJsonObject = readOrCreateOutObject(payloadContext, jsonPathOut);
         if (!decryptedValueJsonElement.isJsonObject()) {
-            // Primitive type
+            // Primitive type: overwrite
             payloadContext.set(jsonPathOut, decryptedValueJsonElement);
         } else {
-            // Add decrypted data to the existing object
+            // Object: merge
             for (Entry<String, JsonElement> entry : ((JsonObject)decryptedValueJsonElement).entrySet()) {
                 outJsonObject.remove(entry.getKey());
                 outJsonObject.add(entry.getKey(), entry.getValue());
             }
             payloadContext.set(jsonPathOut, outJsonObject);
+        }
+
+        // Remove the input object if now empty
+        inJsonObject = readJsonObject(payloadContext, jsonPathIn, jsonPathConfig);
+        if (inJsonObject != null && inJsonObject.keySet().isEmpty()) {
+            payloadContext.delete(jsonPathIn);
         }
     }
 

@@ -3,7 +3,9 @@ package com.mastercard.developer.encryption;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -314,6 +316,31 @@ public class FieldLevelEncryptionTest {
     }
 
     @Test
+    public void testEncryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath() throws Exception {
+
+        // GIVEN
+        String payload = "{" +
+                "    \"data\": {" +
+                "        \"encryptedData\": {}" +
+                "    }   " +
+                "}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data.encryptedData", "data")
+                .withEncryptedValueFieldName("encryptedData")
+                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        JsonObject dataObject = (JsonObject) encryptedPayloadObject.get("data");
+        JsonPrimitive encryptedDataPrimitive = (JsonPrimitive) dataObject.get("encryptedData");
+        assertNotNull(encryptedDataPrimitive);
+    }
+
+    @Test
     public void testDecryptPayload_Nominal() throws Exception {
 
         // GIVEN
@@ -592,7 +619,7 @@ public class FieldLevelEncryptionTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldKeepEncryptionFieldObject_WhenNotEmpty() throws Exception {
+    public void testDecryptPayload_ShouldKeepInputObject_WhenContainsAdditionalFields() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -615,5 +642,31 @@ public class FieldLevelEncryptionTest {
         // THEN
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertEquals("\"fieldValue\"", payloadObject.get("encryptedData").getAsJsonObject().get("field").toString());
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"17492f69d92d2008ee9289cf3e07bd36\"," +
+                "        \"encryptedKey\": \"22b3df5e70777cef394c39ac74bacfcdbfc8cef4a4da771f1d07611f18b4dc9eacde7297870acb421abe77b8b974f53b2e5b834a68e11a4ddab53ece2d37ae7dee5646dc3f4c5c17166906258615b9c7c52f7242a1afa6edf24815c3dbec4b2092a027de11bcdab4c47de0159ce76d2449394f962a07196a5a5b41678a085d77730baee0d3d0e486eb4719aae8f1f1c0fd7026aea7b0872c049e8df1e7eed088fa84fc613602e989fa4e7a7b77ac40da212a462ae5d3df5078be96fcf3d0fe612e0ec401d27a243c0df1feb8241d49248697db5ec79571b9d52386064ee3db11d200156bfd3af03a289ea37ec2c8f315840e7804669a855bf9e34190e3b14d28\"," +
+                "        \"encryptedValue\": \"9cad34c0d7b2443f07bb7b7e19817ade132ba3f312b1176c09a312e5b5f908198e1e0cfac0fd8c9f66c70a9b05b1a701\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    } " +
+                "}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "encryptedData")
+                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
+        assertEquals("\"field1Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
+        assertEquals("\"field2Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
     }
 }
