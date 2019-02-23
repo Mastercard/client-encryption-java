@@ -5,14 +5,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.security.spec.MGF1ParameterSpec;
 
-import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.*;
+import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionConfigBuilder;
 import static org.junit.Assert.*;
 
@@ -28,7 +27,7 @@ public class FieldLevelEncryptionTest {
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -54,7 +53,7 @@ public class FieldLevelEncryptionTest {
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withFieldValueEncoding(FieldValueEncoding.BASE64)
                 .withEncryptionCertificateFingerprint(null)
                 .withEncryptionKeyFingerprint(null)
@@ -83,7 +82,7 @@ public class FieldLevelEncryptionTest {
         String payload = "{\"data\": \"string\", \"encryptedData\": {}}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -154,7 +153,7 @@ public class FieldLevelEncryptionTest {
         String payload = "{\"data\": {}, \"encryptedData\": \"string\"}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // THEN
@@ -301,7 +300,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -327,7 +326,7 @@ public class FieldLevelEncryptionTest {
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data.encryptedData", "data")
                 .withEncryptedValueFieldName("encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -356,7 +355,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -382,7 +381,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -410,7 +409,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withFieldValueEncoding(FieldValueEncoding.BASE64)
                 .build();
 
@@ -454,7 +453,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "dataParent.data")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -633,7 +632,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -658,7 +657,7 @@ public class FieldLevelEncryptionTest {
                 "}";
         FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "encryptedData")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN

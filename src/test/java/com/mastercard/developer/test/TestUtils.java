@@ -5,7 +5,6 @@ import com.mastercard.developer.encryption.FieldLevelEncryptionConfigBuilder;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.spec.MGF1ParameterSpec;
 
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static com.mastercard.developer.utils.EncryptionUtils.loadEncryptionCertificate;
@@ -27,11 +26,11 @@ public class TestUtils {
         return FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
-                .withOaepDigestAlgorithmFieldName("oaepHashingAlgorithm")
+                .withOaepPaddingDigestAlgorithmFieldName("oaepHashingAlgorithm")
                 .withEncryptionCertificateFingerprintFieldName("encryptionCertificateFingerprint")
                 .withEncryptionCertificateFingerprint("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279")
                 .withEncryptionKeyFingerprintFieldName("encryptionKeyFingerprint")

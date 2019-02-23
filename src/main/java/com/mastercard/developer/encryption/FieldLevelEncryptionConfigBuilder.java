@@ -4,12 +4,13 @@ import com.jayway.jsonpath.JsonPath;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.spec.MGF1ParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.*;
+import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
+import static java.security.spec.MGF1ParameterSpec.SHA256;
+import static java.security.spec.MGF1ParameterSpec.SHA512;
 
 /**
  * A builder class for {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig}.
@@ -22,9 +23,9 @@ public final class FieldLevelEncryptionConfigBuilder {
     private PrivateKey decryptionKey;
     private Map<String, String> encryptionPaths = new HashMap<>();
     private Map<String, String> decryptionPaths = new HashMap<>();
-    private MGF1ParameterSpec mgf1ParameterSpec;
+    private String oaepPaddingDigestAlgorithm;
     private String ivFieldName;
-    private String oaepDigestAlgorithmFieldName;
+    private String oaepPaddingDigestAlgorithmFieldName;
     private String encryptedKeyFieldName;
     private String encryptedValueFieldName;
     private String encryptionCertificateFingerprintFieldName;
@@ -90,10 +91,10 @@ public final class FieldLevelEncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#mgf1ParameterSpec}.
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#oaepPaddingDigestAlgorithm}.
      */
-    public FieldLevelEncryptionConfigBuilder withMgf1ParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
-        this.mgf1ParameterSpec = mgf1ParameterSpec;
+    public FieldLevelEncryptionConfigBuilder withOaepPaddingDigestAlgorithm(String oaepPaddingDigestAlgorithm) {
+        this.oaepPaddingDigestAlgorithm = oaepPaddingDigestAlgorithm;
         return this;
     }
 
@@ -106,10 +107,10 @@ public final class FieldLevelEncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#oaepDigestAlgorithmFieldName}.
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#oaepPaddingDigestAlgorithmFieldName}.
      */
-    public FieldLevelEncryptionConfigBuilder withOaepDigestAlgorithmFieldName(String oaepDigestAlgorithmFieldName) {
-        this.oaepDigestAlgorithmFieldName = oaepDigestAlgorithmFieldName;
+    public FieldLevelEncryptionConfigBuilder withOaepPaddingDigestAlgorithmFieldName(String oaepPaddingDigestAlgorithmFieldName) {
+        this.oaepPaddingDigestAlgorithmFieldName = oaepPaddingDigestAlgorithmFieldName;
         return this;
     }
 
@@ -170,9 +171,9 @@ public final class FieldLevelEncryptionConfigBuilder {
         config.decryptionKey = this.decryptionKey;
         config.encryptionPaths = this.encryptionPaths;
         config.encryptionCertificate = this.encryptionCertificate;
-        config.mgf1ParameterSpec = this.mgf1ParameterSpec;
+        config.oaepPaddingDigestAlgorithm = this.oaepPaddingDigestAlgorithm;
         config.ivFieldName = this.ivFieldName;
-        config.oaepDigestAlgorithmFieldName = this.oaepDigestAlgorithmFieldName;
+        config.oaepPaddingDigestAlgorithmFieldName = this.oaepPaddingDigestAlgorithmFieldName;
         config.decryptionPaths = this.decryptionPaths;
         config.encryptedKeyFieldName = this.encryptedKeyFieldName;
         config.fieldValueEncoding = this.fieldValueEncoding;
@@ -195,8 +196,13 @@ public final class FieldLevelEncryptionConfigBuilder {
     }
 
     private void checkParameterValues() {
-        if (mgf1ParameterSpec == null) {
-            throw new IllegalArgumentException("MGF1 spec cannot be null!");
+        if (oaepPaddingDigestAlgorithm == null) {
+            throw new IllegalArgumentException("The digest algorithm for OAEP cannot be null!");
+        }
+
+        if (!SHA256.getDigestAlgorithm().equals(oaepPaddingDigestAlgorithm)
+                && !SHA512.getDigestAlgorithm().equals(oaepPaddingDigestAlgorithm)) {
+            throw new IllegalArgumentException(String.format("Unsupported OAEP digest algorithm: %s!", oaepPaddingDigestAlgorithm));
         }
 
         if (fieldValueEncoding == null) {

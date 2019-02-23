@@ -60,20 +60,23 @@ public class FieldLevelEncryption {
      * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} object
      * @return The updated payload
      */
-    public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws GeneralSecurityException {
+    public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+        try {
+            // Parse the given payload
+            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
 
-        // Parse the given payload
-        DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            // Perform encryption (if needed)
+            for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
+                String jsonPathIn = entry.getKey();
+                String jsonPathOut = entry.getValue();
+                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+            }
 
-        // Perform encryption (if needed)
-        for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
-            String jsonPathIn = entry.getKey();
-            String jsonPathOut = entry.getValue();
-            encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+            // Return the updated payload
+            return payloadContext.json().toString();
+        } catch (GeneralSecurityException e) {
+            throw new EncryptionException("Payload encryption failed!", e);
         }
-
-        // Return the updated payload
-        return payloadContext.json().toString();
     }
 
     /**
@@ -82,20 +85,23 @@ public class FieldLevelEncryption {
      * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} object
      * @return The updated payload
      */
-    public static String decryptPayload(String payload, FieldLevelEncryptionConfig config) throws GeneralSecurityException, DecoderException {
+    public static String decryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+        try {
+            // Parse the given payload
+            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
 
-        // Parse the given payload
-        DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            // Perform decryption (if needed)
+            for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
+                String jsonPathIn = entry.getKey();
+                String jsonPathOut = entry.getValue();
+                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+            }
 
-        // Perform decryption (if needed)
-        for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
-            String jsonPathIn = entry.getKey();
-            String jsonPathOut = entry.getValue();
-            decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+            // Return the updated payload
+            return payloadContext.json().toString();
+        } catch (GeneralSecurityException | DecoderException e) {
+            throw new EncryptionException("Payload decryption failed!", e);
         }
-
-        // Return the updated payload
-        return payloadContext.json().toString();
     }
 
     private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
@@ -136,7 +142,7 @@ public class FieldLevelEncryption {
         outJsonObject.addProperty(config.encryptedValueFieldName, encryptedValue);
         addEncryptionCertificateFingerprint(outJsonObject, config);
         addEncryptionKeyFingerprint(outJsonObject, config);
-        addOaepDigestAlgorithm(outJsonObject, config);
+        addOaepPaddingDigestAlgorithm(outJsonObject, config);
 
         // Update the JSON payload by keeping encrypted data and encryption fields only
         payloadContext.delete(jsonPathIn);
@@ -157,8 +163,8 @@ public class FieldLevelEncryption {
         JsonElement encryptedKeyJsonElement = inJsonObject.remove(config.encryptedKeyFieldName);
         JsonElement ivJsonElement = inJsonObject.remove(config.ivFieldName);
         JsonElement oaepDigestAlgorithmJsonElement = null;
-        if (config.oaepDigestAlgorithmFieldName != null) {
-            oaepDigestAlgorithmJsonElement = inJsonObject.remove(config.oaepDigestAlgorithmFieldName);
+        if (config.oaepPaddingDigestAlgorithmFieldName != null) {
+            oaepDigestAlgorithmJsonElement = inJsonObject.remove(config.oaepPaddingDigestAlgorithmFieldName);
         }
         if (config.encryptionCertificateFingerprintFieldName != null) {
             inJsonObject.remove(config.encryptionCertificateFingerprintFieldName);
@@ -170,7 +176,7 @@ public class FieldLevelEncryption {
 
         // Decrypt the AES secret key
         byte[] encryptedSecretKeyBytes = decodeValue(encryptedKeyJsonElement.getAsString(), config.fieldValueEncoding);
-        String oaepDigestAlgorithm = null != oaepDigestAlgorithmJsonElement ? oaepDigestAlgorithmJsonElement.getAsString() : config.mgf1ParameterSpec.getDigestAlgorithm();
+        String oaepDigestAlgorithm = null != oaepDigestAlgorithmJsonElement ? oaepDigestAlgorithmJsonElement.getAsString() : config.oaepPaddingDigestAlgorithm;
         Key secretKey = unwrapSecretKey(config, encryptedSecretKeyBytes, oaepDigestAlgorithm);
 
         // Decode the IV
@@ -305,11 +311,9 @@ public class FieldLevelEncryption {
         }
     }
 
-    private static void addOaepDigestAlgorithm(JsonObject jsonObject, FieldLevelEncryptionConfig config) {
-        MGF1ParameterSpec mgf1ParameterSpec = config.mgf1ParameterSpec;
-        String oaepDigestAlgorithm = mgf1ParameterSpec.getDigestAlgorithm();
-        oaepDigestAlgorithm = oaepDigestAlgorithm.replace("-", "");
-        jsonObject.addProperty(config.oaepDigestAlgorithmFieldName, oaepDigestAlgorithm);
+    private static void addOaepPaddingDigestAlgorithm(JsonObject jsonObject, FieldLevelEncryptionConfig config) {
+        String oaepDigestAlgorithm = config.oaepPaddingDigestAlgorithm.replace("-", "");
+        jsonObject.addProperty(config.oaepPaddingDigestAlgorithmFieldName, oaepDigestAlgorithm);
     }
 
     private static IvParameterSpec generateIv() throws GeneralSecurityException {
@@ -327,14 +331,14 @@ public class FieldLevelEncryption {
 
     private static byte[] wrapSecretKey(FieldLevelEncryptionConfig config, Key key) throws GeneralSecurityException {
         Key publicEncryptionKey = config.encryptionCertificate.getPublicKey();
-        MGF1ParameterSpec mgf1ParameterSpec = config.mgf1ParameterSpec;
+        MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(config.oaepPaddingDigestAlgorithm);
         String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
         Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
         cipher.init(Cipher.WRAP_MODE, publicEncryptionKey, getOaepParameterSpec(mgf1ParameterSpec));
         return cipher.wrap(key);
     }
 
-    public static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws GeneralSecurityException {
+    private static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws GeneralSecurityException {
         if (!oaepDigestAlgorithm.contains("-")) {
             oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
         }
@@ -379,7 +383,7 @@ public class FieldLevelEncryption {
         return encoding == FieldValueEncoding.HEX ? new String(Hex.encodeHex(bytes)) : Base64.encodeBase64String(bytes);
     }
 
-    public static byte[] decodeValue(String value, FieldValueEncoding encoding) throws DecoderException {
+    private static byte[] decodeValue(String value, FieldValueEncoding encoding) throws DecoderException {
         return encoding == FieldValueEncoding.HEX ? Hex.decodeHex(value.toCharArray()) : Base64.decodeBase64(value);
     }
 

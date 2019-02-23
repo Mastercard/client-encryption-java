@@ -1,13 +1,12 @@
 package com.mastercard.developer.interceptors;
 
+import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.squareup.okhttp.*;
 import okio.Buffer;
-import org.apache.commons.codec.DecoderException;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * An OkHttp2 interceptor for encrypting/decrypting parts of HTTP payloads.
@@ -52,7 +51,7 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                     .header("Content-Length", String.valueOf(encryptedBody.contentLength()))
                     .build();
 
-        } catch (GeneralSecurityException e) {
+        } catch (EncryptionException e) {
             throw new IOException("Failed to encrypt request!", e);
         }
     }
@@ -81,7 +80,7 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                         .header("Content-Length", String.valueOf(decryptedBody.contentLength()))
                         .build();
             }
-        } catch (GeneralSecurityException | DecoderException e) {
+        } catch (EncryptionException e) {
             throw new IOException("Failed to decrypt response!", e);
         }
     }

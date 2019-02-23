@@ -6,8 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.security.spec.MGF1ParameterSpec;
-
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding.HEX;
 
 public class FieldLevelEncryptionConfigBuilderTest {
@@ -31,7 +29,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expectMessage("Can't decrypt without decryption key!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withDecryptionPath("$.encryptedPayload", "$.payload")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -55,7 +53,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expectMessage("Can't encrypt without encryption key!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptionPath("$.payload", "$.encryptedPayload")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -64,14 +62,23 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingMgf1Spec() {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingOaepPaddingDigestAlgorithm() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("MGF1 spec cannot be null!");
+        expectedException.expectMessage("The digest algorithm for OAEP cannot be null!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
                 .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenUnsupportedOaepPaddingDigestAlgorithm() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Unsupported OAEP digest algorithm: SHA-720!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-720")
                 .build();
     }
 
@@ -80,7 +87,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Encrypted value field name cannot be null!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
                 .withFieldValueEncoding(HEX)
@@ -92,7 +99,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Encrypted key field name cannot be null!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withIvFieldName("iv")
                 .withFieldValueEncoding(HEX)
@@ -104,7 +111,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("IV field name cannot be null");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withFieldValueEncoding(HEX)
@@ -116,7 +123,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Value encoding for fields cannot be null!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -134,7 +141,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
                 .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
                 .withDecryptionPath("$.encryptedPayload", "$.payload")
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA512)
+                .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -149,7 +156,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("publicKeyFingerprint", config.encryptionKeyFingerprintFieldName);
         Assert.assertEquals(1, config.decryptionPaths.size());
         Assert.assertNotNull(config.decryptionKey);
-        Assert.assertEquals(MGF1ParameterSpec.SHA512, config.mgf1ParameterSpec);
+        Assert.assertEquals("SHA-512", config.oaepPaddingDigestAlgorithm);
         Assert.assertEquals("encryptedValue", config.encryptedValueFieldName);
         Assert.assertEquals("encryptedKey", config.encryptedKeyFieldName);
         Assert.assertEquals("iv", config.ivFieldName);

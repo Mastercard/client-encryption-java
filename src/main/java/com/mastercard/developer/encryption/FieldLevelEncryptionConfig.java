@@ -2,7 +2,6 @@ package com.mastercard.developer.encryption;
 
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.spec.MGF1ParameterSpec;
 import java.util.Collections;
 import java.util.Map;
 
@@ -71,15 +70,16 @@ public class FieldLevelEncryptionConfig {
     protected Map<String, String> decryptionPaths = Collections.emptyMap();
 
     /**
-     * The set of parameters to be used in the OAEP padding scheme.
-     * Example: MGF1ParameterSpec.SHA512 for "RSA/ECB/OAEPWithSHA-512AndMGF1Padding".
+     * The digest algorithm to be used for the RSA OAEP padding.
+     * Example: "SHA-512";
      */
-    protected MGF1ParameterSpec mgf1ParameterSpec = null;
+    protected String oaepPaddingDigestAlgorithm = null;
 
     /**
-     * The name of the payload field that will contain the OAEP digest algorithm.
+     * The name of the payload field that will contain the digest algorithm to be
+     * used for the RSA OAEP padding.
      */
-    protected String oaepDigestAlgorithmFieldName = null;
+    protected String oaepPaddingDigestAlgorithmFieldName = null;
 
     /**
      * The name of the payload field that will contain the initialization vector value.
