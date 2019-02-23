@@ -312,6 +312,10 @@ public class FieldLevelEncryption {
     }
 
     private static void addOaepPaddingDigestAlgorithm(JsonObject jsonObject, FieldLevelEncryptionConfig config) {
+        if (isNullOrEmpty(config.oaepPaddingDigestAlgorithmFieldName)) {
+            // Nothing to add
+            return;
+        }
         String oaepDigestAlgorithm = config.oaepPaddingDigestAlgorithm.replace("-", "");
         jsonObject.addProperty(config.oaepPaddingDigestAlgorithmFieldName, oaepDigestAlgorithm);
     }

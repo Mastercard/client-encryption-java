@@ -8,11 +8,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import sun.security.x509.X509CertImpl;
 
-import java.security.spec.MGF1ParameterSpec;
+import java.security.InvalidKeyException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionConfigBuilder;
+import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
+import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 
 public class FieldLevelEncryptionTest {
@@ -38,6 +41,7 @@ public class FieldLevelEncryptionTest {
         assertNull(encryptedPayloadObject.get("data"));
         JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
         assertNotNull(encryptedData);
+        assertEquals(6, encryptedData.size());
         assertEquals("SHA256", encryptedData.get("oaepHashingAlgorithm").getAsString());
         assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", encryptedData.get("encryptionKeyFingerprint").getAsString());
         assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", encryptedData.get("encryptionCertificateFingerprint").getAsString());
@@ -337,6 +341,47 @@ public class FieldLevelEncryptionTest {
         JsonObject dataObject = (JsonObject) encryptedPayloadObject.get("data");
         JsonPrimitive encryptedDataPrimitive = (JsonPrimitive) dataObject.get("encryptedData");
         assertNotNull(encryptedDataPrimitive);
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldNotAddOaepPaddingDigestAlgorithm_WhenOaepPaddingDigestAlgorithmFieldNameNotSet() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": {}, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .withOaepPaddingDigestAlgorithmFieldName(null)
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertNotNull(encryptedData);
+        assertEquals(5, encryptedData.size());
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldThrowEncryptionException_WhenInvalidCertificateObject() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": {}, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withEncryptionCertificate(new X509CertImpl())
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // THEN
+        expectedException.expect(EncryptionException.class);
+        expectedException.expectMessage("Payload encryption failed!");
+        expectedException.expectCause(isA(InvalidKeyException.class));
+
+        // WHEN
+        FieldLevelEncryption.encryptPayload(payload, config);
     }
 
     @Test
@@ -667,5 +712,31 @@ public class FieldLevelEncryptionTest {
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertEquals("\"field1Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
         assertEquals("\"field2Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldThrowEncryptionException_WhenWrongDecryptionKey() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"ba574b07248f63756bce778f8a115819\"," +
+                "        \"encryptedKey\": \"26687f6d03d27145451d20bdaa29cc199e2533bb9eb7351772e31d1290b98380b43dbf47b9a337cc2ecaff9d3d9fb45305950f13382c5ad822ee6df79e1a57b14a3c58c71090121994a9f771ef96472669671718b55a0fa8d9f76de9e172fedcabbc87d64b5a994899e43abb19afa840269012c397b5b18d4babc0e41c1ad698db98c89121bbe5b2d227cfc5d3c3c87f4f4c8b04b509d326199b39adfbd8bca8bf0a150fcf3c37b9717382af502ad8d4d28b17b91762bf108d34aba0fb40ca410c2ecaeb30d68003af20dce27d9d034e4c557b8104e85f859de0eb709b23f9978869bae545c7f1b62173887eae9e75e4b6d6b4b01d7172ccc8c5774c0db51c24\"," +
+                "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .withDecryptionKey(loadDecryptionKey("./src/test/resources/test_key_container.p12", "mykeyalias", "Password1"))
+                .build();
+
+        // THEN
+        expectedException.expect(EncryptionException.class);
+        expectedException.expectMessage("Payload decryption failed!");
+        expectedException.expectCause(isA(InvalidKeyException.class));
+
+        // WHEN
+        FieldLevelEncryption.decryptPayload(encryptedPayload, config);
     }
 }
