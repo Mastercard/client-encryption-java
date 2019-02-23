@@ -24,7 +24,7 @@ Zero dependency library for Mastercard API compliant encryption/decryption.
 Java 7+
 
 ### References <a name="references"></a>
-* [Encryption of sensitive data guide](https://developer.mastercard.com/page/mdes-token-connect-encryption-of-sensitive-data)
+* [Encryption of sensitive data](https://developer.mastercard.com/page/mdes-token-connect-encryption-of-sensitive-data) guide
 
 ## Usage <a name="usage"></a>
 ### Prerequisites <a name="prerequisites"></a>
@@ -109,7 +109,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
                 .withDecryptionKey(decryptionKey)
                 .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
                 .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
-                .withMgf1ParameterSpec(MGF1ParameterSpec.SHA256)
+                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -117,29 +117,29 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
                 .build();
 ```
 
-See also [FieldLevelEncryptionConfig.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.java) for all config options.
+See also [FieldLevelEncryptionConfigBuilder.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfigBuilder.java) for all config options.
 
 #### Performing Encryption
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
-
-* Request payload:
-```json
-{
-    "path": {
-        "to": {
-            "foo": {
-                "sensitiveField1": "sensitiveValue1",
-                "sensitiveField2": "sensitiveValue2"
-            }
-        }
-    }
-}
+```java
+String payload = "{" +
+        "    \"path\": {" +
+        "        \"to\": {" +
+        "            \"foo\": {" +
+        "                \"sensitiveField1\": \"sensitiveValue1\"," +
+        "                \"sensitiveField2\": \"sensitiveValue2\"" +
+        "            }" +
+        "        }" +
+        "    }" +
+        "}";
+String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
 ```
 
-* Encrypted request payload:
+Output:
 ```json
 {
     "path": {
@@ -147,8 +147,7 @@ Example using the configuration [above](#configuring-the-field-level-encryption)
             "encryptedFoo": {
                 "iv": "7f1105fb0c684864a189fb3709ce3d28",
                 "encryptedKey": "67f467d1b653d98411a0c6d3c(...)ffd4c09dd42f713a51bff2b48f937c8",
-                "encryptedValue": "b73aabd267517fc09ed72455c2(...)dffb5fa04bf6e6ce9ade1ff514ed6141",
-                "oaepHashingAlgorithm": "SHA256"
+                "encryptedValue": "b73aabd267517fc09ed72455c2(...)dffb5fa04bf6e6ce9ade1ff514ed6141"
             }
         }
     }
@@ -160,24 +159,23 @@ Example using the configuration [above](#configuring-the-field-level-encryption)
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
-
-* Encrypted response payload:
-```json
-{
-    "path": {
-        "to": {
-            "encryptedFoo": {
-                "iv": "e5d313c056c411170bf07ac82ede78c9",
-                "encryptedKey": "e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd",
-                "encryptedValue": "809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f",
-                "oaepHashingAlgorithm": "SHA256"
-            }
-        }
-    }
-}
+```java
+String encryptedPayload = "{" +
+        "    \"path\": {" +
+        "        \"to\": {" +
+        "            \"encryptedFoo\": {" +
+        "                \"iv\": \"e5d313c056c411170bf07ac82ede78c9\"," +
+        "                \"encryptedKey\": \"e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd\"," +
+        "                \"encryptedValue\": \"809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f\"" +
+        "            }" +
+        "        }" +
+        "    }" +
+        "}";
+String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
 ```
 
-* Response payload:
+Output:
 ```json
 {
     "path": {
