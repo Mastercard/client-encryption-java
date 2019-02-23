@@ -70,41 +70,40 @@ public class FieldLevelEncryptionConfig {
     protected Map<String, String> decryptionPaths = Collections.emptyMap();
 
     /**
-     * The digest algorithm to be used for the RSA OAEP padding.
-     * Example: "SHA-512";
+     * The digest algorithm to be used for the RSA OAEP padding. Example: "SHA-512".
      */
     protected String oaepPaddingDigestAlgorithm = null;
 
     /**
-     * The name of the payload field that will contain the digest algorithm to be
-     * used for the RSA OAEP padding.
+     * The name of the payload field where to write/read the digest algorithm used for
+     * the RSA OAEP padding (optional, the field won't be set if the name is null or empty).
      */
     protected String oaepPaddingDigestAlgorithmFieldName = null;
 
     /**
-     * The name of the payload field that will contain the initialization vector value.
+     * The name of the payload field where to write/read the initialization vector value.
      */
     protected String ivFieldName = null;
 
     /**
-     * The name of the payload field that will contain the encrypted symmetric key.
+     * The name of the payload field where to write/read the encrypted symmetric key.
      */
     protected String encryptedKeyFieldName = null;
 
     /**
-     * The name of the payload field that will contain the encrypted data value.
+     * The name of the payload field where to write/read the encrypted data value.
      */
     protected String encryptedValueFieldName = null;
 
     /**
-     * The name of the payload field that will contain the digest of the encryption certificate (optional,
-     * the field won't be set if the name is null or empty).
+     * The name of the payload field where to write/read the digest of the encryption
+     * certificate (optional, the field won't be set if the name is null or empty).
      */
     protected String encryptionCertificateFingerprintFieldName = null;
 
     /**
-     * The name of the payload field that will contain the digest of the encryption key (optional,
-     * the field won't be set if the name is null or empty).
+     * The name of the payload field where to write/read the digest of the encryption
+     * key (optional, the field won't be set if the name is null or empty).
      */
     protected String encryptionKeyFingerprintFieldName = null;
 
