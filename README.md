@@ -200,6 +200,7 @@ Library options currently supported for the `java` generator:
 + [okhttp-gson](#okhttp-gson)
 + [retrofit](#retrofit)
 + [retrofit2](#retrofit2)
++ [google-api-client](#google-api-client)
 
 See also:
 * [OpenAPI Generator (maven Plugin)](https://mvnrepository.com/artifact/org.openapitools/openapi-generator-maven-plugin) 
@@ -270,5 +271,32 @@ OkHttpClient.Builder okBuilder = client.getOkBuilder();
 okBuilder.addNetworkInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config));
 okBuilder.addNetworkInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = client.createService(ServiceApi.class);
+// ...
+```
+
+#### google-api-client <a name="google-api-client"></a>
+##### OpenAPI Generator Plugin Configuration
+```xml
+<configuration>
+    <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+    <generatorName>java</generatorName>
+    <library>google-api-client</library>
+    <!-- ... -->
+</configuration>
+```
+
+##### Usage of `HttpExecuteFieldLevelEncryptionInterceptor` and `HttpExecuteInterceptorChain`
+```java
+HttpRequestInitializer initializer = new HttpRequestInitializer() {
+    @Override
+    public void initialize(HttpRequest request) {
+        HttpExecuteOAuth1Interceptor authenticationInterceptor = new HttpExecuteOAuth1Interceptor(consumerKey, signingKey);
+        HttpExecuteFieldLevelEncryptionInterceptor encryptionInterceptor = new HttpExecuteFieldLevelEncryptionInterceptor(config);
+        request.setInterceptor(new HttpExecuteInterceptorChain(Arrays.asList(encryptionInterceptor, authenticationInterceptor)));
+        request.setResponseInterceptor(encryptionInterceptor);
+    }
+};
+ApiClient client = new ApiClient("https://sandbox.api.mastercard.com", null, initializer, null);
+ServiceApi serviceApi = client.serviceApi();
 // ...
 ```
