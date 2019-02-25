@@ -18,7 +18,7 @@
   * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
 
 ## Overview <a name="overview"></a>
-Zero dependency library for Mastercard API compliant encryption/decryption.
+Zero dependency library for Mastercard API compliant payload encryption/decryption.
 
 ### Compatibility <a name="compatibility"></a>
 Java 7+
