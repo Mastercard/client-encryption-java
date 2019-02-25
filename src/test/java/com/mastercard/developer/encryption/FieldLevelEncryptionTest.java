@@ -13,7 +13,7 @@ import sun.security.x509.X509CertImpl;
 import java.security.InvalidKeyException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
-import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionConfigBuilder;
+import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
@@ -28,7 +28,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -55,7 +55,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withFieldValueEncoding(FieldValueEncoding.BASE64)
@@ -84,7 +84,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": \"string\", \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -104,7 +104,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("objectNotInPayload", "encryptedData")
                 .build();
 
@@ -120,7 +120,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedDataParent\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedDataParent.encryptedData")
                 .build();
 
@@ -138,7 +138,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "parentNotInPayload.encryptedData")
                 .build();
 
@@ -155,7 +155,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": \"string\"}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -173,7 +173,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withEncryptionCertificateFingerprint(null)
                 .withEncryptionKeyFingerprint(null)
@@ -194,7 +194,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withEncryptionCertificateFingerprintFieldName(null)
                 .withEncryptionKeyFingerprintFieldName(null)
@@ -215,7 +215,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data1\": {}, \"data2\": {}, \"encryptedData1\": {}, \"encryptedData2\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data1", "encryptedData1")
                 .withEncryptionPath("data2", "encryptedData2")
                 .build();
@@ -241,7 +241,7 @@ public class FieldLevelEncryptionTest {
                 " \"data2\": {}, \"encryptedData2\": {}," +
                 " \"data3\": {}, \"encryptedData3\": {}," +
                 " \"data4\": { \"object\": {} }, \"encryptedData4\": { \"object\": {} }}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.data1", "$.encryptedData1")
                 .withEncryptionPath("data2", "encryptedData2")
                 .withEncryptionPath("$['data3']", "$['encryptedData3']")
@@ -269,7 +269,7 @@ public class FieldLevelEncryptionTest {
         // GIVEN
         String payload = "{\"data1\": {}, \"data2\": {}, \"data3\": {}, " +
                 " \"data4\": { \"object\": {} }, \"encryptedData4\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.data1", "$.encryptedData1")
                 .withEncryptionPath("data2", "encryptedData2")
                 .withEncryptionPath("$['data3']", "$['encryptedData3']")
@@ -302,7 +302,7 @@ public class FieldLevelEncryptionTest {
                 "        \"iv\": \"previousIvValue\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -327,7 +327,7 @@ public class FieldLevelEncryptionTest {
                 "        \"encryptedData\": {}" +
                 "    }   " +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data.encryptedData", "data")
                 .withEncryptedValueFieldName("encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
@@ -348,7 +348,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withOaepPaddingDigestAlgorithmFieldName(null)
@@ -369,7 +369,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withEncryptionCertificate(new X509CertImpl())
                 .withOaepPaddingDigestAlgorithm("SHA-256")
@@ -398,7 +398,7 @@ public class FieldLevelEncryptionTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -424,7 +424,7 @@ public class FieldLevelEncryptionTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -452,7 +452,7 @@ public class FieldLevelEncryptionTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withFieldValueEncoding(FieldValueEncoding.BASE64)
@@ -472,7 +472,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String encryptedPayload = "{\"data\": {}}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("objectNotInPayload", "data")
                 .build();
 
@@ -496,7 +496,7 @@ public class FieldLevelEncryptionTest {
                 "    }, " +
                 "    \"dataParent\": {}" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "dataParent.data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -522,7 +522,7 @@ public class FieldLevelEncryptionTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "parentNotInPayload.data")
                 .build();
 
@@ -547,7 +547,7 @@ public class FieldLevelEncryptionTest {
                 "    }, " +
                 "    \"data\": \"string\"" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .build();
 
@@ -564,7 +564,7 @@ public class FieldLevelEncryptionTest {
 
         // GIVEN
         String encryptedPayload = "{ \"encryptedData\": \"string\" }";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .build();
 
@@ -587,7 +587,7 @@ public class FieldLevelEncryptionTest {
                 "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .build();
 
@@ -616,7 +616,7 @@ public class FieldLevelEncryptionTest {
                 "        \"encryptedValue\": \"1ea73031bc0cf9c67b61bc1684d78f2b\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData1", "data1")
                 .withDecryptionPath("encryptedData2", "data2")
                 .build();
@@ -649,7 +649,7 @@ public class FieldLevelEncryptionTest {
                 "    }" +
                 "}";
 
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .build();
 
@@ -675,7 +675,7 @@ public class FieldLevelEncryptionTest {
                 "        \"field\": \"fieldValue\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -700,7 +700,7 @@ public class FieldLevelEncryptionTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    } " +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "encryptedData")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
@@ -725,7 +725,7 @@ public class FieldLevelEncryptionTest {
                 "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .withDecryptionKey(loadDecryptionKey("./src/test/resources/test_key_container.p12", "mykeyalias", "Password1"))

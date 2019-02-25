@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
-import static com.mastercard.developer.test.TestUtils.getFieldLevelEncryptionConfigBuilder;
+import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static org.hamcrest.core.Is.isA;
 import static org.mockito.Mockito.*;
 
@@ -36,7 +36,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     public void testIntercept_ShouldEncryptRequestPayload() throws Exception {
 
         // GIVEN
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
                 .build();
         HttpRequest request = mock(HttpRequest.class);
@@ -63,7 +63,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     public void testIntercept_ShouldDoNothing_WhenNoPayload() throws Exception {
 
         // GIVEN
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
                 .build();
         HttpRequest request = mock(HttpRequest.class);
@@ -82,7 +82,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     public void testIntercept_ShouldThrowIOException_WhenEncryptionFails() throws Exception {
 
         // GIVEN
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
                 .withEncryptionCertificate(new X509CertImpl()) // Certificate without key
                 .build();
@@ -111,7 +111,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("$.encryptedData", "$.data")
                 .build();
         HttpResponse response = mock(HttpResponse.class);
@@ -136,7 +136,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     public void testInterceptResponse_ShouldDoNothing_WhenNoPayload() throws Exception {
 
         // GIVEN
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder().build();
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder().build();
         HttpResponse response = mock(HttpResponse.class);
         when(response.parseAsString()).thenReturn(null);
 
@@ -156,11 +156,11 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
         String encryptedPayload = "{" +
                 "    \"encryptedData\": {" +
                 "        \"iv\": \"a2c494ca28dec4f3d6ce7d68b1044cfe\"," +
-                "        \"encryptedKey\": \"Not a valid key\"," +
+                "        \"encryptedKey\": \"NOT A VALID KEY!\"," +
                 "        \"encryptedValue\": \"0672589113046bf692265b6ea6088184\"" +
                 "    }" +
                 "}";
-        FieldLevelEncryptionConfig config = getFieldLevelEncryptionConfigBuilder()
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("$.encryptedData", "$.data")
                 .build();
         HttpResponse response = mock(HttpResponse.class);

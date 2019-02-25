@@ -22,7 +22,7 @@ public class TestUtils {
         return loadDecryptionKey("./src/test/resources/test_key.der");
     }
 
-    public static FieldLevelEncryptionConfigBuilder getFieldLevelEncryptionConfigBuilder() throws Exception {
+    public static FieldLevelEncryptionConfigBuilder getTestFieldLevelEncryptionConfigBuilder() throws Exception {
         return FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
