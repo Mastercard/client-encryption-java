@@ -48,7 +48,7 @@ As part of this set up, you'll receive:
 #### Gradle
 ```
 dependencies {
-	implementation "com.mastercard.developer:client-encryption:$clientEncryptionVersion"
+    implementation "com.mastercard.developer:client-encryption:$clientEncryptionVersion"
 }	
 ```
 

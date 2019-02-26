@@ -49,10 +49,10 @@ public final class EncryptionUtils {
      * Load a RSA decryption key out of a PKCS#12 container.
      */
     public static PrivateKey loadDecryptionKey(String pkcs12KeyFilePath,
-                                            String encryptionKeyAlias,
-                                            String encryptionKeyPassword) throws IOException, NoSuchProviderException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+                                            String decryptionKeyAlias,
+                                            String decryptionKeyPassword) throws IOException, NoSuchProviderException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12", "SunJSSE");
-        pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), encryptionKeyPassword.toCharArray());
-        return (PrivateKey) pkcs12KeyStore.getKey(encryptionKeyAlias, encryptionKeyPassword.toCharArray());
+        pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), decryptionKeyPassword.toCharArray());
+        return (PrivateKey) pkcs12KeyStore.getKey(decryptionKeyAlias, decryptionKeyPassword.toCharArray());
     }
 }
