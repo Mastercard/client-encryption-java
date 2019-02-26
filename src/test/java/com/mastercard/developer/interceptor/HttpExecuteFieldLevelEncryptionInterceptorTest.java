@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.interceptors.HttpExecuteFieldLevelEncryptionInterceptor;
+import com.mastercard.developer.test.TestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -12,7 +13,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnitRunner;
-import sun.security.x509.X509CertImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,7 +84,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
         // GIVEN
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
-                .withEncryptionCertificate(new X509CertImpl()) // Certificate without key
+                .withEncryptionCertificate(TestUtils.getTestInvalidEncryptionCertificate()) // Invalid certificate
                 .build();
         HttpRequest request = mock(HttpRequest.class);
         when(request.getContent()).thenReturn(new ByteArrayContent(JSON_TYPE, "{\"foo\":\"bar\"}".getBytes()));

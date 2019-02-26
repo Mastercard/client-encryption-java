@@ -3,6 +3,7 @@ package com.mastercard.developer.interceptor;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.interceptors.OkHttpFieldLevelEncryptionInterceptor;
+import com.mastercard.developer.test.TestUtils;
 import okhttp3.*;
 import okio.Buffer;
 import org.junit.Assert;
@@ -10,7 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
-import sun.security.x509.X509CertImpl;
 
 import java.io.IOException;
 
@@ -89,7 +89,7 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
         // GIVEN
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("$.foo", "$.encryptedFoo")
-                .withEncryptionCertificate(new X509CertImpl()) // Certificate without key
+                .withEncryptionCertificate(TestUtils.getTestInvalidEncryptionCertificate()) // Invalid certificate
                 .build();
         Request request = new Request.Builder()
                 .url("https://sandbox.api.mastercard.com/service")

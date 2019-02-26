@@ -4,11 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mastercard.developer.test.TestUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import sun.security.x509.X509CertImpl;
 
 import java.security.InvalidKeyException;
 
@@ -365,13 +365,13 @@ public class FieldLevelEncryptionTest {
     }
 
     @Test
-    public void testEncryptPayload_ShouldThrowEncryptionException_WhenInvalidCertificateObject() throws Exception {
+    public void testEncryptPayload_ShouldThrowEncryptionException_WhenEncryptionErrorOccurs() throws Exception {
 
         // GIVEN
         String payload = "{\"data\": {}, \"encryptedData\": {}}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
-                .withEncryptionCertificate(new X509CertImpl())
+                .withEncryptionCertificate(TestUtils.getTestInvalidEncryptionCertificate()) // Invalid certificate
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
@@ -715,7 +715,7 @@ public class FieldLevelEncryptionTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldThrowEncryptionException_WhenWrongDecryptionKey() throws Exception {
+    public void testDecryptPayload_ShouldThrowEncryptionException_WhenDecryptionErrorOccurs() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -728,6 +728,7 @@ public class FieldLevelEncryptionTest {
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
+                // Not the right key
                 .withDecryptionKey(loadDecryptionKey("./src/test/resources/test_key_container.p12", "mykeyalias", "Password1"))
                 .build();
 
