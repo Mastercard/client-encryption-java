@@ -8,7 +8,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -47,7 +46,6 @@ public class FieldLevelEncryption {
 
     private static final Configuration jsonPathConfig = new Configuration.ConfigurationBuilder()
             .jsonProvider(new GsonJsonProvider())
-            .mappingProvider(new GsonMappingProvider())
             .options(Option.SUPPRESS_EXCEPTIONS)
             .build();
 
