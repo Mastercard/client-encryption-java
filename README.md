@@ -69,9 +69,9 @@ Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<
 A `PrivateKey` key object can be created from a PKCS#12 file by calling the `EncryptionUtils.loadDecryptionKey` method:
 ```java
 PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
-                        "<insert PKCS#12 key file path>", 
-                        "<insert key alias>", 
-                        "<insert key password>");
+                                    "<insert PKCS#12 key file path>", 
+                                    "<insert key alias>", 
+                                    "<insert key password>");
 ```
 
 #### From a PKCS#8 Formatted Key
