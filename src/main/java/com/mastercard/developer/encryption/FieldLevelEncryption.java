@@ -377,8 +377,7 @@ public class FieldLevelEncryption {
     private static String sanitizeJson(String json) {
         return json.replaceAll("\n", "")
                 .replaceAll("\r", "")
-                .replaceAll("\t", "")
-                .replaceAll(" ", "");
+                .replaceAll("\t", "");
     }
 
     private static String encodeBytes(byte[] bytes, FieldValueEncoding encoding) {
