@@ -124,6 +124,10 @@ public class FieldLevelEncryption {
 
         // Encrypt data at the given JSON path
         String inJsonString = sanitizeJson(inJsonElement.toString());
+        if (inJsonElement.isJsonPrimitive() && inJsonString.startsWith("\"")) {
+            // "value" => value
+            inJsonString = inJsonString.substring(1, inJsonString.length() - 1);
+        }
         byte[] inJsonBytes = null;
         try {
             inJsonBytes = inJsonString.getBytes(StandardCharsets.UTF_8.name());
