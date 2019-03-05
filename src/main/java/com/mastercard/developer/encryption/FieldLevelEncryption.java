@@ -162,19 +162,28 @@ public class FieldLevelEncryption {
 
         // Read and remove encrypted data and encryption fields at the given JSON path
         JsonElement encryptedValueJsonElement = inJsonObject.remove(config.encryptedValueFieldName);
+        if (encryptedValueJsonElement == null) {
+            // Nothing to decrypt
+            return;
+        }
+        payloadContext.delete(jsonPathIn + "." + config.encryptedValueFieldName);
         JsonElement encryptedKeyJsonElement = inJsonObject.remove(config.encryptedKeyFieldName);
+        payloadContext.delete(jsonPathIn + "." + config.encryptedKeyFieldName);
         JsonElement ivJsonElement = inJsonObject.remove(config.ivFieldName);
+        payloadContext.delete(jsonPathIn + "." + config.ivFieldName);
         JsonElement oaepDigestAlgorithmJsonElement = null;
         if (config.oaepPaddingDigestAlgorithmFieldName != null) {
             oaepDigestAlgorithmJsonElement = inJsonObject.remove(config.oaepPaddingDigestAlgorithmFieldName);
+            payloadContext.delete(jsonPathIn + "." + config.oaepPaddingDigestAlgorithmFieldName);
         }
         if (config.encryptionCertificateFingerprintFieldName != null) {
             inJsonObject.remove(config.encryptionCertificateFingerprintFieldName);
+            payloadContext.delete(jsonPathIn + "." + config.encryptionCertificateFingerprintFieldName);
         }
         if (config.encryptionKeyFingerprintFieldName != null) {
             inJsonObject.remove(config.encryptionKeyFingerprintFieldName);
+            payloadContext.delete(jsonPathIn + "." + config.encryptionKeyFingerprintFieldName);
         }
-        payloadContext.set(jsonPathIn, inJsonObject);
 
         // Decrypt the AES secret key
         byte[] encryptedSecretKeyBytes = decodeValue(encryptedKeyJsonElement.getAsString(), config.fieldValueEncoding);
@@ -193,22 +202,21 @@ public class FieldLevelEncryption {
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
         decryptedValue = sanitizeJson(decryptedValue);
         JsonElement decryptedValueJsonElement = new Gson().fromJson(decryptedValue, JsonElement.class);
-        JsonObject outJsonObject = readOrCreateOutObject(payloadContext, jsonPathOut);
+        readOrCreateOutObject(payloadContext, jsonPathOut);
         if (!decryptedValueJsonElement.isJsonObject()) {
-            // Primitive type: overwrite
+            // Primitive or array: overwrite
             payloadContext.set(jsonPathOut, decryptedValueJsonElement);
         } else {
             // Object: merge
             for (Entry<String, JsonElement> entry : ((JsonObject)decryptedValueJsonElement).entrySet()) {
-                outJsonObject.remove(entry.getKey());
-                outJsonObject.add(entry.getKey(), entry.getValue());
+                payloadContext.delete(jsonPathOut + "." + entry.getKey());
+                payloadContext.put(jsonPathOut, entry.getKey(), entry.getValue());
             }
-            payloadContext.set(jsonPathOut, outJsonObject);
         }
 
         // Remove the input object if now empty
         inJsonObject = readJsonObject(payloadContext, jsonPathIn, jsonPathConfig);
-        if (inJsonObject != null && inJsonObject.keySet().isEmpty()) {
+        if (inJsonObject != null && inJsonObject.keySet().isEmpty() && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
     }
