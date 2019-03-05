@@ -119,7 +119,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
 
 See also:
 * [FieldLevelEncryptionConfigBuilder.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfigBuilder.java) for all config options
-* [Mastercard service configurations](https://github.com/Mastercard/client-encryption-service-configurations/blob/master/README.md) on GitHub
+* [Service configurations](https://github.com/Mastercard/client-encryption-java/wiki/Java-Service-Configurations) wiki page
 
 #### Performing Encryption
 
@@ -205,7 +205,8 @@ Library options currently supported for the `java` generator:
 + [google-api-client](#google-api-client)
 
 See also:
-* [OpenAPI Generator (maven Plugin)](https://mvnrepository.com/artifact/org.openapitools/openapi-generator-maven-plugin) 
+* [OpenAPI Generator (maven Plugin)](https://mvnrepository.com/artifact/org.openapitools/openapi-generator-maven-plugin)
+* [OpenAPI Generator (executable)](https://mvnrepository.com/artifact/org.openapitools/openapi-generator-cli)
 * [CONFIG OPTIONS for java](https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/java.md)
 
 #### okhttp-gson <a name="okhttp-gson"></a>
