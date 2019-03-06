@@ -149,7 +149,7 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
     }
 
     @Test
-    public void testIntercept_ShouldDoNothing_WhenResponseWithout() throws Exception {
+    public void testIntercept_ShouldDoNothing_WhenResponseWithoutPayload() throws Exception {
 
         // GIVEN
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder().build();
@@ -159,6 +159,27 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
         when(chain.request()).thenReturn(request);
         when(chain.proceed(any(Request.class))).thenReturn(response);
         when(response.body()).thenReturn(null);
+
+        // WHEN
+        OkHttp2FieldLevelEncryptionInterceptor instanceUnderTest = new OkHttp2FieldLevelEncryptionInterceptor(config);
+        instanceUnderTest.intercept(chain);
+
+        // THEN
+        verify(response).body();
+        verifyNoMoreInteractions(response);
+    }
+
+    @Test
+    public void testIntercept_ShouldDoNothing_WhenResponseWithEmptyPayload() throws Exception {
+
+        // GIVEN
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder().build();
+        Request request = mock(Request.class);
+        Chain chain = mock(Chain.class);
+        Response response = mock(Response.class);
+        when(chain.request()).thenReturn(request);
+        when(chain.proceed(any(Request.class))).thenReturn(response);
+        when(response.body()).thenReturn(ResponseBody.create(JSON_MEDIA_TYPE, ""));
 
         // WHEN
         OkHttp2FieldLevelEncryptionInterceptor instanceUnderTest = new OkHttp2FieldLevelEncryptionInterceptor(config);
