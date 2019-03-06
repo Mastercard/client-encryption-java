@@ -73,6 +73,13 @@ Example:
 FieldLevelEncryption.withJsonEngine(new JettisonJsonEngine());
 ```
 
+Available engine classes: 
+* `GsonJsonEngine`
+* `JacksonJsonEngine`
+* `JettisonJsonEngine`
+* `JsonOrgJsonEngine`
+* `JsonSmartJsonEngine`
+
 ### Loading the Encryption Certificate <a name="loading-the-encryption-certificate"></a>
 
 A `Certificate` object can be created from a PEM file by calling the `EncryptionUtils.loadEncryptionCertificate` method:
