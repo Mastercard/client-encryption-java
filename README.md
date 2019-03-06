@@ -12,7 +12,7 @@
 - [Usage](#usage)
   * [Prerequisites](#prerequisites)
   * [Adding the Library to Your Project](#adding-the-library-to-your-project)
-  * [Configuring a JSON Engine](#configuring-a-json-engine)
+  * [Selecting a JSON Engine](#selecting-a-json-engine)
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
   * [Performing Field Level Encryption and Decryption](#performing-field-level-encryption-and-decryption)
@@ -56,7 +56,7 @@ dependencies {
 #### Other Dependency Managers
 See: https://search.maven.org/artifact/com.mastercard.developer/client-encryption
 
-### Configuring a JSON Engine <a name="configuring-a-json-engine"></a>
+### Selecting a JSON Engine <a name="selecting-a-json-engine"></a>
 
 This library requires one of the following dependencies to be added to your classpath:
 
@@ -66,7 +66,7 @@ This library requires one of the following dependencies to be added to your clas
 * [Jettison](https://search.maven.org/artifact/org.codehaus.jettison/jettison) 1.0+
 * [Org JSON](https://search.maven.org/artifact/org.json/json) 20070829+
 
-You can force the one to be used by calling `withJsonEngine` on the `FieldLevelEncryption` class.
+You can either let the library choose for you, or force the one to be used by calling `withJsonEngine` on the `FieldLevelEncryption` class.
 Example:
 
 ```java
