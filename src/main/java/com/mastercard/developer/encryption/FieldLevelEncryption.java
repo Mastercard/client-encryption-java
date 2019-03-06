@@ -1,11 +1,8 @@
 package com.mastercard.developer.encryption;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.*;
 import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.mastercard.developer.json.JsonEngine;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -24,6 +21,8 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,12 +41,21 @@ public class FieldLevelEncryption {
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
     private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(".*(\\['.*'\\])"); // Returns "['obj2']" for "$['obj1']['obj2']"
 
-    private static final Configuration jsonPathConfig = new Configuration.ConfigurationBuilder()
-            .jsonProvider(new GsonJsonProvider())
-            .options(Option.SUPPRESS_EXCEPTIONS)
-            .build();
+    private static Configuration jsonPathConfig = withJsonEngine(JsonEngine.getDefault());
 
     private FieldLevelEncryption() {
+    }
+
+    /**
+     * Specify the JSON engine to be used.
+     * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} object
+     */
+    public static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
+        jsonPathConfig = new Configuration.ConfigurationBuilder()
+                .jsonProvider(jsonEngine.getJsonProvider())
+                .options(Option.SUPPRESS_EXCEPTIONS)
+                .build();
+        return jsonPathConfig;
     }
 
     /**
@@ -69,7 +77,7 @@ public class FieldLevelEncryption {
             }
 
             // Return the updated payload
-            return payloadContext.json().toString();
+            return payloadContext.jsonString();
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Payload encryption failed!", e);
         }
@@ -94,7 +102,7 @@ public class FieldLevelEncryption {
             }
 
             // Return the updated payload
-            return payloadContext.json().toString();
+            return payloadContext.jsonString();
         } catch (GeneralSecurityException | DecoderException e) {
             throw new EncryptionException("Payload decryption failed!", e);
         }
@@ -136,6 +144,9 @@ public class FieldLevelEncryption {
         byte[] encryptedValueBytes = encryptBytes(secretKey, iv, inJsonBytes);
         String encryptedValue = encodeBytes(encryptedValueBytes, config.fieldValueEncoding);
 
+        // Delete data in clear
+        payloadContext.delete(jsonPathIn);
+
         // Add encrypted data and encryption fields at the given JSON path
         Object outJsonObject = readOrCreateOutObject(payloadContext, jsonPathOut);
         jsonProvider.setProperty(outJsonObject, config.ivFieldName, ivValue);
@@ -144,9 +155,6 @@ public class FieldLevelEncryption {
         addEncryptionCertificateFingerprint(outJsonObject, config);
         addEncryptionKeyFingerprint(outJsonObject, config);
         addOaepPaddingDigestAlgorithm(outJsonObject, config);
-
-        // Update the JSON payload by keeping encrypted data and encryption fields only
-        payloadContext.delete(jsonPathIn);
         payloadContext.set(jsonPathOut, outJsonObject);
     }
 
@@ -172,7 +180,7 @@ public class FieldLevelEncryption {
         readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionCertificateFingerprintFieldName);
         readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
 
-        // Decrypt the AES secret key=
+        // Decrypt the AES secret key
         byte[] encryptedSecretKeyBytes = decodeValue(jsonProvider.unwrap(encryptedKeyJsonElement).toString(), config.fieldValueEncoding);
         String oaepDigestAlgorithm = isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : jsonProvider.unwrap(oaepDigestAlgorithmJsonElement).toString();
         Key secretKey = unwrapSecretKey(config, encryptedSecretKeyBytes, oaepDigestAlgorithm);
@@ -188,18 +196,8 @@ public class FieldLevelEncryption {
         // Add decrypted data at the given JSON path
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
         decryptedValue = sanitizeJson(decryptedValue);
-        Object decryptedValueJsonElement = jsonProvider.parse(decryptedValue);
         readOrCreateOutObject(payloadContext, jsonPathOut);
-        if (!isJsonObject(decryptedValueJsonElement)) {
-            // Primitive or array: overwrite
-            payloadContext.set(jsonPathOut, decryptedValueJsonElement);
-        } else {
-            // Object: merge
-            for (String key : jsonProvider.getPropertyKeys(decryptedValueJsonElement)) {
-                payloadContext.delete(jsonPathOut + "." + key);
-                payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
-            }
-        }
+        addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
 
         // Remove the input object if now empty
         inJsonObject = readJsonObject(payloadContext, jsonPathIn);
@@ -250,8 +248,45 @@ public class FieldLevelEncryption {
             return null;
         }
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
+        Object value = jsonProvider.getMapValue(object, key);
         context.delete(objectPath + "." + key);
-        return jsonProvider.getMapValue(object, key);
+        return value;
+    }
+
+    private static void addDecryptedDataToPayload(DocumentContext payloadContext, String decryptedValue, String jsonPathOut) {
+        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
+        boolean isPrimitiveType = false;
+        Object decryptedValueJsonElement = null;
+
+        try {
+            decryptedValueJsonElement = jsonProvider.parse(decryptedValue);
+        } catch (InvalidJsonException | IllegalStateException e) {
+            // Primitive type that can't be parsed by some JSON implementations
+            isPrimitiveType = true;
+        }
+
+        if (isPrimitiveType) {
+            if (decryptedValue.startsWith("\"")) {
+                // "value" => value
+                decryptedValue = decryptedValue.substring(1, decryptedValue.length() - 1);
+            }
+            payloadContext.set(jsonPathOut, decryptedValue);
+            return;
+        }
+
+        if (!isJsonObject(decryptedValueJsonElement)) {
+            // Array or primitive: overwrite
+            payloadContext.set(jsonPathOut, decryptedValueJsonElement);
+            return;
+        }
+
+        // Object: merge
+        int length = jsonProvider.length(decryptedValueJsonElement);
+        Collection<String> propertyKeys = (0 == length) ? Collections.<String>emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
+        for (String key : propertyKeys) {
+            payloadContext.delete(jsonPathOut + "." + key);
+            payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
+        }
     }
 
     private static boolean isJsonPrimitive(Object jsonElement) {
@@ -266,7 +301,7 @@ public class FieldLevelEncryption {
     private static boolean isNullOrEmptyJson(Object jsonElement) {
         return jsonElement == null
                 || "".equals(jsonElement.toString())
-                || "{}".equals(jsonPathConfig.jsonProvider().toJson(jsonElement));
+                || 0 == jsonElement.getClass().getFields().length;
     }
 
     /**

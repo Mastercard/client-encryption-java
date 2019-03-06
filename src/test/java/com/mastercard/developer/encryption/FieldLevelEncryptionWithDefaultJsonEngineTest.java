@@ -3,7 +3,6 @@ package com.mastercard.developer.encryption;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mastercard.developer.test.TestUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Rule;
@@ -18,7 +17,7 @@ import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 
-public class FieldLevelEncryptionTest {
+public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,7 +40,7 @@ public class FieldLevelEncryptionTest {
         assertNull(encryptedPayloadObject.get("data"));
         JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
         assertNotNull(encryptedData);
-        assertEquals(6, encryptedData.size());
+        assertEquals(6, encryptedData.entrySet().size());
         assertEquals("SHA256", encryptedData.get("oaepHashingAlgorithm").getAsString());
         assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", encryptedData.get("encryptionKeyFingerprint").getAsString());
         assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", encryptedData.get("encryptionCertificateFingerprint").getAsString());
@@ -135,7 +134,7 @@ public class FieldLevelEncryptionTest {
         String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
 
         // THEN
-        assertEquals("{\"data\":{},\"encryptedData\":{}}", encryptedPayload);
+        assertEquals("{\"data\":{},\"encryptedData\":{}}", new Gson().fromJson(encryptedPayload, JsonObject.class).getAsJsonObject().toString());
     }
 
     @Test
@@ -362,8 +361,12 @@ public class FieldLevelEncryptionTest {
         // THEN
         JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
         JsonObject dataObject = (JsonObject) encryptedPayloadObject.get("data");
-        JsonPrimitive encryptedDataPrimitive = (JsonPrimitive) dataObject.get("encryptedData");
-        assertNotNull(encryptedDataPrimitive);
+        assertNotNull(dataObject.get("iv"));
+        assertNotNull(dataObject.get("encryptedKey"));
+        assertNotNull(dataObject.get("encryptionCertificateFingerprint"));
+        assertNotNull(dataObject.get("encryptionKeyFingerprint"));
+        assertNotNull(dataObject.get("oaepHashingAlgorithm"));
+        assertNotNull(dataObject.get("encryptedData"));
     }
 
     @Test
@@ -384,7 +387,7 @@ public class FieldLevelEncryptionTest {
         JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
         JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
         assertNotNull(encryptedData);
-        assertEquals(5, encryptedData.size());
+        assertEquals(5, encryptedData.entrySet().size());
     }
 
     @Test
@@ -526,7 +529,7 @@ public class FieldLevelEncryptionTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        assertEquals("{\"data\":{}}", payload);
+        assertEquals("{\"data\":{}}", new Gson().fromJson(payload, JsonObject.class).getAsJsonObject().toString());
     }
 
     @Test
@@ -728,7 +731,11 @@ public class FieldLevelEncryptionTest {
         // THEN
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertNull(payloadObject.get("encryptedData"));
-        assertEquals("{\"field3\":\"field3Value\",\"field1\":\"field1Value\",\"field2\":\"field2Value\"}", payloadObject.get("data").toString());
+        JsonElement dataObject = payloadObject.get("data");
+        assertNotNull(dataObject);
+        assertEquals("field1Value", dataObject.getAsJsonObject().get("field1").getAsString());
+        assertEquals("field2Value", dataObject.getAsJsonObject().get("field2").getAsString());
+        assertEquals("field3Value", dataObject.getAsJsonObject().get("field3").getAsString());
     }
 
     @Test
