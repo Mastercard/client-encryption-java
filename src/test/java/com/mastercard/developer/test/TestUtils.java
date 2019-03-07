@@ -1,5 +1,8 @@
 package com.mastercard.developer.test;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfigBuilder;
 
@@ -9,6 +12,7 @@ import java.security.cert.X509Certificate;
 
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static com.mastercard.developer.utils.EncryptionUtils.loadEncryptionCertificate;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class TestUtils {
@@ -42,5 +46,16 @@ public class TestUtils {
                 .withEncryptionKeyFingerprintFieldName("encryptionKeyFingerprint")
                 .withEncryptionKeyFingerprint("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79")
                 .withFieldValueEncoding(FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
+    }
+
+    public static void assertDecryptedPayloadEquals(String expectedPayload, String encryptedPayload, FieldLevelEncryptionConfig config) throws Exception {
+        String payloadString = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+        String normalizedPayloadString = new Gson().fromJson(payloadString, JsonObject.class).toString();
+        assertEquals(expectedPayload, normalizedPayloadString);
+    }
+
+    public static void assertPayloadEquals(String expectedPayload, String payload) {
+        String normalizedPayloadString = new Gson().fromJson(payload, JsonObject.class).toString();
+        assertEquals(expectedPayload, normalizedPayloadString);
     }
 }

@@ -12,7 +12,7 @@ import org.junit.rules.ExpectedException;
 import java.security.InvalidKeyException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
-import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
+import static com.mastercard.developer.test.TestUtils.*;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
@@ -1037,16 +1037,5 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionCertificateFingerprint"));
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionKeyFingerprint"));
         assertEquals("{}", payloadObject.get("data").toString());
-    }
-
-    private static void assertDecryptedPayloadEquals(String expectedPayload, String encryptedPayload, FieldLevelEncryptionConfig config) throws Exception {
-        String payloadString = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
-        String normalizedPayloadString = new Gson().fromJson(payloadString, JsonObject.class).toString();
-        assertEquals(expectedPayload, normalizedPayloadString);
-    }
-
-    private static void assertPayloadEquals(String expectedPayload, String payload) throws Exception {
-        String normalizedPayloadString = new Gson().fromJson(payload, JsonObject.class).toString();
-        assertEquals(expectedPayload, normalizedPayloadString);
     }
 }

@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 
+import static com.mastercard.developer.test.TestUtils.assertPayloadEquals;
 import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static com.squareup.okhttp.Interceptor.Chain;
 import static org.hamcrest.core.Is.isA;
@@ -56,7 +57,7 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
         String encryptedPayload = buffer.readUtf8();
         Assert.assertFalse(encryptedPayload.contains("foo"));
         Assert.assertTrue(encryptedPayload.contains("encryptedFoo"));
-        Assert.assertEquals(868, encryptedRequest.body().contentLength());
+        Assert.assertEquals(encryptedPayload.length(), encryptedRequest.body().contentLength());
     }
 
     @Test
@@ -117,9 +118,9 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
         // GIVEN
         String encryptedPayload = "{" +
                 "    \"encryptedData\": {" +
-                "        \"iv\": \"a2c494ca28dec4f3d6ce7d68b1044cfe\"," +
-                "        \"encryptedKey\": \"038c65f154a2b07f6c788aaddc13ecead05fdeb11eca0bf576cab7185df66349d2cba4ba51a5304d45995e915bb1de462f0f66acd05026b21340b567d141653a2175ccfe2030b3b49261c6750381421cf0e29bd67840bcdc8092a44691c6c74dcdf620d5a744832fce3b45b8e3f8ad1af6c919195eb7f878c7435143e328e8b858dd232dbfacf7bb2f73981a80a09dc7c6dcd49ad95df527d415438958700b48994d7f6207f03d974a5cf50181205ac0a301a91e94b35ad162c8cf39475d2505d8ae7b1d4ed6f170091ab523f037a75eddb5ca46db9328c10395b69f8b798c280fa0e76f8385a64fe37b67e8578f3f9572dfb87d71e80a97323753030966901b\"," +
-                "        \"encryptedValue\": \"0672589113046bf692265b6ea6088184\"," +
+                "        \"iv\": \"a32059c51607d0d02e823faecda5fb15\"," +
+                "        \"encryptedKey\": \"a31cfe7a7981b72428c013270619554c1d645c04b9d51c7eaf996f55749ef62fd7c7f8d334f95913be41ae38c46d192670fd1acb84ebb85a00cd997f1a9a3f782229c7bf5f0fdf49fe404452d7ed4fd41fbb95b787d25893fbf3d2c75673cecc8799bbe3dd7eb4fe6d3f744b377572cdf8aba1617194e10475b6cd6a8dd4fb8264f8f51534d8f7ac7c10b4ce9c44d15066724b03a0ab0edd512f9e6521fdb5841cd6964e457d6b4a0e45ba4aac4e77d6bbe383d6147e751fa88bc26278bb9690f9ee84b17123b887be2dcef0873f4f9f2c895d90e23456fafb01b99885e31f01a3188f0ad47edf22999cc1d0ddaf49e1407375117b5d66f1f185f2b57078d255\"," +
+                "        \"encryptedValue\": \"21d754bdb4567d35d58720c9f8364075\"," +
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
@@ -144,8 +145,9 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
 
         // THEN
         String expectedPayload = "{\"data\":\"string\"}";
-        Assert.assertEquals(expectedPayload, response.body().string());
-        Assert.assertEquals(expectedPayload.length(), response.body().contentLength());
+        String payload = response.body().string();
+        assertPayloadEquals(expectedPayload, payload);
+        Assert.assertEquals(payload.length(), response.body().contentLength());
     }
 
     @Test
