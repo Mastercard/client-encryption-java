@@ -5,6 +5,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 public abstract class JsonEngine {
 
     public abstract JsonProvider getJsonProvider();
+    public abstract Object parse(String string);
 
     public static JsonEngine getDefault() {
         try {
@@ -49,5 +50,22 @@ public abstract class JsonEngine {
                 "* org.json:json\n" +
                 "* com.google.code.gson:gson";
         throw new IllegalStateException(message);
+    }
+
+    protected Object asPrimitiveValue(String string) {
+       // Boolean?
+        if ("true".equals(string) || "false".equals(string)) {
+            return Boolean.valueOf(string);
+        }
+
+        // Numeric?
+        try {
+            return Long.valueOf(string);
+        } catch (NumberFormatException e) {
+            // Do nothing
+        }
+
+        // String
+        return string;
     }
 }

@@ -87,7 +87,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testEncryptPayload_ShouldEncryptPrimitiveTypes() throws Exception {
+    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_String() throws Exception {
 
         // GIVEN
         String payload = "{\"data\": \"string\", \"encryptedData\": {}}";
@@ -105,6 +105,48 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNull(encryptedPayloadObject.get("data"));
         assertNotNull(encryptedPayloadObject.get("encryptedData"));
         assertDecryptedPayloadEquals("{\"data\":\"string\"}", encryptedPayload, config);
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_Integer() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": 1984, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withDecryptionPath("encryptedData", "data")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("data"));
+        assertNotNull(encryptedPayloadObject.get("encryptedData"));
+        assertDecryptedPayloadEquals("{\"data\":1984}", encryptedPayload, config);
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_Boolean() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": false, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withDecryptionPath("encryptedData", "data")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("data"));
+        assertNotNull(encryptedPayloadObject.get("encryptedData"));
+        assertDecryptedPayloadEquals("{\"data\":false}", encryptedPayload, config);
     }
 
     @Test
@@ -450,7 +492,6 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertEquals(6, encryptedPayloadObject.entrySet().size());
     }
 
-
     @Test
     public void testEncryptPayload_ShouldThrowEncryptionException_WhenEncryptionErrorOccurs() throws Exception {
 
@@ -497,14 +538,14 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldDecryptPrimitiveTypes() throws Exception {
+    public void testDecryptPayload_ShouldDecryptPrimitiveTypes_String() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
                 "    \"encryptedData\": {" +
-                "        \"iv\": \"a2c494ca28dec4f3d6ce7d68b1044cfe\"," +
-                "        \"encryptedKey\": \"038c65f154a2b07f6c788aaddc13ecead05fdeb11eca0bf576cab7185df66349d2cba4ba51a5304d45995e915bb1de462f0f66acd05026b21340b567d141653a2175ccfe2030b3b49261c6750381421cf0e29bd67840bcdc8092a44691c6c74dcdf620d5a744832fce3b45b8e3f8ad1af6c919195eb7f878c7435143e328e8b858dd232dbfacf7bb2f73981a80a09dc7c6dcd49ad95df527d415438958700b48994d7f6207f03d974a5cf50181205ac0a301a91e94b35ad162c8cf39475d2505d8ae7b1d4ed6f170091ab523f037a75eddb5ca46db9328c10395b69f8b798c280fa0e76f8385a64fe37b67e8578f3f9572dfb87d71e80a97323753030966901b\"," +
-                "        \"encryptedValue\": \"0672589113046bf692265b6ea6088184\"," +
+                "        \"iv\": \"a32059c51607d0d02e823faecda5fb15\"," +
+                "        \"encryptedKey\": \"a31cfe7a7981b72428c013270619554c1d645c04b9d51c7eaf996f55749ef62fd7c7f8d334f95913be41ae38c46d192670fd1acb84ebb85a00cd997f1a9a3f782229c7bf5f0fdf49fe404452d7ed4fd41fbb95b787d25893fbf3d2c75673cecc8799bbe3dd7eb4fe6d3f744b377572cdf8aba1617194e10475b6cd6a8dd4fb8264f8f51534d8f7ac7c10b4ce9c44d15066724b03a0ab0edd512f9e6521fdb5841cd6964e457d6b4a0e45ba4aac4e77d6bbe383d6147e751fa88bc26278bb9690f9ee84b17123b887be2dcef0873f4f9f2c895d90e23456fafb01b99885e31f01a3188f0ad47edf22999cc1d0ddaf49e1407375117b5d66f1f185f2b57078d255\"," +
+                "        \"encryptedValue\": \"21d754bdb4567d35d58720c9f8364075\"," +
                 "        \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "    }" +
                 "}";
@@ -517,6 +558,52 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         assertPayloadEquals("{\"data\":\"string\"}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldDecryptPrimitiveTypes_Integer() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"5bb681fb4ca4a8f85a9c80b8f234e87c\"," +
+                "        \"encryptedKey\": \"d6819275d3a692bddce0baa10187769e0d683c351fb4e1857ab30f2572fbe1db95c34583d20ea5b224a638e99d26f6935104500b49fc1e855b7af30f34ac1d148090c6393e77e0f16d710614d00817ac862f9af730e9b3596d2c0dacf1349abd18717792ac3040f4ef1cc2e8fd9e0d685a192bfc6800e79022393eb3ce326757ba556107be28c02590390fad73117f7da3d96c05f54aaa36541b05680f23a222f1b7bbe54f1b070515dfbea8e5312708d5c27bfe9d9350e7bb72914351a6db1d83cdefee7d7514d04b73b6e285f334b27c674ad50ec830494ebc2901f1fe1738863b2d7940c98a15e1467d501545bffa724fd97b2d673e92629c9be79ca7381f\"," +
+                "        \"encryptedValue\": \"072b6ef69afd42d43b89afdf8f8bb172\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        assertPayloadEquals("{\"data\":1984}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldDecryptPrimitiveTypes_Boolean() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"683c1559d6b9366f21efc4dec682cca2\"," +
+                "        \"encryptedKey\": \"631f0729018db2aa4f02823eeac6c1bf4bc766897dfd8159ec831086acb68cf37d91427347db77869fe1088e4cd8553b5bb0308accb43e92a3977245e0005385fc538aacea323cb62d44d21c932b7fbb3fc2039de44d18fff130108b30bd5c9925a3463ace729099ce63375dfa1dd9ec9f1e277de6b4ace5161a0e47ae81908aa2f8b44a654be2b863d6dfc5112a422dda065d8fbc0d5e47ea435409262c608edfc28a49e90fbda035c1743ec8cabd453d75775b0ab7b660b20b3a1f37c6eecffa32a26b07adf78432e1dd479a2ce19002846cb2fa2488ade423265ce7c4b003373837971c7b803925624f8eeb9254dad347941ebab8f641522b5b1efe53f572\"," +
+                "        \"encryptedValue\": \"cc8bb0cc778d508f198c39364cce9137\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        assertPayloadEquals("{\"data\":false}", payload);
     }
 
     @Test

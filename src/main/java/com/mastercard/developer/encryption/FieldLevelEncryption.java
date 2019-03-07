@@ -42,6 +42,7 @@ public class FieldLevelEncryption {
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
     private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(".*(\\['.*'\\])"); // Returns "['obj2']" for "$['obj1']['obj2']"
 
+    private static JsonEngine jsonEngine;
     private static Configuration jsonPathConfig = withJsonEngine(JsonEngine.getDefault());
 
     private FieldLevelEncryption() {
@@ -52,7 +53,8 @@ public class FieldLevelEncryption {
      * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} object
      */
     public static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
-        jsonPathConfig = new Configuration.ConfigurationBuilder()
+        FieldLevelEncryption.jsonEngine = jsonEngine;
+        FieldLevelEncryption.jsonPathConfig = new Configuration.ConfigurationBuilder()
                 .jsonProvider(jsonEngine.getJsonProvider())
                 .options(Option.SUPPRESS_EXCEPTIONS)
                 .build();
@@ -132,10 +134,6 @@ public class FieldLevelEncryption {
 
         // Encrypt data at the given JSON path
         String inJsonString = sanitizeJson(toJsonString(inJsonElement));
-        if (isJsonPrimitive(inJsonElement) && inJsonString.startsWith("\"")) {
-            // "value" => value
-            inJsonString = inJsonString.substring(1, inJsonString.length() - 1);
-        }
         byte[] inJsonBytes = null;
         try {
             inJsonBytes = inJsonString.getBytes(StandardCharsets.UTF_8.name());
@@ -149,7 +147,7 @@ public class FieldLevelEncryption {
         if (!"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         } else {
-            // Delete keys
+            // Delete keys one by one
             Collection<String> propertyKeys = new ArrayList<>(jsonProvider.getPropertyKeys(inJsonElement));
             for (String key : propertyKeys) {
                 payloadContext.delete(jsonPathIn + "." + key);
@@ -168,7 +166,7 @@ public class FieldLevelEncryption {
         if (!"$".equals(jsonPathOut)) {
             payloadContext.set(jsonPathOut, outJsonObject);
         } else {
-            // Add keys
+            // Add keys one by one
             Collection<String> propertyKeys = new ArrayList<>(jsonProvider.getPropertyKeys(outJsonObject));
             for (String key : propertyKeys) {
                 payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(outJsonObject, key));
@@ -273,24 +271,7 @@ public class FieldLevelEncryption {
 
     private static void addDecryptedDataToPayload(DocumentContext payloadContext, String decryptedValue, String jsonPathOut) {
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
-        boolean isPrimitiveType = false;
-        Object decryptedValueJsonElement = null;
-
-        try {
-            decryptedValueJsonElement = jsonProvider.parse(decryptedValue);
-        } catch (InvalidJsonException | IllegalStateException e) {
-            // Primitive type that can't be parsed by some JSON implementations
-            isPrimitiveType = true;
-        }
-
-        if (isPrimitiveType) {
-            if (decryptedValue.startsWith("\"")) {
-                // "value" => value
-                decryptedValue = decryptedValue.substring(1, decryptedValue.length() - 1);
-            }
-            payloadContext.set(jsonPathOut, decryptedValue);
-            return;
-        }
+        Object decryptedValueJsonElement = jsonEngine.parse(decryptedValue);
 
         if (!isJsonObject(decryptedValueJsonElement)) {
             // Array or primitive: overwrite
@@ -306,6 +287,7 @@ public class FieldLevelEncryption {
             payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
         }
     }
+
     private static String toJsonString(Object object) {
         if (null == object) {
             throw new IllegalStateException("Can get JSON string, object is null!");

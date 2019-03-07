@@ -5,8 +5,15 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 
 public class GsonJsonEngine extends JsonEngine {
 
+    private static final JsonProvider jsonProvider = new GsonJsonProvider();
+
     @Override
     public JsonProvider getJsonProvider() {
-        return new GsonJsonProvider();
+        return jsonProvider;
+    }
+
+    @Override
+    public Object parse(String string) {
+        return jsonProvider.parse(string);
     }
 }
