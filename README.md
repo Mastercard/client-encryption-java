@@ -114,6 +114,16 @@ Reading PEM encoded keys requires an additional step:
 2. Call `EncryptionUtils.loadDecryptionKey` (see above)
 
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
+
++ [Introduction](#introduction)
++ [Configuring the Field Level Encryption](#configuring-the-field-level-encryption)
++ [Performing Encryption](#performing-encryption)
++ [Performing Decryption](#performing-decryption)
++ [Encrypting Entire Payloads](#encrypting-entire-payloads)
++ [Decrypting Entire Payloads](#decrypting-entire-payloads)
+
+#### Introduction <a name="introduction"></a>
+
 The methods that do all the heavy lifting are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
 * `encryptPayload` usage:
@@ -130,23 +140,23 @@ String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePa
 Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withEncryptionCertificate(encryptionCertificate)
-                .withDecryptionKey(decryptionKey)
-                .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
-                .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
-                .withOaepPaddingDigestAlgorithm("SHA-256")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(FieldValueEncoding.HEX)
-                .build();
+        .withEncryptionCertificate(encryptionCertificate)
+        .withDecryptionKey(decryptionKey)
+        .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
+        .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
+        .withOaepPaddingDigestAlgorithm("SHA-256")
+        .withEncryptedValueFieldName("encryptedValue")
+        .withEncryptedKeyFieldName("encryptedKey")
+        .withIvFieldName("iv")
+        .withFieldValueEncoding(FieldValueEncoding.HEX)
+        .build();
 ```
 
 See also:
 * [FieldLevelEncryptionConfigBuilder.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfigBuilder.java) for all config options
 * [Service configurations](https://github.com/Mastercard/client-encryption-java/wiki/Java-Service-Configurations) wiki page
 
-#### Performing Encryption
+#### Performing Encryption <a name="performing-encryption"></a>
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -181,7 +191,7 @@ Output:
 }
 ```
 
-#### Performing Decryption
+#### Performing Decryption <a name="performing-decryption"></a>
 
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -213,6 +223,68 @@ Output:
             }
         }
     }
+}
+```
+
+#### Encrypting Entire Payloads <a name="encrypting-entire-payloads"></a>
+
+Entire payloads can be encrypted using the "$" operator as encryption path:
+
+```java
+FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+        .withEncryptionCertificate(encryptionCertificate)
+        .withEncryptionPath("$", "$")
+        // ...
+        .build();
+```
+
+Example:
+```java
+String payload = "{" +
+        "    \"sensitiveField1\": \"sensitiveValue1\"," +
+        "    \"sensitiveField2\": \"sensitiveValue2\"" +
+        "}";
+String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+    "iv": "1b9396c98ab2bfd195de661d70905a45",
+    "encryptedKey": "7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13",
+    "encryptedValue": "e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515"
+}
+```
+
+#### Decrypting Entire Payloads <a name="decrypting-entire-payloads"></a>
+
+Entire payloads can be decrypted using the "$" operator as decryption path:
+
+```java
+FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+        .withDecryptionKey(decryptionKey)
+        .withDecryptionPath("$", "$")
+        // ...
+        .build();
+```
+
+Example:
+```java
+String encryptedPayload = "{" +
+        "  \"iv\": \"1b9396c98ab2bfd195de661d70905a45\"," +
+        "  \"encryptedKey\": \"7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13\"," +
+        "  \"encryptedValue\": \"e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515\"" +
+        "}";
+String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+    "sensitiveField1": "sensitiveValue1",
+    "sensitiveField2": "sensitiveValue2"
 }
 ```
 
