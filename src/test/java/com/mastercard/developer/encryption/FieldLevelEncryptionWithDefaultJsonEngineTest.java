@@ -26,9 +26,16 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     public void testEncryptPayload_Nominal() throws Exception {
 
         // GIVEN
-        String payload = "{\"data\": {}, \"encryptedData\": {}}";
+        String payload = "{" +
+                "    \"data\": {" +
+                "        \"field1\": \"value1\"," +
+                "        \"field2\": \"value2\"" +
+                "    }," +
+                "    \"encryptedData\": {}" +
+                "}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
+                .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
@@ -47,6 +54,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNotNull(encryptedData.get("encryptedValue").getAsString());
         assertNotNull(encryptedData.get("encryptedKey").getAsString());
         assertNotNull(encryptedData.get("iv").getAsString());
+        assertDecryptedPayloadEquals("{\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", encryptedPayload, config);
     }
 
     @Test
@@ -85,6 +93,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = "{\"data\": \"string\", \"encryptedData\": {}}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
+                .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
@@ -95,6 +104,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
         assertNull(encryptedPayloadObject.get("data"));
         assertNotNull(encryptedPayloadObject.get("encryptedData"));
+        assertDecryptedPayloadEquals("{\"data\":\"string\"}", encryptedPayload, config);
     }
 
     @Test
@@ -109,6 +119,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
                 "}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("items", "encryptedItems")
+                .withDecryptionPath("encryptedItems", "items")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
@@ -119,6 +130,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
         assertNull(encryptedPayloadObject.get("items"));
         assertNotNull(encryptedPayloadObject.get("encryptedItems"));
+        assertDecryptedPayloadEquals("{\"items\":[{},{}]}", encryptedPayload, config);
     }
 
     @Test
@@ -134,7 +146,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
 
         // THEN
-        assertEquals("{\"data\":{},\"encryptedData\":{}}", new Gson().fromJson(encryptedPayload, JsonObject.class).getAsJsonObject().toString());
+        assertPayloadEquals("{\"data\":{},\"encryptedData\":{}}", encryptedPayload);
     }
 
     @Test
@@ -391,6 +403,55 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
+    public void testEncryptPayload_ShouldSupportRootAsInputPath() throws Exception {
+
+        // GIVEN
+        String payload = "{" +
+                "    \"field1\": \"value1\"," +
+                "    \"field2\": \"value2\"" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("$", "encryptedData")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("field1"));
+        assertNull(encryptedPayloadObject.get("field2"));
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertNotNull(encryptedData);
+        assertEquals(6, encryptedData.entrySet().size());
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldSupportRootAsInputPathAndOutputPath() throws Exception {
+
+        // GIVEN
+        String payload = "{" +
+                "    \"field1\": \"value1\"," +
+                "    \"field2\": \"value2\"" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("$", "$")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("field1"));
+        assertNull(encryptedPayloadObject.get("field2"));
+        assertEquals(6, encryptedPayloadObject.entrySet().size());
+    }
+
+
+    @Test
     public void testEncryptPayload_ShouldThrowEncryptionException_WhenEncryptionErrorOccurs() throws Exception {
 
         // GIVEN
@@ -432,9 +493,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("encryptedData"));
-        assertEquals("{}", payloadObject.get("data").toString());
+        assertPayloadEquals("{\"data\":{}}", payload);
     }
 
     @Test
@@ -457,9 +516,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("encryptedData"));
-        assertEquals("\"string\"", payloadObject.get("data").toString());
+        assertPayloadEquals("{\"data\":\"string\"}", payload);
     }
 
     @Test
@@ -482,10 +539,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("encryptedItems"));
-        assertNotNull(payloadObject.get("items"));
-        assertEquals(2, payloadObject.get("items").getAsJsonArray().size());
+        assertPayloadEquals("{\"items\":[{},{}]}", payload);
     }
 
     @Test
@@ -511,9 +565,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("encryptedData"));
-        assertEquals("{}", payloadObject.get("data").toString());
+        assertPayloadEquals("{\"data\":{}}", payload);
     }
 
     @Test
@@ -529,7 +581,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        assertEquals("{\"data\":{}}", new Gson().fromJson(payload, JsonObject.class).getAsJsonObject().toString());
+        assertPayloadEquals("{\"data\":{}}", payload);
     }
 
     @Test
@@ -667,9 +719,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("encryptedData"));
-        assertEquals("{}", payloadObject.get("data").toString());
+        assertPayloadEquals("{\"data\":{}}", payload);
     }
 
     @Test
@@ -794,14 +844,15 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // GIVEN
         String encryptedPayload = "{" +
-                "    \"iv\": \"17492f69d92d2008ee9289cf3e07bd36\"," +
-                "    \"encryptedKey\": \"22b3df5e70777cef394c39ac74bacfcdbfc8cef4a4da771f1d07611f18b4dc9eacde7297870acb421abe77b8b974f53b2e5b834a68e11a4ddab53ece2d37ae7dee5646dc3f4c5c17166906258615b9c7c52f7242a1afa6edf24815c3dbec4b2092a027de11bcdab4c47de0159ce76d2449394f962a07196a5a5b41678a085d77730baee0d3d0e486eb4719aae8f1f1c0fd7026aea7b0872c049e8df1e7eed088fa84fc613602e989fa4e7a7b77ac40da212a462ae5d3df5078be96fcf3d0fe612e0ec401d27a243c0df1feb8241d49248697db5ec79571b9d52386064ee3db11d200156bfd3af03a289ea37ec2c8f315840e7804669a855bf9e34190e3b14d28\"," +
-                "    \"encryptedValue\": \"9cad34c0d7b2443f07bb7b7e19817ade132ba3f312b1176c09a312e5b5f908198e1e0cfac0fd8c9f66c70a9b05b1a701\"," +
+                "    \"iv\": \"6fef040c8fe8ad9ec56b74efa194b5f7\"," +
+                "    \"encryptedKey\": \"b04c69e1ca944fd7641ea79f03e5cd540144759212fa50d07c8a97ab30ca8bded324e2d4b8cd2613b25cd6bceac35b76c2fa1b521ff205b5f33eafaf4102efbefd35cae6707f985953d6dac366cca36295b29d8af3d94d5d5d1532158066b9fecfc2cc000f10e4757967e84c043d7db164d7488f5bef28f59c989c4cd316c870da7b7c1d10cfd73b6d285cd43447e9e96702e3e818011b45b0ecda21b02286db04b7c77ab193dcc4a9036beff065a404689b7cea40b6a348554900ae3eb819af9cb53ab800e158051aac8d8075045a06808e3730cd8cbc1b5334dcdc922d0227f6da1518442914ac5f3abf6751dfb5721074459d0626b62e934f6a6e6fd96020\"," +
+                "    \"encryptedValue\": \"386cdb354a33a5b5ae44fa73622297d0372857d1f7634b45010f691964958e2afca0f7391742dc1243768ccf0b4fce8b\"," +
+                "    \"encryptionCertificateFingerprint\": \"80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279\"," +
+                "    \"encryptionKeyFingerprint\": \"761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79\"," +
                 "    \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("$", "$.encryptedData")
-                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
@@ -813,8 +864,10 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNull(payloadObject.get("encryptedKey"));
         assertNull(payloadObject.get("encryptedValue"));
         assertNull(payloadObject.get("oaepHashingAlgorithm"));
-        assertEquals("\"field1Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
-        assertEquals("\"field2Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
+        assertNull(payloadObject.get("encryptionCertificateFingerprint"));
+        assertNull(payloadObject.get("encryptionKeyFingerprint"));
+        assertEquals("\"value1\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
+        assertEquals("\"value2\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
     }
 
     @Test
@@ -822,27 +875,22 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // GIVEN
         String encryptedPayload = "{" +
-                "    \"iv\": \"17492f69d92d2008ee9289cf3e07bd36\"," +
-                "    \"encryptedKey\": \"22b3df5e70777cef394c39ac74bacfcdbfc8cef4a4da771f1d07611f18b4dc9eacde7297870acb421abe77b8b974f53b2e5b834a68e11a4ddab53ece2d37ae7dee5646dc3f4c5c17166906258615b9c7c52f7242a1afa6edf24815c3dbec4b2092a027de11bcdab4c47de0159ce76d2449394f962a07196a5a5b41678a085d77730baee0d3d0e486eb4719aae8f1f1c0fd7026aea7b0872c049e8df1e7eed088fa84fc613602e989fa4e7a7b77ac40da212a462ae5d3df5078be96fcf3d0fe612e0ec401d27a243c0df1feb8241d49248697db5ec79571b9d52386064ee3db11d200156bfd3af03a289ea37ec2c8f315840e7804669a855bf9e34190e3b14d28\"," +
-                "    \"encryptedValue\": \"9cad34c0d7b2443f07bb7b7e19817ade132ba3f312b1176c09a312e5b5f908198e1e0cfac0fd8c9f66c70a9b05b1a701\"," +
+                "    \"iv\": \"6fef040c8fe8ad9ec56b74efa194b5f7\"," +
+                "    \"encryptedKey\": \"b04c69e1ca944fd7641ea79f03e5cd540144759212fa50d07c8a97ab30ca8bded324e2d4b8cd2613b25cd6bceac35b76c2fa1b521ff205b5f33eafaf4102efbefd35cae6707f985953d6dac366cca36295b29d8af3d94d5d5d1532158066b9fecfc2cc000f10e4757967e84c043d7db164d7488f5bef28f59c989c4cd316c870da7b7c1d10cfd73b6d285cd43447e9e96702e3e818011b45b0ecda21b02286db04b7c77ab193dcc4a9036beff065a404689b7cea40b6a348554900ae3eb819af9cb53ab800e158051aac8d8075045a06808e3730cd8cbc1b5334dcdc922d0227f6da1518442914ac5f3abf6751dfb5721074459d0626b62e934f6a6e6fd96020\"," +
+                "    \"encryptedValue\": \"386cdb354a33a5b5ae44fa73622297d0372857d1f7634b45010f691964958e2afca0f7391742dc1243768ccf0b4fce8b\"," +
+                "    \"encryptionCertificateFingerprint\": \"80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279\"," +
+                "    \"encryptionKeyFingerprint\": \"761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79\"," +
                 "    \"oaepHashingAlgorithm\": \"SHA256\"" +
                 "}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("$", "$")
-                .withOaepPaddingDigestAlgorithm("SHA-256")
                 .build();
 
         // WHEN
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 
         // THEN
-        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
-        assertNull(payloadObject.get("iv"));
-        assertNull(payloadObject.get("encryptedKey"));
-        assertNull(payloadObject.get("encryptedValue"));
-        assertNull(payloadObject.get("oaepHashingAlgorithm"));
-        assertEquals("\"field1Value\"", payloadObject.get("field1").toString());
-        assertEquals("\"field2Value\"", payloadObject.get("field2").toString());
+        assertPayloadEquals("{\"field1\":\"value1\",\"field2\":\"value2\"}", payload);
     }
 
     @Test
@@ -902,5 +950,16 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionCertificateFingerprint"));
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionKeyFingerprint"));
         assertEquals("{}", payloadObject.get("data").toString());
+    }
+
+    private static void assertDecryptedPayloadEquals(String expectedPayload, String encryptedPayload, FieldLevelEncryptionConfig config) throws Exception {
+        String payloadString = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+        String normalizedPayloadString = new Gson().fromJson(payloadString, JsonObject.class).toString();
+        assertEquals(expectedPayload, normalizedPayloadString);
+    }
+
+    private static void assertPayloadEquals(String expectedPayload, String payload) throws Exception {
+        String normalizedPayloadString = new Gson().fromJson(payload, JsonObject.class).toString();
+        assertEquals(expectedPayload, normalizedPayloadString);
     }
 }

@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
@@ -130,7 +131,7 @@ public class FieldLevelEncryption {
         String encryptedKeyValue = encodeBytes(encryptedSecretKeyBytes, config.fieldValueEncoding);
 
         // Encrypt data at the given JSON path
-        String inJsonString = sanitizeJson(inJsonElement.toString());
+        String inJsonString = sanitizeJson(toJsonString(inJsonElement));
         if (isJsonPrimitive(inJsonElement) && inJsonString.startsWith("\"")) {
             // "value" => value
             inJsonString = inJsonString.substring(1, inJsonString.length() - 1);
@@ -145,7 +146,15 @@ public class FieldLevelEncryption {
         String encryptedValue = encodeBytes(encryptedValueBytes, config.fieldValueEncoding);
 
         // Delete data in clear
-        payloadContext.delete(jsonPathIn);
+        if (!"$".equals(jsonPathIn)) {
+            payloadContext.delete(jsonPathIn);
+        } else {
+            // Delete keys
+            Collection<String> propertyKeys = new ArrayList<>(jsonProvider.getPropertyKeys(inJsonElement));
+            for (String key : propertyKeys) {
+                payloadContext.delete(jsonPathIn + "." + key);
+            }
+        }
 
         // Add encrypted data and encryption fields at the given JSON path
         Object outJsonObject = readOrCreateOutObject(payloadContext, jsonPathOut);
@@ -155,7 +164,16 @@ public class FieldLevelEncryption {
         addEncryptionCertificateFingerprint(outJsonObject, config);
         addEncryptionKeyFingerprint(outJsonObject, config);
         addOaepPaddingDigestAlgorithm(outJsonObject, config);
-        payloadContext.set(jsonPathOut, outJsonObject);
+
+        if (!"$".equals(jsonPathOut)) {
+            payloadContext.set(jsonPathOut, outJsonObject);
+        } else {
+            // Add keys
+            Collection<String> propertyKeys = new ArrayList<>(jsonProvider.getPropertyKeys(outJsonObject));
+            for (String key : propertyKeys) {
+                payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(outJsonObject, key));
+            }
+        }
     }
 
     private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
@@ -181,16 +199,16 @@ public class FieldLevelEncryption {
         readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
 
         // Decrypt the AES secret key
-        byte[] encryptedSecretKeyBytes = decodeValue(jsonProvider.unwrap(encryptedKeyJsonElement).toString(), config.fieldValueEncoding);
-        String oaepDigestAlgorithm = isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : jsonProvider.unwrap(oaepDigestAlgorithmJsonElement).toString();
+        byte[] encryptedSecretKeyBytes = decodeValue(toJsonString(encryptedKeyJsonElement), config.fieldValueEncoding);
+        String oaepDigestAlgorithm = isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : toJsonString(oaepDigestAlgorithmJsonElement);
         Key secretKey = unwrapSecretKey(config, encryptedSecretKeyBytes, oaepDigestAlgorithm);
 
         // Decode the IV
-        byte[] ivByteArray = decodeValue(jsonProvider.unwrap(ivJsonElement).toString(), config.fieldValueEncoding);
+        byte[] ivByteArray = decodeValue(toJsonString(ivJsonElement), config.fieldValueEncoding);
         IvParameterSpec iv = new IvParameterSpec(ivByteArray);
 
         // Decrypt data
-        byte[] encryptedValueBytes = decodeValue(jsonProvider.unwrap(encryptedValueJsonElement).toString(), config.fieldValueEncoding);
+        byte[] encryptedValueBytes = decodeValue(toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
         byte[] decryptedValueBytes = decryptBytes(secretKey, iv, encryptedValueBytes);
 
         // Add decrypted data at the given JSON path
@@ -288,6 +306,17 @@ public class FieldLevelEncryption {
             payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
         }
     }
+    private static String toJsonString(Object object) {
+        if (null == object) {
+            throw new IllegalStateException("Can get JSON string, object is null!");
+        }
+        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
+        if (isJsonPrimitive(object)) {
+            return object.toString();
+        }
+        return jsonProvider.toJson(object);
+    }
+
 
     private static boolean isJsonPrimitive(Object jsonElement) {
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
@@ -300,7 +329,7 @@ public class FieldLevelEncryption {
 
     private static boolean isNullOrEmptyJson(Object jsonElement) {
         return jsonElement == null
-                || "".equals(jsonElement.toString())
+                || "".equals(toJsonString(jsonElement))
                 || 0 == jsonElement.getClass().getFields().length;
     }
 
