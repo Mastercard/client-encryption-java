@@ -34,7 +34,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testIntercept_ShouldEncryptRequestPayload() throws Exception {
+    public void testIntercept_ShouldEncryptRequestPayloadAndUpdateContentLengthHeader() throws Exception {
 
         // GIVEN
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
@@ -101,7 +101,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
     }
 
     @Test
-    public void testInterceptResponse_ShouldDecryptResponsePayload() throws Exception {
+    public void testInterceptResponse_ShouldDecryptResponsePayloadAndUpdateContentLengthHeader() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -125,12 +125,11 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
         instanceUnderTest.interceptResponse(response);
 
         // THEN
-        String expectedPayload = "{\"data\":\"string\"}";
         Field contentField = response.getClass().getDeclaredField("content");
         contentField.setAccessible(true);
         InputStream payloadInputStream = (InputStream) contentField.get(response);
         String payload = IOUtils.toString(payloadInputStream, StandardCharsets.UTF_8);
-        assertPayloadEquals(expectedPayload, payload);
+        assertPayloadEquals("{\"data\":\"string\"}", payload);
         Assert.assertEquals(payload.length(), httpHeaders.getContentLength().intValue());
     }
 

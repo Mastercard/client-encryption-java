@@ -28,7 +28,7 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testIntercept_ShouldEncryptRequestPayload() throws Exception {
+    public void testIntercept_ShouldEncryptRequestPayloadAndUpdateContentLengthHeader() throws Exception {
 
         // GIVEN
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
@@ -113,7 +113,7 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
     }
 
     @Test
-    public void testIntercept_ShouldDecryptResponsePayload() throws Exception {
+    public void testIntercept_ShouldDecryptResponsePayloadAndUpdateContentLengthHeader() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -145,9 +145,8 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
         Response response = instanceUnderTest.intercept(chain);
 
         // THEN
-        String expectedPayload = "{\"data\":\"string\"}";
         String payload = response.body().string();
-        assertPayloadEquals(expectedPayload, payload);
+        assertPayloadEquals("{\"data\":\"string\"}", payload);
         Assert.assertEquals(payload.length(), response.body().contentLength());
     }
 

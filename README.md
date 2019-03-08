@@ -297,6 +297,7 @@ The `com.mastercard.developer.interceptors` package will provide you with some i
 
 Library options currently supported for the `java` generator:
 + [okhttp-gson](#okhttp-gson)
++ [feign](#feign)
 + [retrofit](#retrofit)
 + [retrofit2](#retrofit2)
 + [google-api-client](#google-api-client)
@@ -325,6 +326,32 @@ List<Interceptor> interceptors = client.getHttpClient().networkInterceptors();
 interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = new ServiceApi(client);
+// ...
+```
+
+#### feign <a name="feign"></a>
+##### OpenAPI Generator Plugin Configuration
+```xml
+<configuration>
+    <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+    <generatorName>java</generatorName>
+    <library>feign</library>
+    <!-- ... -->
+</configuration>
+```
+
+##### Usage of `FeignFieldLevelEncryptionEncoder` and `FeignFieldLevelEncryptionDecoder`
+```java
+ApiClient client = new ApiClient();
+ObjectMapper objectMapper = client.getObjectMapper();
+client.setBasePath("https://sandbox.api.mastercard.com");
+Feign.Builder feignBuilder = client.getFeignBuilder();
+ArrayList<RequestInterceptor> interceptors = new ArrayList<>();
+interceptors.add(new OpenFeignOAuth1Interceptor(consumerKey, signingKey, client.getBasePath()));
+feignBuilder.requestInterceptors(interceptors);
+feignBuilder.encoder(new FeignFieldLevelEncryptionEncoder(config, new FormEncoder(new JacksonEncoder(objectMapper))));
+feignBuilder.decoder(new FeignFieldLevelEncryptionDecoder(config, new JacksonDecoder(objectMapper)));
+ServiceApi serviceApi = client.buildClient(ServiceApi.class);
 // ...
 ```
 
