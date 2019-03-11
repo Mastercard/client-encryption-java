@@ -136,6 +136,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expectMessage("IV header name and encrypted key header name must be both set or both unset!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyHeaderName("x-encrypted-key")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
@@ -149,6 +150,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         expectedException.expectMessage("IV field name and encrypted key field name must be both set or both unset!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withEncryptedKeyHeaderName("x-encrypted-key")
                 .withIvHeaderName("x-iv")

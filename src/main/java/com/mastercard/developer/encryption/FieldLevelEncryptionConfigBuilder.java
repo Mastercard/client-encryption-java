@@ -245,7 +245,7 @@ public final class FieldLevelEncryptionConfigBuilder {
         }
     }
 
-    private void checkOaepPaddingDigestAlgorithm() {
+    private void checkParameterValues() {
         if (oaepPaddingDigestAlgorithm == null) {
             throw new IllegalArgumentException("The digest algorithm for OAEP cannot be null!");
         }
@@ -254,10 +254,6 @@ public final class FieldLevelEncryptionConfigBuilder {
                 && !SHA512.getDigestAlgorithm().equals(oaepPaddingDigestAlgorithm)) {
             throw new IllegalArgumentException(String.format("Unsupported OAEP digest algorithm: %s!", oaepPaddingDigestAlgorithm));
         }
-    }
-
-    private void checkParameterValues() {
-        checkOaepPaddingDigestAlgorithm();
 
         if (fieldValueEncoding == null) {
             throw new IllegalArgumentException("Value encoding for fields and headers cannot be null!");
@@ -269,16 +265,6 @@ public final class FieldLevelEncryptionConfigBuilder {
 
         if (encryptedKeyFieldName == null && encryptedKeyHeaderName == null) {
             throw new IllegalArgumentException("At least one of encrypted key field name or encrypted key header name must be set!");
-        }
-
-        if (ivHeaderName != null && encryptedKeyHeaderName == null
-                || ivHeaderName == null && encryptedKeyHeaderName != null) {
-            throw new IllegalArgumentException("IV header name and encrypted key header name must be both set or both unset!");
-        }
-
-        if (ivFieldName != null && encryptedKeyFieldName == null
-                || ivFieldName == null && encryptedKeyFieldName != null) {
-            throw new IllegalArgumentException("IV field name and encrypted key field name must be both set or both unset!");
         }
 
         if (encryptedValueFieldName == null) {
@@ -293,6 +279,16 @@ public final class FieldLevelEncryptionConfigBuilder {
 
         if (!encryptionPaths.isEmpty() && encryptionCertificate == null) {
             throw new IllegalArgumentException("Can't encrypt without encryption key!");
+        }
+
+        if (ivHeaderName != null && encryptedKeyHeaderName == null
+                || ivHeaderName == null && encryptedKeyHeaderName != null) {
+            throw new IllegalArgumentException("IV header name and encrypted key header name must be both set or both unset!");
+        }
+
+        if (ivFieldName != null && encryptedKeyFieldName == null
+                || ivFieldName == null && encryptedKeyFieldName != null) {
+            throw new IllegalArgumentException("IV field name and encrypted key field name must be both set or both unset!");
         }
     }
 }

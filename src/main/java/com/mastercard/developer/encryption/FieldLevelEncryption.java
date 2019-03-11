@@ -201,6 +201,10 @@ public class FieldLevelEncryption {
             return;
         }
 
+        if ((config.encryptedKeyFieldName == null || config.ivFieldName == null) && params == null) {
+            throw new IllegalStateException("Encryption params have to be passed in argument or field names have to be set in config!");
+        }
+
         if (params == null) {
             // Read encryption params from the payload
             Object oaepDigestAlgorithmJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.oaepPaddingDigestAlgorithmFieldName);

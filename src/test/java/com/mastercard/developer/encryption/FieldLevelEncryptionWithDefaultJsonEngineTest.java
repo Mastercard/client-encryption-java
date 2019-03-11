@@ -518,6 +518,90 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
+    public void testEncryptPayload_ShouldUseProvidedEncryptionParams_WhenPassedAsArgument() throws Exception {
+
+        // GIVEN
+        String payload = "{\"data\": {}, \"encryptedData\": {}}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .build();
+        FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, params);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertEquals(params.getIvValue(), encryptedData.get("iv").getAsString());
+        assertEquals(params.getEncryptedKeyValue(), encryptedData.get("encryptedKey").getAsString());
+        assertEquals(params.getOaepPaddingDigestAlgorithmValue(), encryptedData.get("oaepHashingAlgorithm").getAsString());
+        assertEquals(params.getEncryptionCertificateFingerprintValue(), encryptedData.get("encryptionCertificateFingerprint").getAsString());
+        assertEquals(params.getEncryptionKeyFingerprintValue(), encryptedData.get("encryptionKeyFingerprint").getAsString());
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldGenerateEncryptionParams_WhenNullArgument() throws Exception {
+
+        // GIVEN
+        String payload = "{" +
+                "    \"data\": {" +
+                "        \"field1\": \"value1\"," +
+                "        \"field2\": \"value2\"" +
+                "    }," +
+                "    \"encryptedData\": {}" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, null);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("data"));
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertNotNull(encryptedData);
+        assertEquals(6, encryptedData.entrySet().size());
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldNotAddEncryptionParamsToPayload_WhenFieldNamesNotSetInConfig() throws Exception {
+
+        // GIVEN
+        String payload = "{" +
+                "    \"data\": {" +
+                "        \"field1\": \"value1\"," +
+                "        \"field2\": \"value2\"" +
+                "    }," +
+                "    \"encryptedData\": {}" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("data", "encryptedData")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .withOaepPaddingDigestAlgorithmFieldName(null)
+                .withEncryptedKeyFieldName(null)
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withEncryptionKeyFingerprintFieldName(null)
+                .withEncryptionCertificateFingerprintFieldName(null)
+                .withIvFieldName(null)
+                .withIvHeaderName("x-iv")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNull(encryptedPayloadObject.get("data"));
+        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
+        assertNotNull(encryptedData);
+        assertEquals(1, encryptedData.entrySet().size()); // "encryptedValue" only
+    }
+
+    @Test
     public void testDecryptPayload_Nominal() throws Exception {
 
         // GIVEN
@@ -1042,5 +1126,83 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionCertificateFingerprint"));
         assertNotNull(encryptedDataObject.getAsJsonObject().get("encryptionKeyFingerprint"));
         assertEquals("{}", payloadObject.get("data").toString());
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldUseProvidedEncryptionParams_WhenPassedAsArgument() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .build();
+
+        String ivValue = "ba574b07248f63756bce778f8a115819";
+        String encryptedKeyValue = "26687f6d03d27145451d20bdaa29cc199e2533bb9eb7351772e31d1290b98380b43dbf47b9a337cc2ecaff9d3d9fb45305950f13382c5ad822ee6df79e1a57b14a3c58c71090121994a9f771ef96472669671718b55a0fa8d9f76de9e172fedcabbc87d64b5a994899e43abb19afa840269012c397b5b18d4babc0e41c1ad698db98c89121bbe5b2d227cfc5d3c3c87f4f4c8b04b509d326199b39adfbd8bca8bf0a150fcf3c37b9717382af502ad8d4d28b17b91762bf108d34aba0fb40ca410c2ecaeb30d68003af20dce27d9d034e4c557b8104e85f859de0eb709b23f9978869bae545c7f1b62173887eae9e75e4b6d6b4b01d7172ccc8c5774c0db51c24";
+        String oaepHashingAlgorithmValue = "SHA256";
+        String encryptionCertificateFingerprintValue = "80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279";
+        String encryptionKeyFingerprintValue = "761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79";
+        FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepHashingAlgorithmValue,
+                                                                           encryptionCertificateFingerprintValue, encryptionKeyFingerprintValue, config);
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
+
+        // THEN
+        assertPayloadEquals("{\"data\":{}}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldUseEncryptionParamsFromPayload_WhenNullArgument() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"ba574b07248f63756bce778f8a115819\"," +
+                "        \"encryptedKey\": \"26687f6d03d27145451d20bdaa29cc199e2533bb9eb7351772e31d1290b98380b43dbf47b9a337cc2ecaff9d3d9fb45305950f13382c5ad822ee6df79e1a57b14a3c58c71090121994a9f771ef96472669671718b55a0fa8d9f76de9e172fedcabbc87d64b5a994899e43abb19afa840269012c397b5b18d4babc0e41c1ad698db98c89121bbe5b2d227cfc5d3c3c87f4f4c8b04b509d326199b39adfbd8bca8bf0a150fcf3c37b9717382af502ad8d4d28b17b91762bf108d34aba0fb40ca410c2ecaeb30d68003af20dce27d9d034e4c557b8104e85f859de0eb709b23f9978869bae545c7f1b62173887eae9e75e4b6d6b4b01d7172ccc8c5774c0db51c24\"," +
+                "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"," +
+                "        \"encryptionCertificateFingerprint\": \"80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279\"," +
+                "        \"encryptionKeyFingerprint\": \"761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, null);
+
+        // THEN
+        assertPayloadEquals("{\"data\":{}}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldThrowIllegalStateException_WhenEncryptionParamsAreMissing() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"encryptedValue\": \"2867e67545b2f3d0708500a1cea649e3\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("encryptedData", "data")
+                .withEncryptedKeyFieldName(null)
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvFieldName(null)
+                .withIvHeaderName("x-iv")
+                .build();
+
+        // THEN
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("Encryption params have to be passed in argument or field names have to be set in config!");
+
+        // WHEN
+        FieldLevelEncryption.decryptPayload(encryptedPayload, config, null);
     }
 }
