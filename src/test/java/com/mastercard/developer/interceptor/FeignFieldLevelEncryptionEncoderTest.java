@@ -112,11 +112,49 @@ public class FeignFieldLevelEncryptionEncoderTest {
 
         // THEN
         expectedException.expect(EncodeException.class);
-        expectedException.expectMessage("Failed to encrypt request!");
+        expectedException.expectMessage("Failed to intercept and encrypt request!");
         expectedException.expectCause(isA(EncryptionException.class));
 
         // WHEN
         FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
+    }
+
+    @Test
+    public void testEncode_ShouldEncryptRequestPayloadAndAddEncryptionHttpHeaders_WhenRequestedInConfig() throws Exception {
+
+        // GIVEN
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("$.foo", "$.encryptedFoo")
+                .withIvHeaderName("x-iv")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
+                .withEncryptionCertificateFingerprintHeaderName("x-encryption-certificate-fingerprint")
+                .withEncryptionKeyFingerprintHeaderName("x-encryption-key-fingerprint")
+                .build();
+        Type type = mock(Type.class);
+        Encoder delegate = mock(Encoder.class);
+        Object object = mock(Object.class);
+        RequestTemplate request = mock(RequestTemplate.class);
+        when(request.body()).thenReturn("{\"foo\":\"bar\"}".getBytes());
+
+        // WHEN
+        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        instanceUnderTest.encode(object, type, request);
+
+        // THEN
+        verify(delegate).encode(object, type, request);
+        verify(request).body();
+        ArgumentCaptor<String> encryptedPayloadCaptor = ArgumentCaptor.forClass(String.class);
+        verify(request).body(encryptedPayloadCaptor.capture());
+        verify(request).header(eq("Content-Length"), anyString());
+        String encryptedPayload = encryptedPayloadCaptor.getValue();
+        Assert.assertFalse(encryptedPayload.contains("foo"));
+        Assert.assertTrue(encryptedPayload.contains("encryptedFoo"));
+        verify(request).header(eq("x-iv"), anyString());
+        verify(request).header(eq("x-encrypted-key"), anyString());
+        verify(request).header("x-oaep-padding-digest-algorithm", "SHA256");
+        verify(request).header("x-encryption-certificate-fingerprint", "80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279");
+        verify(request).header("x-encryption-key-fingerprint", "761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79");
     }
 }

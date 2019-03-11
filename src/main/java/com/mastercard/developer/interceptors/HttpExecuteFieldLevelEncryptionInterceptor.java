@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 
+import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
+
 /**
  * A Google Client API interceptor for encrypting/decrypting parts of HTTP payloads.
  * See also:
@@ -46,7 +48,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
             request.setContent(encryptedContent);
 
         } catch (EncryptionException e) {
-            throw new IOException("Failed to encrypt request!", e);
+            throw new IOException("Failed to intercept and encrypt request!", e);
         }
     }
 
@@ -55,7 +57,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
         try {
             // Read response payload
             String responsePayload = response.parseAsString();
-            if (null == responsePayload || responsePayload.length() == 0) {
+            if (isNullOrEmpty(responsePayload)) {
                 // Nothing to encrypt
                 return;
             }
@@ -72,7 +74,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
             contentField.set(response, ((ByteArrayContent) decryptedContent).getInputStream());
 
         } catch (EncryptionException e) {
-            throw new IOException("Failed to decrypt response!", e);
+            throw new IOException("Failed to intercept and decrypt response!", e);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IOException("Failed to update response with decrypted payload!", e);
         }

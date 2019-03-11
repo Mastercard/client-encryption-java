@@ -95,9 +95,9 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingEncryptedKeyFieldName() {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothEncryptedKeyFieldNameAndHeaderName() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Encrypted key field name cannot be null!");
+        expectedException.expectMessage("At least one of encrypted key field name or encrypted key header name must be set!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
@@ -107,9 +107,9 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingIvFieldName() {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothIvFieldNameAndHeaderName() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("IV field name cannot be null");
+        expectedException.expectMessage("At least one of IV field name or IV header name must be set!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
@@ -121,12 +121,38 @@ public class FieldLevelEncryptionConfigBuilderTest {
     @Test
     public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingFieldValueEncoding() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Value encoding for fields cannot be null!");
+        expectedException.expectMessage("Value encoding for fields and headers cannot be null!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withOaepPaddingDigestAlgorithm("SHA-512")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
                 .withIvFieldName("iv")
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvHeaderNamesNotBothSetOrUnset() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("IV header name and encrypted key header name must be both set or both unset!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvFieldNamesNotBothSetOrUnset() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("IV field name and encrypted key field name must be both set or both unset!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvHeaderName("x-iv")
+                .withFieldValueEncoding(HEX)
                 .build();
     }
 
@@ -138,13 +164,19 @@ public class FieldLevelEncryptionConfigBuilderTest {
                 .withEncryptionCertificateFingerprint("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B")
                 .withEncryptionKeyFingerprint("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810")
                 .withEncryptionCertificateFingerprintFieldName("publicCertificateFingerprint")
+                .withEncryptionCertificateFingerprintHeaderName("x-public-certificate-fingerprint")
                 .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
+                .withEncryptionKeyFingerprintHeaderName("x-public-key-fingerprint")
                 .withDecryptionPath("$.encryptedPayload", "$.payload")
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withOaepPaddingDigestAlgorithmFieldName("oaepPaddingDigestAlgorithm")
+                .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
                 .withEncryptedValueFieldName("encryptedValue")
                 .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
                 .withIvFieldName("iv")
+                .withIvHeaderName("x-iv")
                 .withFieldValueEncoding(HEX)
                 .build();
         Assert.assertNotNull(config);
@@ -153,13 +185,19 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B", config.encryptionCertificateFingerprint);
         Assert.assertEquals("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810", config.encryptionKeyFingerprint);
         Assert.assertEquals("publicCertificateFingerprint", config.encryptionCertificateFingerprintFieldName);
+        Assert.assertEquals("x-public-certificate-fingerprint", config.encryptionCertificateFingerprintHeaderName);
         Assert.assertEquals("publicKeyFingerprint", config.encryptionKeyFingerprintFieldName);
+        Assert.assertEquals("x-public-key-fingerprint", config.encryptionKeyFingerprintHeaderName);
         Assert.assertEquals(1, config.decryptionPaths.size());
         Assert.assertNotNull(config.decryptionKey);
         Assert.assertEquals("SHA-512", config.oaepPaddingDigestAlgorithm);
         Assert.assertEquals("encryptedValue", config.encryptedValueFieldName);
         Assert.assertEquals("encryptedKey", config.encryptedKeyFieldName);
+        Assert.assertEquals("x-encrypted-key", config.encryptedKeyHeaderName);
         Assert.assertEquals("iv", config.ivFieldName);
+        Assert.assertEquals("x-iv", config.ivHeaderName);
+        Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
+        Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
         Assert.assertEquals(HEX, config.fieldValueEncoding);
     }
 }

@@ -3,6 +3,7 @@ package com.mastercard.developer.interceptors;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
+import com.mastercard.developer.encryption.FieldLevelEncryptionParams;
 import feign.Response;
 import feign.Util;
 import feign.codec.DecodeException;
@@ -11,7 +12,8 @@ import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+
+import static com.mastercard.developer.utils.FeignUtils.*;
 
 /**
  * A Feign decoder for decrypting parts of HTTP payloads.
@@ -39,29 +41,34 @@ public class FeignFieldLevelEncryptionDecoder implements Decoder {
             // Read response payload
             String responsePayload = Util.toString(body.asReader());
 
-            // Decrypt fields
-            String decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
-            Map<String, Collection<String>> headers = new HashMap<>(response.headers());
-            updateContentLength(headers, String.valueOf(decryptedPayload.length()));
+            // Decrypt fields & update headers
+            String decryptedPayload;
+            if (config.useHttpHeaders()) {
+                // Read encryption params in HTTP headers and delete headers
+                String ivValue = readHeader(response, config.getIvHeaderName());
+                response = removeHeader(response, config.getIvHeaderName());
+                String oaepPaddingDigestAlgorithmValue = readHeader(response, config.getOaepPaddingDigestAlgorithmHeaderName());
+                response = removeHeader(response, config.getOaepPaddingDigestAlgorithmHeaderName());
+                String encryptedKeyValue = readHeader(response, config.getEncryptedKeyHeaderName());
+                response = removeHeader(response, config.getEncryptedKeyHeaderName());
+                response = removeHeader(response, config.getEncryptionCertificateFingerprintHeaderName());
+                response = removeHeader(response, config.getEncryptionKeyFingerprintHeaderName());
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
+                                                                                   null, null, config);
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
+            } else {
+                // Encryption params are stored in the payload
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
+            }
+            response = updateHeader(response, "Content-Length", String.valueOf(decryptedPayload.length()));
             response = response.toBuilder()
                     .body(decryptedPayload, StandardCharsets.UTF_8)
-                    .headers(headers)
                     .build();
         } catch (EncryptionException e) {
-            throw new DecodeException("Failed to decrypt response!", e);
+            throw new DecodeException("Failed to intercept and decrypt response!", e);
         }
 
         // Call the regular decoder
         return this.delegate.decode(response, type);
-    }
-
-    private static void updateContentLength(Map<String, Collection<String>> headers, String length) {
-        Set<String> headerNames = new HashSet<>(headers.keySet());
-        for (String headerName : headerNames) {
-            if (headerName.equalsIgnoreCase("content-length")) {
-                headers.remove(headerName);
-            }
-        }
-        headers.put("Content-Length", Collections.singleton(length));
     }
 }

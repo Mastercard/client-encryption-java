@@ -25,11 +25,16 @@ public final class FieldLevelEncryptionConfigBuilder {
     private Map<String, String> decryptionPaths = new HashMap<>();
     private String oaepPaddingDigestAlgorithm;
     private String ivFieldName;
+    private String ivHeaderName;
     private String oaepPaddingDigestAlgorithmFieldName;
+    private String oaepPaddingDigestAlgorithmHeaderName;
     private String encryptedKeyFieldName;
+    private String encryptedKeyHeaderName;
     private String encryptedValueFieldName;
     private String encryptionCertificateFingerprintFieldName;
+    private String encryptionCertificateFingerprintHeaderName;
     private String encryptionKeyFingerprintFieldName;
+    private String encryptionKeyFingerprintHeaderName;
     private FieldValueEncoding fieldValueEncoding;
 
     private FieldLevelEncryptionConfigBuilder() {
@@ -155,6 +160,46 @@ public final class FieldLevelEncryptionConfigBuilder {
     }
 
     /**
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#ivHeaderName}.
+     */
+    public FieldLevelEncryptionConfigBuilder withIvHeaderName(String ivHeaderName) {
+        this.ivHeaderName = ivHeaderName;
+        return this;
+    }
+
+    /**
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#oaepPaddingDigestAlgorithmHeaderName}.
+     */
+    public FieldLevelEncryptionConfigBuilder withOaepPaddingDigestAlgorithmHeaderName(String oaepPaddingDigestAlgorithmHeaderName) {
+        this.oaepPaddingDigestAlgorithmHeaderName = oaepPaddingDigestAlgorithmHeaderName;
+        return this;
+    }
+
+    /**
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptedKeyHeaderName}.
+     */
+    public FieldLevelEncryptionConfigBuilder withEncryptedKeyHeaderName(String encryptedKeyHeaderName) {
+        this.encryptedKeyHeaderName = encryptedKeyHeaderName;
+        return this;
+    }
+
+    /**
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptionCertificateFingerprintHeaderName}.
+     */
+    public FieldLevelEncryptionConfigBuilder withEncryptionCertificateFingerprintHeaderName(String encryptionCertificateFingerprintHeaderName) {
+        this.encryptionCertificateFingerprintHeaderName = encryptionCertificateFingerprintHeaderName;
+        return this;
+    }
+
+    /**
+     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptionKeyFingerprintHeaderName}.
+     */
+    public FieldLevelEncryptionConfigBuilder withEncryptionKeyFingerprintHeaderName(String encryptionKeyFingerprintHeaderName) {
+        this.encryptionKeyFingerprintHeaderName = encryptionKeyFingerprintHeaderName;
+        return this;
+    }
+
+    /**
      * Build a {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig}.
      */
     public FieldLevelEncryptionConfig build() {
@@ -178,6 +223,11 @@ public final class FieldLevelEncryptionConfigBuilder {
         config.encryptedKeyFieldName = this.encryptedKeyFieldName;
         config.fieldValueEncoding = this.fieldValueEncoding;
         config.encryptedValueFieldName = this.encryptedValueFieldName;
+        config.ivHeaderName = this.ivHeaderName;
+        config.oaepPaddingDigestAlgorithmHeaderName = this.oaepPaddingDigestAlgorithmHeaderName;
+        config.encryptedKeyHeaderName = this.encryptedKeyHeaderName;
+        config.encryptionCertificateFingerprintHeaderName = this.encryptionCertificateFingerprintHeaderName;
+        config.encryptionKeyFingerprintHeaderName = this.encryptionKeyFingerprintHeaderName;
         return config;
     }
 
@@ -195,7 +245,7 @@ public final class FieldLevelEncryptionConfigBuilder {
         }
     }
 
-    private void checkParameterValues() {
+    private void checkOaepPaddingDigestAlgorithm() {
         if (oaepPaddingDigestAlgorithm == null) {
             throw new IllegalArgumentException("The digest algorithm for OAEP cannot be null!");
         }
@@ -204,17 +254,31 @@ public final class FieldLevelEncryptionConfigBuilder {
                 && !SHA512.getDigestAlgorithm().equals(oaepPaddingDigestAlgorithm)) {
             throw new IllegalArgumentException(String.format("Unsupported OAEP digest algorithm: %s!", oaepPaddingDigestAlgorithm));
         }
+    }
+
+    private void checkParameterValues() {
+        checkOaepPaddingDigestAlgorithm();
 
         if (fieldValueEncoding == null) {
-            throw new IllegalArgumentException("Value encoding for fields cannot be null!");
+            throw new IllegalArgumentException("Value encoding for fields and headers cannot be null!");
         }
 
-        if (ivFieldName == null) {
-            throw new IllegalArgumentException("IV field name cannot be null!");
+        if (ivFieldName == null && ivHeaderName == null) {
+            throw new IllegalArgumentException("At least one of IV field name or IV header name must be set!");
         }
 
-        if (encryptedKeyFieldName == null) {
-            throw new IllegalArgumentException("Encrypted key field name cannot be null!");
+        if (encryptedKeyFieldName == null && encryptedKeyHeaderName == null) {
+            throw new IllegalArgumentException("At least one of encrypted key field name or encrypted key header name must be set!");
+        }
+
+        if (ivHeaderName != null && encryptedKeyHeaderName == null
+                || ivHeaderName == null && encryptedKeyHeaderName != null) {
+            throw new IllegalArgumentException("IV header name and encrypted key header name must be both set or both unset!");
+        }
+
+        if (ivFieldName != null && encryptedKeyFieldName == null
+                || ivFieldName == null && encryptedKeyFieldName != null) {
+            throw new IllegalArgumentException("IV field name and encrypted key field name must be both set or both unset!");
         }
 
         if (encryptedValueFieldName == null) {

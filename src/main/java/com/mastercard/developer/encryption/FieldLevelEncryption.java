@@ -1,34 +1,27 @@
 package com.mastercard.developer.encryption;
 
-import com.jayway.jsonpath.*;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.mastercard.developer.json.JsonEngine;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.MGF1ParameterSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
+import static com.mastercard.developer.utils.EncodingUtils.decodeValue;
+import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
+import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 
 /**
  * Performs field level encryption on HTTP payloads.
@@ -36,11 +29,7 @@ import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.Fie
 public class FieldLevelEncryption {
 
     private static final String SUN_JCE = "SunJCE";
-    private static final Integer SYMMETRIC_KEY_SIZE = 128;
-    private static final String SYMMETRIC_KEY_TYPE = "AES";
     private static final String SYMMETRIC_CYPHER = "AES/CBC/PKCS5Padding";
-    private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
-    private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(".*(\\['.*'\\])"); // Returns "['obj2']" for "$['obj1']['obj2']"
 
     private static JsonEngine jsonEngine;
     private static Configuration jsonPathConfig = withJsonEngine(JsonEngine.getDefault());
@@ -50,7 +39,7 @@ public class FieldLevelEncryption {
 
     /**
      * Specify the JSON engine to be used.
-     * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} object
+     * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} instance
      */
     public static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
         FieldLevelEncryption.jsonEngine = jsonEngine;
@@ -62,12 +51,25 @@ public class FieldLevelEncryption {
     }
 
     /**
-     * Encrypt parts of a JSON payload according to the given configuration.
+     * Encrypt parts of a JSON payload using the given configuration.
      * @param payload A JSON string
-     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} object
+     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} instance
      * @return The updated payload
+     * @throws EncryptionException
      */
     public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+        return encryptPayload(payload, config, null);
+    }
+
+    /**
+     * Encrypt parts of a JSON payload using the given parameters and configuration.
+     * @param payload A JSON string
+     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} instance
+     * @param params A {@link FieldLevelEncryptionParams} instance
+     * @return The updated payload
+     * @throws EncryptionException
+     */
+    public static String encryptPayload(String payload, FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
@@ -76,7 +78,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, params);
             }
 
             // Return the updated payload
@@ -87,12 +89,26 @@ public class FieldLevelEncryption {
     }
 
     /**
-     * Decrypt parts of a JSON payload according to the given configuration.
+     * Decrypt parts of a JSON payload using the given configuration.
      * @param payload A JSON string
-     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} object
+     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} instance
      * @return The updated payload
+     * @throws EncryptionException
      */
     public static String decryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+        return decryptPayload(payload, config, null);
+    }
+
+
+    /**
+     * Decrypt parts of a JSON payload using the given parameters and configuration.
+     * @param payload A JSON string
+     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} instance
+     * @param params A {@link FieldLevelEncryptionParams} instance
+     * @return The updated payload
+     * @throws EncryptionException
+     */
+    public static String decryptPayload(String payload, FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
@@ -101,7 +117,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, params);
             }
 
             // Return the updated payload
@@ -112,7 +128,7 @@ public class FieldLevelEncryption {
     }
 
     private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
-                                           FieldLevelEncryptionConfig config) throws GeneralSecurityException {
+                                           FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
@@ -121,26 +137,20 @@ public class FieldLevelEncryption {
             return;
         }
 
-        // Generate a random IV
-        IvParameterSpec iv = generateIv();
-        String ivValue = encodeBytes(iv.getIV(), config.fieldValueEncoding);
-
-        // Generate an AES secret key
-        SecretKey secretKey = generateSecretKey();
-
-        // Encrypt the secret key
-        byte[] encryptedSecretKeyBytes = wrapSecretKey(config, secretKey);
-        String encryptedKeyValue = encodeBytes(encryptedSecretKeyBytes, config.fieldValueEncoding);
+        if (params == null) {
+            // Generate encryption params
+            params = FieldLevelEncryptionParams.generate(config);
+        }
 
         // Encrypt data at the given JSON path
-        String inJsonString = sanitizeJson(toJsonString(inJsonElement));
+        String inJsonString = sanitizeJson(jsonEngine.toJsonString(inJsonElement));
         byte[] inJsonBytes = null;
         try {
             inJsonBytes = inJsonString.getBytes(StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             // Should not happen
         }
-        byte[] encryptedValueBytes = encryptBytes(secretKey, iv, inJsonBytes);
+        byte[] encryptedValueBytes = encryptBytes(params.getSecretKey(), params.getIvSpec(), inJsonBytes);
         String encryptedValue = encodeBytes(encryptedValueBytes, config.fieldValueEncoding);
 
         // Delete data in clear
@@ -156,16 +166,26 @@ public class FieldLevelEncryption {
 
         // Add encrypted data and encryption fields at the given JSON path
         checkOrCreateOutObject(payloadContext, jsonPathOut);
-        payloadContext.put(jsonPathOut, config.ivFieldName, ivValue);
-        payloadContext.put(jsonPathOut, config.encryptedKeyFieldName, encryptedKeyValue);
         payloadContext.put(jsonPathOut, config.encryptedValueFieldName, encryptedValue);
-        addEncryptionCertificateFingerprint(payloadContext, jsonPathOut, config);
-        addEncryptionKeyFingerprint(payloadContext, jsonPathOut, config);
-        addOaepPaddingDigestAlgorithm(payloadContext, jsonPathOut, config);
+        if (!isNullOrEmpty(config.ivFieldName)) {
+            payloadContext.put(jsonPathOut, config.ivFieldName, params.getIvValue());
+        }
+        if (!isNullOrEmpty(config.encryptedKeyFieldName)) {
+            payloadContext.put(jsonPathOut, config.encryptedKeyFieldName, params.getEncryptedKeyValue());
+        }
+        if (!isNullOrEmpty(config.encryptionCertificateFingerprintFieldName)) {
+            payloadContext.put(jsonPathOut, config.encryptionCertificateFingerprintFieldName, params.getEncryptionCertificateFingerprintValue());
+        }
+        if (!isNullOrEmpty(config.encryptionKeyFingerprintFieldName)) {
+            payloadContext.put(jsonPathOut, config.encryptionKeyFingerprintFieldName, params.getEncryptionKeyFingerprintValue());
+        }
+        if (!isNullOrEmpty(config.oaepPaddingDigestAlgorithmFieldName)) {
+            payloadContext.put(jsonPathOut, config.oaepPaddingDigestAlgorithmFieldName, params.getOaepPaddingDigestAlgorithmValue());
+        }
     }
 
     private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
-                                           FieldLevelEncryptionConfig config) throws GeneralSecurityException, DecoderException {
+                                           FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, DecoderException, EncryptionException {
 
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
@@ -176,28 +196,26 @@ public class FieldLevelEncryption {
 
         // Read and remove encrypted data and encryption fields at the given JSON path
         Object encryptedValueJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedValueFieldName);
-        if (isNullOrEmptyJson(encryptedValueJsonElement)) {
+        if (jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
             // Nothing to decrypt
             return;
         }
-        Object encryptedKeyJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedKeyFieldName);
-        Object ivJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.ivFieldName);
-        Object oaepDigestAlgorithmJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.oaepPaddingDigestAlgorithmFieldName);
-        readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionCertificateFingerprintFieldName);
-        readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
 
-        // Decrypt the AES secret key
-        byte[] encryptedSecretKeyBytes = decodeValue(toJsonString(encryptedKeyJsonElement), config.fieldValueEncoding);
-        String oaepDigestAlgorithm = isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : toJsonString(oaepDigestAlgorithmJsonElement);
-        Key secretKey = unwrapSecretKey(config, encryptedSecretKeyBytes, oaepDigestAlgorithm);
-
-        // Decode the IV
-        byte[] ivByteArray = decodeValue(toJsonString(ivJsonElement), config.fieldValueEncoding);
-        IvParameterSpec iv = new IvParameterSpec(ivByteArray);
+        if (params == null) {
+            // Read encryption params from the payload
+            Object oaepDigestAlgorithmJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.oaepPaddingDigestAlgorithmFieldName);
+            String oaepDigestAlgorithm = jsonEngine.isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : jsonEngine.toJsonString(oaepDigestAlgorithmJsonElement);
+            Object encryptedKeyJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedKeyFieldName);
+            Object ivJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.ivFieldName);
+            readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionCertificateFingerprintFieldName);
+            readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
+            params = new FieldLevelEncryptionParams(jsonEngine.toJsonString(ivJsonElement), jsonEngine.toJsonString(encryptedKeyJsonElement),
+                                                    oaepDigestAlgorithm, null, null, config);
+        }
 
         // Decrypt data
-        byte[] encryptedValueBytes = decodeValue(toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
-        byte[] decryptedValueBytes = decryptBytes(secretKey, iv, encryptedValueBytes);
+        byte[] encryptedValueBytes = decodeValue(jsonEngine.toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
+        byte[] decryptedValueBytes = decryptBytes(params.getSecretKey(), params.getIvSpec(), encryptedValueBytes);
 
         // Add decrypted data at the given JSON path
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
@@ -212,6 +230,25 @@ public class FieldLevelEncryption {
         }
     }
 
+    private static void addDecryptedDataToPayload(DocumentContext payloadContext, String decryptedValue, String jsonPathOut) {
+        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
+        Object decryptedValueJsonElement = jsonEngine.parse(decryptedValue);
+
+        if (!jsonEngine.isJsonObject(decryptedValueJsonElement)) {
+            // Array or primitive: overwrite
+            payloadContext.set(jsonPathOut, decryptedValueJsonElement);
+            return;
+        }
+
+        // Object: merge
+        int length = jsonProvider.length(decryptedValueJsonElement);
+        Collection<String> propertyKeys = (0 == length) ? Collections.<String>emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
+        for (String key : propertyKeys) {
+            payloadContext.delete(jsonPathOut + "." + key);
+            payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
+        }
+    }
+
     private static void checkOrCreateOutObject(DocumentContext context, String jsonPathOutString) {
         Object outJsonObject = readJsonObject(context, jsonPathOutString);
         if (null != outJsonObject) {
@@ -220,13 +257,13 @@ public class FieldLevelEncryption {
         }
 
         // Path does not exist: if parent exists then we create a new object under the parent
-        String parentJsonPath = getParentJsonPath(jsonPathOutString);
+        String parentJsonPath = JsonEngine.getParentJsonPath(jsonPathOutString);
         Object parentJsonObject = readJsonObject(context, parentJsonPath);
         if (parentJsonObject == null) {
             throw new IllegalArgumentException(String.format("Parent path not found in payload: '%s'!", parentJsonPath));
         }
         outJsonObject = jsonPathConfig.jsonProvider().createMap();
-        String elementKey = getJsonElementKey(jsonPathOutString);
+        String elementKey = JsonEngine.getJsonElementKey(jsonPathOutString);
         context.put(parentJsonPath, elementKey, outJsonObject);
     }
 
@@ -241,7 +278,7 @@ public class FieldLevelEncryption {
         if (jsonElement == null) {
             return null;
         }
-        if (!isJsonObject(jsonElement)) {
+        if (!jsonEngine.isJsonObject(jsonElement)) {
             throw new IllegalArgumentException(String.format("JSON object expected at path: '%s'!", jsonPathString));
         }
         return jsonElement;
@@ -258,161 +295,10 @@ public class FieldLevelEncryption {
         return value;
     }
 
-    private static void addDecryptedDataToPayload(DocumentContext payloadContext, String decryptedValue, String jsonPathOut) {
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
-        Object decryptedValueJsonElement = jsonEngine.parse(decryptedValue);
-
-        if (!isJsonObject(decryptedValueJsonElement)) {
-            // Array or primitive: overwrite
-            payloadContext.set(jsonPathOut, decryptedValueJsonElement);
-            return;
-        }
-
-        // Object: merge
-        int length = jsonProvider.length(decryptedValueJsonElement);
-        Collection<String> propertyKeys = (0 == length) ? Collections.<String>emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
-        for (String key : propertyKeys) {
-            payloadContext.delete(jsonPathOut + "." + key);
-            payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
-        }
-    }
-
-    private static String toJsonString(Object object) {
-        if (null == object) {
-            throw new IllegalStateException("Can get JSON string, object is null!");
-        }
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
-        if (isJsonPrimitive(object)) {
-            return object.toString();
-        }
-        return jsonProvider.toJson(object);
-    }
-
-
-    private static boolean isJsonPrimitive(Object jsonElement) {
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
-        return !jsonProvider.isMap(jsonElement) && !jsonProvider.isArray(jsonElement);
-    }
-
-    private static boolean isJsonObject(Object jsonElement) {
-        return jsonPathConfig.jsonProvider().isMap(jsonElement);
-    }
-
-    private static boolean isNullOrEmptyJson(Object jsonElement) {
-        return jsonElement == null
-                || "".equals(toJsonString(jsonElement))
-                || 0 == jsonElement.getClass().getFields().length;
-    }
-
-    /**
-     * Get JSON path to the parent of the object at the given JSON path.
-     * Examples:
-     * - "$['obj1']['obj2']" will return "$['obj1']"
-     * - "$.obj1.obj2" will return "$['obj1']"
-     * - "obj1.obj2" will return "$['obj1']"
-     */
-    private static String getParentJsonPath(String jsonPathString) {
-        JsonPath jsonPath = JsonPath.compile(jsonPathString);
-        String compiledPath = jsonPath.getPath();
-        Matcher matcher = LAST_ELEMENT_IN_PATH_PATTERN.matcher(compiledPath);
-        if (matcher.find()) {
-            return compiledPath.replace(matcher.group(1), "");
-        }
-        throw new IllegalStateException(String.format("Unable to find parent for '%s'", jsonPathString));
-    }
-
-    /**
-     * Get object key at the given JSON path.
-     * Examples:
-     * - "$['obj1']['obj2']" will return "obj2"
-     * - "$.obj1.obj2" will return "obj2"
-     * - "obj1.obj2" will return "obj2"
-     */
-    private static String getJsonElementKey(String jsonPathString) {
-        JsonPath jsonPath = JsonPath.compile(jsonPathString);
-        String compiledPath = jsonPath.getPath();
-        Matcher matcher = LAST_ELEMENT_IN_PATH_PATTERN.matcher(compiledPath);
-        if (matcher.find()) {
-            return matcher.group(1).replace("['", "").replace("']", "");
-        }
-        throw new IllegalStateException(String.format("Unable to find object key for '%s'", jsonPathString));
-    }
-
-    private static void addEncryptionCertificateFingerprint(DocumentContext payloadContext, String jsonPathOut, FieldLevelEncryptionConfig config) throws GeneralSecurityException {
-        if (isNullOrEmpty(config.encryptionCertificateFingerprintFieldName)) {
-            // Nothing to add
-            return;
-        }
-        String providedCertificateFingerprintValue = config.encryptionCertificateFingerprint;
-        if (!isNullOrEmpty(providedCertificateFingerprintValue)) {
-            payloadContext.put(jsonPathOut, config.encryptionCertificateFingerprintFieldName, providedCertificateFingerprintValue);
-        } else {
-            byte[] certificateFingerprintBytes = sha256digestBytes(config.encryptionCertificate.getEncoded());
-            String certificateFingerprintValue = encodeBytes(certificateFingerprintBytes, config.fieldValueEncoding);
-            payloadContext.put(jsonPathOut, config.encryptionCertificateFingerprintFieldName, certificateFingerprintValue);
-        }
-    }
-
-    private static void addEncryptionKeyFingerprint(DocumentContext payloadContext, String jsonPathOut, FieldLevelEncryptionConfig config) throws GeneralSecurityException {
-        if (isNullOrEmpty(config.encryptionKeyFingerprintFieldName)) {
-            // Nothing to add
-            return;
-        }
-        String providedKeyFingerprintValue = config.encryptionKeyFingerprint;
-        if (!isNullOrEmpty(providedKeyFingerprintValue)) {
-            payloadContext.put(jsonPathOut, config.encryptionKeyFingerprintFieldName, providedKeyFingerprintValue);
-        } else {
-            byte[] keyFingerprintBytes = sha256digestBytes(config.encryptionCertificate.getPublicKey().getEncoded());
-            String keyFingerprintValue = encodeBytes(keyFingerprintBytes, config.fieldValueEncoding);
-            payloadContext.put(jsonPathOut, config.encryptionKeyFingerprintFieldName, keyFingerprintValue);
-        }
-    }
-
-    private static void addOaepPaddingDigestAlgorithm(DocumentContext payloadContext, String jsonPathOut, FieldLevelEncryptionConfig config) {
-        if (isNullOrEmpty(config.oaepPaddingDigestAlgorithmFieldName)) {
-            // Nothing to add
-            return;
-        }
-        String oaepDigestAlgorithm = config.oaepPaddingDigestAlgorithm.replace("-", "");
-        payloadContext.put(jsonPathOut, config.oaepPaddingDigestAlgorithmFieldName, oaepDigestAlgorithm);
-    }
-
-    private static IvParameterSpec generateIv() throws GeneralSecurityException {
-        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
-        byte[] ivBytes = new byte[16];
-        secureRandom.nextBytes(ivBytes);
-        return new IvParameterSpec(ivBytes);
-    }
-
-    private static SecretKey generateSecretKey() throws GeneralSecurityException {
-        KeyGenerator generator = KeyGenerator.getInstance(SYMMETRIC_KEY_TYPE, SUN_JCE);
-        generator.init(SYMMETRIC_KEY_SIZE);
-        return generator.generateKey();
-    }
-
-    private static byte[] wrapSecretKey(FieldLevelEncryptionConfig config, Key key) throws GeneralSecurityException {
-        Key publicEncryptionKey = config.encryptionCertificate.getPublicKey();
-        MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(config.oaepPaddingDigestAlgorithm);
-        String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-        Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
-        cipher.init(Cipher.WRAP_MODE, publicEncryptionKey, getOaepParameterSpec(mgf1ParameterSpec));
-        return cipher.wrap(key);
-    }
-
-    private static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws GeneralSecurityException {
-        if (!oaepDigestAlgorithm.contains("-")) {
-            oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
-        }
-        MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(oaepDigestAlgorithm);
-        Key key = config.decryptionKey;
-        String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-        Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
-        cipher.init(Cipher.UNWRAP_MODE, key, getOaepParameterSpec(mgf1ParameterSpec));
-        return cipher.unwrap(keyBytes, SYMMETRIC_KEY_TYPE, Cipher.SECRET_KEY);
-    }
-
-    private static OAEPParameterSpec getOaepParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
-        return new OAEPParameterSpec(mgf1ParameterSpec.getDigestAlgorithm(), "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
+    private static String sanitizeJson(String json) {
+        return json.replaceAll("\n", "")
+                .replaceAll("\r", "")
+                .replaceAll("\t", "");
     }
 
     private static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
@@ -425,29 +311,5 @@ public class FieldLevelEncryption {
         Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER, SUN_JCE);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
         return cipher.doFinal(bytes);
-    }
-
-    private static byte[] sha256digestBytes(byte[] bytes) throws GeneralSecurityException {
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(bytes);
-        return messageDigest.digest();
-    }
-
-    private static String sanitizeJson(String json) {
-        return json.replaceAll("\n", "")
-                .replaceAll("\r", "")
-                .replaceAll("\t", "");
-    }
-
-    private static String encodeBytes(byte[] bytes, FieldValueEncoding encoding) {
-        return encoding == FieldValueEncoding.HEX ? new String(Hex.encodeHex(bytes)) : Base64.encodeBase64String(bytes);
-    }
-
-    private static byte[] decodeValue(String value, FieldValueEncoding encoding) throws DecoderException {
-        return encoding == FieldValueEncoding.HEX ? Hex.decodeHex(value.toCharArray()) : Base64.decodeBase64(value);
-    }
-
-    private static boolean isNullOrEmpty(String str) {
-        return null == str || str.length() == 0;
     }
 }

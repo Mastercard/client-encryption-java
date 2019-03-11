@@ -1,6 +1,7 @@
 package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.EncryptionException;
+import com.mastercard.developer.encryption.FieldLevelEncryptionParams;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import feign.RequestTemplate;
@@ -9,6 +10,8 @@ import feign.codec.Encoder;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+
+import static com.mastercard.developer.utils.FeignUtils.updateHeader;
 
 /**
  * A Feign encoder for encrypting parts of HTTP payloads.
@@ -39,12 +42,26 @@ public class FeignFieldLevelEncryptionEncoder implements Encoder {
             // Read request payload
             String payload = new String(bodyBytes, StandardCharsets.UTF_8);
 
-            // Encrypt fields
-            String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+            // Encrypt fields & update headers
+            String encryptedPayload;
+            if (config.useHttpHeaders()) {
+                // Generate encryption params and add them as HTTP headers
+                FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
+                updateHeader(requestTemplate, config.getIvHeaderName(), params.getIvValue());
+                updateHeader(requestTemplate, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
+                updateHeader(requestTemplate, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
+                updateHeader(requestTemplate, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(requestTemplate, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
+                encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, params);
+            } else {
+                // Encryption params will be stored in the payload
+                encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+            }
             requestTemplate.body(encryptedPayload);
-            requestTemplate.header("Content-Length", String.valueOf(encryptedPayload.length()));
+            updateHeader(requestTemplate, "Content-Length", String.valueOf(encryptedPayload.length()));
+
         } catch (EncryptionException e) {
-            throw new EncodeException("Failed to encrypt request!", e);
+            throw new EncodeException("Failed to intercept and encrypt request!", e);
         }
     }
 }

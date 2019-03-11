@@ -8,6 +8,8 @@ import okio.Buffer;
 
 import java.io.IOException;
 
+import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
+
 /**
  * An OkHttp3 interceptor for encrypting/decrypting parts of HTTP payloads.
  * See: https://github.com/square/okhttp/wiki/Interceptors
@@ -52,7 +54,7 @@ public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
                     .build();
 
         } catch (EncryptionException e) {
-            throw new IOException("Failed to encrypt request!", e);
+            throw new IOException("Failed to intercept and encrypt request!", e);
         }
     }
 
@@ -67,7 +69,7 @@ public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
 
             // Read response payload
             String responsePayload = responseBody.string();
-            if (null == responsePayload || responsePayload.length() == 0) {
+            if (isNullOrEmpty(responsePayload)) {
                 // Nothing to decrypt
                 return response;
             }
@@ -81,7 +83,7 @@ public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
                         .build();
             }
         } catch (EncryptionException e) {
-            throw new IOException("Failed to decrypt response!", e);
+            throw new IOException("Failed to intercept and decrypt response!", e);
         }
     }
 }

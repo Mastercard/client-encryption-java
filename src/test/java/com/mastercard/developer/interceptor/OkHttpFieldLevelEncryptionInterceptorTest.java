@@ -104,7 +104,7 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
 
         // THEN
         expectedException.expect(IOException.class);
-        expectedException.expectMessage("Failed to encrypt request!");
+        expectedException.expectMessage("Failed to intercept and encrypt request!");
         expectedException.expectCause(isA(EncryptionException.class));
 
         // WHEN
@@ -216,7 +216,7 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
 
         // THEN
         expectedException.expect(IOException.class);
-        expectedException.expectMessage("Failed to decrypt response!");
+        expectedException.expectMessage("Failed to intercept and decrypt response!");
         expectedException.expectCause(isA(EncryptionException.class));
 
         // WHEN

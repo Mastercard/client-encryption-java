@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mastercard.developer.test.TestUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -79,8 +80,8 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
         assertNotNull(encryptedData);
         assertEquals("SHA256", encryptedData.get("oaepHashingAlgorithm").getAsString());
-        assertEquals("dhsAPB6t46VJDlAA03iHuqXm7A4ibAdwblmUUfwDKnk=", encryptedData.get("encryptionKeyFingerprint").getAsString());
-        assertEquals("gIEPwTqDGfzw4uwyLIKkwwS3gsw85nEXY0PP6BYMInk=", encryptedData.get("encryptionCertificateFingerprint").getAsString());
+        assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", encryptedData.get("encryptionKeyFingerprint").getAsString());
+        assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", encryptedData.get("encryptionCertificateFingerprint").getAsString());
         assertTrue(Base64.isBase64(encryptedData.get("encryptedValue").getAsString()));
         assertTrue(Base64.isBase64(encryptedData.get("encryptedKey").getAsString()));
         assertTrue(Base64.isBase64(encryptedData.get("iv").getAsString()));
@@ -305,8 +306,12 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNull(encryptedPayloadObject.get("data2"));
         JsonElement encryptedData1 = encryptedPayloadObject.get("encryptedData1");
         assertNotNull(encryptedData1.getAsJsonObject().get("encryptedValue"));
-        JsonElement encryptedData2 = encryptedPayloadObject.get("encryptedData1");
+        JsonElement encryptedData2 = encryptedPayloadObject.get("encryptedData2");
         assertNotNull(encryptedData2.getAsJsonObject().get("encryptedValue"));
+        // The 2 should use a different set of params (IV and symmetric key)
+        String iv1 = encryptedData1.getAsJsonObject().get("iv").getAsString();
+        String iv2 = encryptedData2.getAsJsonObject().get("iv").getAsString();
+        assertNotEquals(iv1, iv2);
     }
 
     @Test
@@ -505,8 +510,8 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         expectedException.expect(EncryptionException.class);
-        expectedException.expectMessage("Payload encryption failed!");
-        expectedException.expectCause(isA(InvalidKeyException.class));
+        expectedException.expectMessage("Failed to wrap secret key!");
+        expectedException.expectCause(isA(InvalidKeyException.class)); // InvalidKeyException: Key must not be null
 
         // WHEN
         FieldLevelEncryption.encryptPayload(payload, config);
@@ -1000,8 +1005,8 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         expectedException.expect(EncryptionException.class);
-        expectedException.expectMessage("Payload decryption failed!");
-        expectedException.expectCause(isA(InvalidKeyException.class));
+        expectedException.expectMessage("Failed to unwrap secret key!");
+        expectedException.expectCause(isA(InvalidKeyException.class)); // InvalidKeyException: Key must not be null
 
         // WHEN
         FieldLevelEncryption.decryptPayload(encryptedPayload, config);

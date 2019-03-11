@@ -1,46 +1,39 @@
 package com.mastercard.developer.json;
 
+import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
+
 public abstract class JsonEngine {
+
+    private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(".*(\\['.*'\\])"); // Returns "['obj2']" for "$['obj1']['obj2']"
 
     public abstract JsonProvider getJsonProvider();
     public abstract Object parse(String string);
 
     public static JsonEngine getDefault() {
-        try {
-            Class.forName("com.fasterxml.jackson.databind.ObjectMapper");
+        if (isClassFound("com.fasterxml.jackson.databind.ObjectMapper")) {
             return new JacksonJsonEngine();
-        } catch (ClassNotFoundException e) {
-            // Do nothing.
         }
 
-        try {
-            Class.forName("org.codehaus.jettison.json.JSONObject");
+        if (isClassFound("org.codehaus.jettison.json.JSONObject")) {
             return new JettisonJsonEngine();
-        } catch (ClassNotFoundException e) {
-            // Do nothing.
         }
 
-        try {
-            Class.forName("org.json.JSONObject");
+        if (isClassFound("org.json.JSONObject")) {
             return new JsonOrgJsonEngine();
-        } catch (ClassNotFoundException e) {
-            // Do nothing.
         }
 
-        try {
-            Class.forName("net.minidev.json.parser.JSONParser");
+        if (isClassFound("net.minidev.json.parser.JSONParser")) {
             return new JsonSmartJsonEngine();
-        } catch (ClassNotFoundException e) {
-            // Do nothing.
         }
 
-        try {
-            Class.forName("com.google.gson.Gson");
+        if (isClassFound("com.google.gson.Gson")) {
             return new GsonJsonEngine();
-        } catch (ClassNotFoundException e) {
-            // Do nothing.
         }
 
         String message = "At least one of the following JSON library must be added to your classpath:\n" +
@@ -50,6 +43,15 @@ public abstract class JsonEngine {
                 "* org.json:json\n" +
                 "* com.google.code.gson:gson";
         throw new IllegalStateException(message);
+    }
+
+    private static boolean isClassFound(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     protected Object asPrimitiveValue(String string) {
@@ -67,5 +69,66 @@ public abstract class JsonEngine {
 
         // String
         return string;
+    }
+
+
+    public String toJsonString(Object object) {
+        if (null == object) {
+            throw new IllegalStateException("Can get a JSON string from a null object!");
+        }
+        if (isJsonPrimitive(object)) {
+            return object.toString();
+        }
+        return getJsonProvider().toJson(object);
+    }
+
+
+    protected boolean isJsonPrimitive(Object jsonElement) {
+        JsonProvider jsonProvider = getJsonProvider();
+        return !jsonProvider.isMap(jsonElement) && !jsonProvider.isArray(jsonElement);
+    }
+
+    public boolean isJsonObject(Object jsonElement) {
+        return getJsonProvider().isMap(jsonElement);
+    }
+
+    public boolean isNullOrEmptyJson(Object jsonElement) {
+        return jsonElement == null
+                || isNullOrEmpty(toJsonString(jsonElement))
+                || 0 == jsonElement.getClass().getFields().length;
+    }
+
+    /**
+     * Get JSON path to the parent of the object at the given JSON path.
+     * Examples:
+     * - "$['obj1']['obj2']" will return "$['obj1']"
+     * - "$.obj1.obj2" will return "$['obj1']"
+     * - "obj1.obj2" will return "$['obj1']"
+     */
+    public static String getParentJsonPath(String jsonPathString) {
+        JsonPath jsonPath = JsonPath.compile(jsonPathString);
+        String compiledPath = jsonPath.getPath();
+        Matcher matcher = LAST_ELEMENT_IN_PATH_PATTERN.matcher(compiledPath);
+        if (matcher.find()) {
+            return compiledPath.replace(matcher.group(1), "");
+        }
+        throw new IllegalStateException(String.format("Unable to find parent for '%s'", jsonPathString));
+    }
+
+    /**
+     * Get object key at the given JSON path.
+     * Examples:
+     * - "$['obj1']['obj2']" will return "obj2"
+     * - "$.obj1.obj2" will return "obj2"
+     * - "obj1.obj2" will return "obj2"
+     */
+    public static String getJsonElementKey(String jsonPathString) {
+        JsonPath jsonPath = JsonPath.compile(jsonPathString);
+        String compiledPath = jsonPath.getPath();
+        Matcher matcher = LAST_ELEMENT_IN_PATH_PATTERN.matcher(compiledPath);
+        if (matcher.find()) {
+            return matcher.group(1).replace("['", "").replace("']", "");
+        }
+        throw new IllegalStateException(String.format("Unable to find object key for '%s'", jsonPathString));
     }
 }
