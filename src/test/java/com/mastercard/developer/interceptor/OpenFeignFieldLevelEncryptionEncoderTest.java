@@ -2,12 +2,11 @@ package com.mastercard.developer.interceptor;
 
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.FeignFieldLevelEncryptionEncoder;
+import com.mastercard.developer.interceptors.OpenFeignFieldLevelEncryptionEncoder;
 import com.mastercard.developer.test.TestUtils;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,7 +19,7 @@ import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class FeignFieldLevelEncryptionEncoderTest {
+public class OpenFeignFieldLevelEncryptionEncoderTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -39,7 +38,7 @@ public class FeignFieldLevelEncryptionEncoderTest {
         when(request.body()).thenReturn("{\"foo\":\"bar\"}".getBytes());
 
         // WHEN
-        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        OpenFeignFieldLevelEncryptionEncoder instanceUnderTest = new OpenFeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
 
         // THEN
@@ -67,7 +66,7 @@ public class FeignFieldLevelEncryptionEncoderTest {
         when(request.body()).thenReturn(null);
 
         // WHEN
-        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        OpenFeignFieldLevelEncryptionEncoder instanceUnderTest = new OpenFeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
 
         // THEN
@@ -89,7 +88,7 @@ public class FeignFieldLevelEncryptionEncoderTest {
         when(request.body()).thenReturn("".getBytes());
 
         // WHEN
-        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        OpenFeignFieldLevelEncryptionEncoder instanceUnderTest = new OpenFeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
 
         // THEN
@@ -117,7 +116,7 @@ public class FeignFieldLevelEncryptionEncoderTest {
         expectedException.expectCause(isA(EncryptionException.class));
 
         // WHEN
-        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        OpenFeignFieldLevelEncryptionEncoder instanceUnderTest = new OpenFeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
     }
 
@@ -140,7 +139,7 @@ public class FeignFieldLevelEncryptionEncoderTest {
         when(request.body()).thenReturn("{\"foo\":\"bar\"}".getBytes());
 
         // WHEN
-        FeignFieldLevelEncryptionEncoder instanceUnderTest = new FeignFieldLevelEncryptionEncoder(config, delegate);
+        OpenFeignFieldLevelEncryptionEncoder instanceUnderTest = new OpenFeignFieldLevelEncryptionEncoder(config, delegate);
         instanceUnderTest.encode(object, type, request);
 
         // THEN

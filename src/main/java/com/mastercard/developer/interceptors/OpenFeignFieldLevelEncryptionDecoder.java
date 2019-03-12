@@ -18,12 +18,12 @@ import static com.mastercard.developer.utils.FeignUtils.*;
 /**
  * A Feign decoder for decrypting parts of HTTP payloads.
  */
-public class FeignFieldLevelEncryptionDecoder implements Decoder {
+public class OpenFeignFieldLevelEncryptionDecoder implements Decoder {
 
     private final FieldLevelEncryptionConfig config;
     private final Decoder delegate;
 
-    public FeignFieldLevelEncryptionDecoder(FieldLevelEncryptionConfig config, Decoder delegate) {
+    public OpenFeignFieldLevelEncryptionDecoder(FieldLevelEncryptionConfig config, Decoder delegate) {
         this.config = config;
         this.delegate = delegate;
     }

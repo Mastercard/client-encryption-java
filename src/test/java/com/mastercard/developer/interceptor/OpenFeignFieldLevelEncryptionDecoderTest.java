@@ -2,12 +2,11 @@ package com.mastercard.developer.interceptor;
 
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.FeignFieldLevelEncryptionDecoder;
+import com.mastercard.developer.interceptors.OpenFeignFieldLevelEncryptionDecoder;
 import feign.Response;
 import feign.Util;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,7 +26,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class FeignFieldLevelEncryptionDecoderTest {
+public class OpenFeignFieldLevelEncryptionDecoderTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -62,7 +61,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
-        FeignFieldLevelEncryptionDecoder instanceUnderTest = new FeignFieldLevelEncryptionDecoder(config, delegate);
+        OpenFeignFieldLevelEncryptionDecoder instanceUnderTest = new OpenFeignFieldLevelEncryptionDecoder(config, delegate);
         instanceUnderTest.decode(response, type);
 
         // THEN
@@ -85,7 +84,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         when(response.body()).thenReturn(null);
 
         // WHEN
-        FeignFieldLevelEncryptionDecoder instanceUnderTest = new FeignFieldLevelEncryptionDecoder(config, delegate);
+        OpenFeignFieldLevelEncryptionDecoder instanceUnderTest = new OpenFeignFieldLevelEncryptionDecoder(config, delegate);
         instanceUnderTest.decode(response, type);
 
         // THEN
@@ -105,7 +104,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
-        FeignFieldLevelEncryptionDecoder instanceUnderTest = new FeignFieldLevelEncryptionDecoder(config, delegate);
+        OpenFeignFieldLevelEncryptionDecoder instanceUnderTest = new OpenFeignFieldLevelEncryptionDecoder(config, delegate);
         instanceUnderTest.decode(response, type);
 
         // THEN
@@ -139,7 +138,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         expectedException.expectCause(isA(EncryptionException.class));
 
         // WHEN
-        FeignFieldLevelEncryptionDecoder instanceUnderTest = new FeignFieldLevelEncryptionDecoder(config, delegate);
+        OpenFeignFieldLevelEncryptionDecoder instanceUnderTest = new OpenFeignFieldLevelEncryptionDecoder(config, delegate);
         instanceUnderTest.decode(response, type);
     }
 
@@ -180,7 +179,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
-        FeignFieldLevelEncryptionDecoder instanceUnderTest = new FeignFieldLevelEncryptionDecoder(config, delegate);
+        OpenFeignFieldLevelEncryptionDecoder instanceUnderTest = new OpenFeignFieldLevelEncryptionDecoder(config, delegate);
         instanceUnderTest.decode(response, type);
 
         // THEN

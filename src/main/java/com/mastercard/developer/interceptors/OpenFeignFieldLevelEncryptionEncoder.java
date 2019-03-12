@@ -16,12 +16,12 @@ import static com.mastercard.developer.utils.FeignUtils.updateHeader;
 /**
  * A Feign encoder for encrypting parts of HTTP payloads.
  */
-public class FeignFieldLevelEncryptionEncoder implements Encoder {
+public class OpenFeignFieldLevelEncryptionEncoder implements Encoder {
 
     private final FieldLevelEncryptionConfig config;
     private final Encoder delegate;
 
-    public FeignFieldLevelEncryptionEncoder(FieldLevelEncryptionConfig config, Encoder delegate) {
+    public OpenFeignFieldLevelEncryptionEncoder(FieldLevelEncryptionConfig config, Encoder delegate) {
         this.config = config;
         this.delegate = delegate;
     }
