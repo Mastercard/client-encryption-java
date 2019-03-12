@@ -201,8 +201,8 @@ public class FieldLevelEncryption {
             return;
         }
 
-        if ((config.encryptedKeyFieldName == null || config.ivFieldName == null) && params == null) {
-            throw new IllegalStateException("Encryption params have to be passed in argument or field names have to be set in config!");
+        if (!config.useHttpPayloads() && params == null) {
+            throw new IllegalStateException("Encryption params have to be set when not stored in HTTP payloads!");
         }
 
         if (params == null) {

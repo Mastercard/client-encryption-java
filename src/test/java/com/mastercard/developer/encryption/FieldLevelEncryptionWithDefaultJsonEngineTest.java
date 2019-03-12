@@ -1200,7 +1200,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Encryption params have to be passed in argument or field names have to be set in config!");
+        expectedException.expectMessage("Encryption params have to be set when not stored in HTTP payloads!");
 
         // WHEN
         FieldLevelEncryption.decryptPayload(encryptedPayload, config, null);

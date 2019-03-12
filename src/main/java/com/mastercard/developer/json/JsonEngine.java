@@ -100,10 +100,6 @@ public abstract class JsonEngine {
 
     /**
      * Get JSON path to the parent of the object at the given JSON path.
-     * Examples:
-     * - "$['obj1']['obj2']" will return "$['obj1']"
-     * - "$.obj1.obj2" will return "$['obj1']"
-     * - "obj1.obj2" will return "$['obj1']"
      */
     public static String getParentJsonPath(String jsonPathString) {
         JsonPath jsonPath = JsonPath.compile(jsonPathString);
@@ -117,10 +113,6 @@ public abstract class JsonEngine {
 
     /**
      * Get object key at the given JSON path.
-     * Examples:
-     * - "$['obj1']['obj2']" will return "obj2"
-     * - "$.obj1.obj2" will return "obj2"
-     * - "obj1.obj2" will return "obj2"
      */
     public static String getJsonElementKey(String jsonPathString) {
         JsonPath jsonPath = JsonPath.compile(jsonPathString);

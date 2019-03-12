@@ -149,6 +149,13 @@ public class FieldLevelEncryptionConfig {
         return encryptedKeyHeaderName != null && ivHeaderName != null;
     }
 
+    /**
+     * If the encryption parameters must be written to/read from HTTP payloads.
+     */
+    public boolean useHttpPayloads() {
+        return encryptedKeyFieldName != null && ivFieldName != null;
+    }
+
     public String getOaepPaddingDigestAlgorithmHeaderName() {
         return oaepPaddingDigestAlgorithmHeaderName;
     }
