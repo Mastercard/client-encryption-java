@@ -452,7 +452,7 @@ ServiceApi serviceApi = new ServiceApi(client);
 </configuration>
 ```
 
-##### Usage of `FeignFieldLevelEncryptionEncoder` and `FeignFieldLevelEncryptionDecoder`
+##### Usage of `OpenFeignFieldLevelEncryptionEncoder` and `OpenFeignFieldLevelEncryptionDecoder`
 ```java
 ApiClient client = new ApiClient();
 ObjectMapper objectMapper = client.getObjectMapper();
@@ -461,8 +461,8 @@ Feign.Builder feignBuilder = client.getFeignBuilder();
 ArrayList<RequestInterceptor> interceptors = new ArrayList<>();
 interceptors.add(new OpenFeignOAuth1Interceptor(consumerKey, signingKey, client.getBasePath()));
 feignBuilder.requestInterceptors(interceptors);
-feignBuilder.encoder(new FeignFieldLevelEncryptionEncoder(config, new FormEncoder(new JacksonEncoder(objectMapper))));
-feignBuilder.decoder(new FeignFieldLevelEncryptionDecoder(config, new JacksonDecoder(objectMapper)));
+feignBuilder.encoder(new OpenFeignFieldLevelEncryptionEncoder(config, new FormEncoder(new JacksonEncoder(objectMapper))));
+feignBuilder.decoder(new OpenFeignFieldLevelEncryptionDecoder(config, new JacksonDecoder(objectMapper)));
 ServiceApi serviceApi = client.buildClient(ServiceApi.class);
 // ...
 ```
