@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
+import com.mastercard.developer.encryption.FieldLevelEncryptionParams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,10 +42,25 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
             content.writeTo(outputStream);
             String requestPayload = outputStream.toString(StandardCharsets.UTF_8.name());
 
-            // Encrypt fields
-            String encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+            // Encrypt fields & update headers
+            String encryptedPayload;
+            HttpHeaders headers = request.getHeaders();
+            if (config.useHttpHeaders()) {
+                // Generate encryption params and add them as HTTP headers
+                FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
+                updateHeader(headers, config.getIvHeaderName(), params.getIvValue());
+                updateHeader(headers, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
+                updateHeader(headers, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
+                updateHeader(headers, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(headers, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
+                encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config, params);
+            } else {
+                // Encryption params will be stored in the payload
+                encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+            }
+            
             HttpContent encryptedContent = new ByteArrayContent("application/json; charset=" + StandardCharsets.UTF_8.name(), encryptedPayload.getBytes());
-            request.getHeaders().setContentLength(encryptedContent.getLength());
+            headers.setContentLength(encryptedContent.getLength());
             request.setContent(encryptedContent);
 
         } catch (EncryptionException e) {
@@ -62,10 +78,29 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
                 return;
             }
 
-            // Decrypt fields
-            String decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
+            // Decrypt fields & update headers
+            String decryptedPayload;
+            HttpHeaders headers = response.getHeaders();
+            if (config.useHttpHeaders()) {
+                // Read encryption params from HTTP headers and delete headers
+                String ivValue = headers.getFirstHeaderStringValue(config.getIvHeaderName());
+                String oaepPaddingDigestAlgorithmValue = headers.getFirstHeaderStringValue(config.getOaepPaddingDigestAlgorithmHeaderName());
+                String encryptedKeyValue = headers.getFirstHeaderStringValue(config.getEncryptedKeyHeaderName());
+                removeHeader(headers, config.getIvHeaderName());
+                removeHeader(headers, config.getEncryptedKeyHeaderName());
+                removeHeader(headers, config.getOaepPaddingDigestAlgorithmHeaderName());
+                removeHeader(headers, config.getEncryptionCertificateFingerprintHeaderName());
+                removeHeader(headers, config.getEncryptionKeyFingerprintHeaderName());
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
+                                                                                   null, null, config);
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
+            } else {
+                // Encryption params are stored in the payload
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
+            }
+
             HttpContent decryptedContent = new ByteArrayContent("application/json; charset=" + StandardCharsets.UTF_8.name(), decryptedPayload.getBytes());
-            response.getHeaders().setContentLength(decryptedContent.getLength());
+            headers.setContentLength(decryptedContent.getLength());
 
             // The HttpResponse public interface prevent from updating the response payload:
             // "Do not read from the content stream unless you intend to throw an exception"
@@ -78,5 +113,22 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IOException("Failed to update response with decrypted payload!", e);
         }
+    }
+
+    private static void removeHeader(HttpHeaders headers, String name) {
+        if (name == null) {
+            // Do nothing
+            return;
+        }
+        headers.remove(name);
+    }
+
+    private static void updateHeader(HttpHeaders headers, String name, String value) {
+        if (name == null) {
+            // Do nothing
+            return;
+        }
+        headers.remove(name);
+        headers.set(name, value);
     }
 }
