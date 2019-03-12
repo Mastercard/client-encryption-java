@@ -44,7 +44,7 @@ public class FeignFieldLevelEncryptionDecoder implements Decoder {
             // Decrypt fields & update headers
             String decryptedPayload;
             if (config.useHttpHeaders()) {
-                // Read encryption params in HTTP headers and delete headers
+                // Read encryption params from HTTP headers and delete headers
                 String ivValue = readHeader(response, config.getIvHeaderName());
                 response = removeHeader(response, config.getIvHeaderName());
                 String oaepPaddingDigestAlgorithmValue = readHeader(response, config.getOaepPaddingDigestAlgorithmHeaderName());

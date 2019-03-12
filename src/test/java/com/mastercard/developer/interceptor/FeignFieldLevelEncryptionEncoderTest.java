@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 
 import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static org.hamcrest.core.Is.isA;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class FeignFieldLevelEncryptionEncoderTest {
@@ -48,8 +49,8 @@ public class FeignFieldLevelEncryptionEncoderTest {
         verify(request).body(encryptedPayloadCaptor.capture());
         verify(request).header(eq("Content-Length"), anyString());
         String encryptedPayload = encryptedPayloadCaptor.getValue();
-        Assert.assertFalse(encryptedPayload.contains("foo"));
-        Assert.assertTrue(encryptedPayload.contains("encryptedFoo"));
+        assertFalse(encryptedPayload.contains("foo"));
+        assertTrue(encryptedPayload.contains("encryptedFoo"));
     }
 
     @Test
@@ -149,8 +150,8 @@ public class FeignFieldLevelEncryptionEncoderTest {
         verify(request).body(encryptedPayloadCaptor.capture());
         verify(request).header(eq("Content-Length"), anyString());
         String encryptedPayload = encryptedPayloadCaptor.getValue();
-        Assert.assertFalse(encryptedPayload.contains("foo"));
-        Assert.assertTrue(encryptedPayload.contains("encryptedFoo"));
+        assertFalse(encryptedPayload.contains("foo"));
+        assertTrue(encryptedPayload.contains("encryptedFoo"));
         verify(request).header(eq("x-iv"), anyString());
         verify(request).header(eq("x-encrypted-key"), anyString());
         verify(request).header("x-oaep-padding-digest-algorithm", "SHA256");

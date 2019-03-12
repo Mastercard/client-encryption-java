@@ -130,7 +130,6 @@ public class FieldLevelEncryption {
     private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
                                            FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
@@ -158,7 +157,7 @@ public class FieldLevelEncryption {
             payloadContext.delete(jsonPathIn);
         } else {
             // Delete keys one by one
-            Collection<String> propertyKeys = new ArrayList<>(jsonProvider.getPropertyKeys(inJsonElement));
+            Collection<String> propertyKeys = new ArrayList<>(jsonEngine.getPropertyKeys(inJsonElement));
             for (String key : propertyKeys) {
                 payloadContext.delete(jsonPathIn + "." + key);
             }

@@ -3,6 +3,8 @@ package com.mastercard.developer.json;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,7 +97,15 @@ public abstract class JsonEngine {
     public boolean isNullOrEmptyJson(Object jsonElement) {
         return jsonElement == null
                 || isNullOrEmpty(toJsonString(jsonElement))
-                || 0 == jsonElement.getClass().getFields().length;
+                || "{}".equals(toJsonString(jsonElement))
+                || Object.class.equals(jsonElement.getClass());
+    }
+
+    public Collection<String> getPropertyKeys(Object jsonElement) {
+        if (isNullOrEmptyJson(jsonElement)) {
+            return Collections.emptyList();
+        }
+        return getJsonProvider().getPropertyKeys(jsonElement);
     }
 
     /**

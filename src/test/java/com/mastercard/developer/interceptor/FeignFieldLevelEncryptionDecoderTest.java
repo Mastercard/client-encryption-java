@@ -23,6 +23,7 @@ import static com.mastercard.developer.test.TestUtils.assertPayloadEquals;
 import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static com.mastercard.developer.utils.FeignUtils.readHeader;
 import static org.hamcrest.core.Is.isA;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -70,7 +71,7 @@ public class FeignFieldLevelEncryptionDecoderTest {
         Response responseValue = responseCaptor.getValue();
         String payload = Util.toString(responseValue.body().asReader());
         assertPayloadEquals("{\"data\":\"string\"}", payload);
-        Assert.assertEquals(String.valueOf(payload.length()), readHeader(responseValue, "Content-Length"));
+        assertEquals(String.valueOf(payload.length()), readHeader(responseValue, "Content-Length"));
     }
 
     @Test
@@ -188,12 +189,12 @@ public class FeignFieldLevelEncryptionDecoderTest {
         Response responseValue = responseCaptor.getValue();
         String payload = Util.toString(responseValue.body().asReader());
         assertPayloadEquals("{\"data\":\"string\"}", payload);
-        Assert.assertEquals(String.valueOf(payload.length()), readHeader(responseValue, "Content-Length"));
-        Assert.assertNull(readHeader(responseValue, "x-iv"));
-        Assert.assertNull(readHeader(responseValue, "x-encrypted-key"));
-        Assert.assertNull(readHeader(responseValue, "x-oaep-padding-digest-algorithm"));
-        Assert.assertNull(readHeader(responseValue, "x-encryption-key-fingerprint"));
-        Assert.assertNull(readHeader(responseValue, "x-encryption-certificate-fingerprint"));
+        assertEquals(String.valueOf(payload.length()), readHeader(responseValue, "Content-Length"));
+        assertNull(readHeader(responseValue, "x-iv"));
+        assertNull(readHeader(responseValue, "x-encrypted-key"));
+        assertNull(readHeader(responseValue, "x-oaep-padding-digest-algorithm"));
+        assertNull(readHeader(responseValue, "x-encryption-key-fingerprint"));
+        assertNull(readHeader(responseValue, "x-encryption-certificate-fingerprint"));
     }
 
     private static Response.Body buildResponseBody(String payload) {

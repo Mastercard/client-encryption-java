@@ -3,6 +3,7 @@ package com.mastercard.developer.interceptors;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
+import com.mastercard.developer.encryption.FieldLevelEncryptionParams;
 import com.squareup.okhttp.*;
 import okio.Buffer;
 
@@ -45,10 +46,25 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                 requestPayload = buffer.readUtf8();
             }
 
-            // Encrypt fields
-            String encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+            // Encrypt fields & update headers
+            String encryptedPayload;
+            Request.Builder requestBuilder = request.newBuilder();
+            if (config.useHttpHeaders()) {
+                // Generate encryption params and add them as HTTP headers
+                FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
+                updateHeader(requestBuilder, config.getIvHeaderName(), params.getIvValue());
+                updateHeader(requestBuilder, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
+                updateHeader(requestBuilder, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
+                updateHeader(requestBuilder, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(requestBuilder, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
+                encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config, params);
+            } else {
+                // Encryption params will be stored in the payload
+                encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+            }
+
             RequestBody encryptedBody = RequestBody.create(requestBody.contentType(), encryptedPayload);
-            return request.newBuilder()
+            return requestBuilder
                     .method(request.method(), encryptedBody)
                     .header("Content-Length", String.valueOf(encryptedBody.contentLength()))
                     .build();
@@ -74,10 +90,29 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                 return response;
             }
 
-            // Decrypt fields
-            String decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
+            // Decrypt fields & update headers
+            String decryptedPayload;
+            Response.Builder responseBuilder = response.newBuilder();
+            if (config.useHttpHeaders()) {
+                // Read encryption params from HTTP headers and delete headers
+                String ivValue = response.header(config.getIvHeaderName(), null);
+                String oaepPaddingDigestAlgorithmValue = response.header(config.getOaepPaddingDigestAlgorithmHeaderName(), null);
+                String encryptedKeyValue = response.header(config.getEncryptedKeyHeaderName(), null);
+                removeHeader(responseBuilder, config.getIvHeaderName());
+                removeHeader(responseBuilder, config.getEncryptedKeyHeaderName());
+                removeHeader(responseBuilder, config.getOaepPaddingDigestAlgorithmHeaderName());
+                removeHeader(responseBuilder, config.getEncryptionCertificateFingerprintHeaderName());
+                removeHeader(responseBuilder, config.getEncryptionKeyFingerprintHeaderName());
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
+                                                                                   null, null, config);
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
+            } else {
+                // Encryption params are stored in the payload
+                decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
+            }
+
             try (ResponseBody decryptedBody = ResponseBody.create(responseBody.contentType(), decryptedPayload)) {
-                return response.newBuilder()
+                return responseBuilder
                         .body(decryptedBody)
                         .header("Content-Length", String.valueOf(decryptedBody.contentLength()))
                         .build();
@@ -85,5 +120,21 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
         } catch (EncryptionException e) {
             throw new IOException("Failed to intercept and decrypt response!", e);
         }
+    }
+
+    private static void removeHeader(Response.Builder responseBuilder, String name) {
+        if (name == null) {
+            // Do nothing
+            return;
+        }
+        responseBuilder.removeHeader(name);
+    }
+
+    private static void updateHeader(Request.Builder requestBuilder, String name, String value) {
+        if (name == null) {
+            // Do nothing
+            return;
+        }
+        requestBuilder.header(name, value);
     }
 }
