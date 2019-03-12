@@ -121,6 +121,7 @@ Reading PEM encoded keys requires an additional step:
 + [Performing Decryption](#performing-decryption)
 + [Encrypting Entire Payloads](#encrypting-entire-payloads)
 + [Decrypting Entire Payloads](#decrypting-entire-payloads)
++ [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
 #### Introduction <a name="introduction"></a>
 
@@ -288,12 +289,123 @@ Output:
 }
 ```
 
+#### Using HTTP Headers for Encryption Params <a name="using-http-headers-for-encryption-params"></a>
+
+In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are stored and expected to be found in HTTP payloads. 
+
+Some services may use HTTP headers instead. Here is how indicate the library not to store the parameters in payloads.
+
+##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
+
+Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building a `FieldLevelEncryptionConfig` instance. Example:
+```java
+FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+        .withEncryptionCertificate(encryptionCertificate)
+        .withDecryptionKey(decryptionKey)
+        .withEncryptionPath("$", "$")
+        .withDecryptionPath("$", "$")
+        .withOaepPaddingDigestAlgorithm("SHA-256")
+        .withEncryptedValueFieldName("data")
+        .withIvHeaderName("x-iv")
+        .withEncryptedKeyHeaderName("x-encrypted-key")
+        // ...
+        .withFieldValueEncoding(FieldValueEncoding.HEX)
+        .build();
+```
+
+See also:
+* [FieldLevelEncryptionConfigBuilder.java](https://github.com/Mastercard/client-encryption-java/blob/master/src/main/java/com/mastercard/developer/encryption/FieldLevelEncryptionConfigBuilder.java) for all config options
+* [Service configurations](https://github.com/Mastercard/client-encryption-java/wiki/Java-Service-Configurations) wiki page
+
+##### Encrypting Using HTTP Headers
+
+Encryption can be performed using the following steps:
+
+1. Generate parameters by calling `FieldLevelEncryptionParams.generate`:
+
+```java
+FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
+```
+
+2. Update the request headers:
+
+```java
+request.setHeader(config.getIvHeaderName(), params.getIvValue());
+request.setHeader(config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
+// ...
+```
+
+3. Call `encryptPayload` with params:
+```java
+FieldLevelEncryption.encryptPayload(payload, config, params);
+```
+
+Example using the configuration [above](#configuration-for-using-http-headers):
+
+```java
+String payload = "{" +
+        "    \"sensitiveField1\": \"sensitiveValue1\"," +
+        "    \"sensitiveField2\": \"sensitiveValue2\"" +
+        "}";
+String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, params);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+    "data": "53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5"
+}
+```
+
+##### Decrypting Using HTTP Headers
+
+Decryption can be performed using the following steps:
+
+1. Read the response headers:
+
+```java
+String ivValue = response.getHeader(config.getIvHeaderName());
+String encryptedKeyValue = response.getHeader(config.getEncryptedKeyHeaderName());
+// ...
+```
+
+2. Create a `FieldLevelEncryptionParams` instance:
+
+```java
+FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, ..., config);
+```
+
+3. Call `decryptPayload` with params:
+```java
+FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
+```
+
+Example using the configuration [above](#configuration-for-using-http-headers):
+
+```java
+String encryptedPayload = "{" +
+        "  \"data\": \"53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5\"" +
+        "}";
+String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+    "sensitiveField1": "sensitiveValue1",
+    "sensitiveField2": "sensitiveValue2"
+}
+```
+
 ### Integrating with OpenAPI Generator API Client Libraries <a name="integrating-with-openapi-generator-api-client-libraries"></a>
 
 [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) generates API client libraries from [OpenAPI Specs](https://github.com/OAI/OpenAPI-Specification). 
 It provides generators and library templates for supporting multiple languages and frameworks.
 
-The `com.mastercard.developer.interceptors` package will provide you with some interceptor classes you can use when configuring your API client. These classes will take care of encrypting/decrypting request and response payloads.
+The `com.mastercard.developer.interceptors` package will provide you with some interceptor classes you can use when configuring your API client. 
+These classes will take care of encrypting request and decrypting response payloads, but also of updating HTTP headers when needed.
 
 Library options currently supported for the `java` generator:
 + [okhttp-gson](#okhttp-gson)
