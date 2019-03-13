@@ -291,9 +291,8 @@ Output:
 
 #### Using HTTP Headers for Encryption Params <a name="using-http-headers-for-encryption-params"></a>
 
-In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are stored and expected to be found in HTTP payloads. 
-
-Some services may use HTTP headers instead. Here is how indicate the library not to store the parameters in payloads.
+In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are part of the HTTP payload.
+Here is how to configure the library for using HTTP headers instead.
 
 ##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
 
