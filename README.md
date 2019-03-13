@@ -291,7 +291,8 @@ Output:
 
 #### Using HTTP Headers for Encryption Params <a name="using-http-headers-for-encryption-params"></a>
 
-In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are part of the HTTP payload.
+In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are part of the HTTP payloads.
+
 Here is how to configure the library for using HTTP headers instead.
 
 ##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
