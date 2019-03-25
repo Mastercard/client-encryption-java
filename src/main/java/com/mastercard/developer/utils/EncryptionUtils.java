@@ -93,7 +93,7 @@ public final class EncryptionUtils {
         int pkcs1Length = pkcs1Bytes.length;
         int totalLength = pkcs1Length + 22;
         byte[] pkcs8Header = new byte[] {
-                0x30, (byte) 0x82, (byte) ((totalLength >> 8) & 0xff), (byte) (totalLength & 0xff), // // Sequence + total length
+                0x30, (byte) 0x82, (byte) ((totalLength >> 8) & 0xff), (byte) (totalLength & 0xff), // Sequence + total length
                 0x2, 0x1, 0x0, // Integer (0)
                 0x30, 0xD, 0x6, 0x9, 0x2A, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xF7, 0xD, 0x1, 0x1, 0x1, 0x5, 0x0, // Sequence: 1.2.840.113549.1.1.1, NULL
                 0x4, (byte) 0x82, (byte) ((pkcs1Length >> 8) & 0xff), (byte) (pkcs1Length & 0xff) // Octet string + length
