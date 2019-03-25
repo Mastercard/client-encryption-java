@@ -21,7 +21,7 @@ public class TestUtils {
     }
 
     public static Certificate getTestEncryptionCertificate() throws Exception {
-        return loadEncryptionCertificate("./src/test/resources/test_certificate.cert");
+        return loadEncryptionCertificate("./src/test/resources/test_certificate.pem");
     }
 
     public static Certificate getTestInvalidEncryptionCertificate() {
@@ -29,7 +29,7 @@ public class TestUtils {
     }
 
     public static PrivateKey getTestDecryptionKey() throws Exception {
-        return loadDecryptionKey("./src/test/resources/test_key.der");
+        return loadDecryptionKey("./src/test/resources/test_key_pkcs8.der");
     }
 
     public static FieldLevelEncryptionConfigBuilder getTestFieldLevelEncryptionConfigBuilder() throws Exception {

@@ -1084,7 +1084,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
                 .withDecryptionPath("encryptedData", "data")
                 .withOaepPaddingDigestAlgorithm("SHA-256")
                 // Not the right key
-                .withDecryptionKey(loadDecryptionKey("./src/test/resources/test_key_container.p12", "mykeyalias", "Password1"))
+                .withDecryptionKey(loadDecryptionKey("./src/test/resources/test_key.p12", "mykeyalias", "Password1"))
                 .build();
 
         // THEN

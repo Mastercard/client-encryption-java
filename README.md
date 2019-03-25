@@ -99,19 +99,17 @@ PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
                                     "<insert key password>");
 ```
 
-#### From a PKCS#8 Formatted Key
+#### From an Unencrypted Key File
 
-A `PrivateKey` object can be created from a PKCS#8 key file by calling the `EncryptionUtils.loadDecryptionKey` method:
+A `PrivateKey` object can be created from a key file by calling the `EncryptionUtils.loadDecryptionKey` method:
 ```java
-PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert PKCS#8 file path>");
+PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert key file path>");
 ```
 
-#### From a PEM Formatted Key
-
-Reading PEM encoded keys requires an additional step:
-
-1. Convert the key using: `openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -out key.der -nocrypt`
-2. Call `EncryptionUtils.loadDecryptionKey` (see above)
+Supported RSA key formats:
+* PKCS#1 PEM (starts with "-----BEGIN RSA PRIVATE KEY-----")
+* PKCS#8 PEM (starts with "-----BEGIN PRIVATE KEY-----")
+* Binary DER-encoded PKCS#8
 
 ### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
 
