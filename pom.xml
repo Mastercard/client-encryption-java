@@ -8,7 +8,7 @@
     <artifactId>client-encryption</artifactId>
     <version>1.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <description>Zero dependency library for Mastercard API compliant payload encryption/decryption</description>
+    <description>Library for Mastercard API compliant payload encryption/decryption</description>
     <url>https://github.com/Mastercard/client-encryption-java</url>
     <name>client-encryption</name>
 
