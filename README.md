@@ -82,10 +82,12 @@ Available engine classes:
 
 ### Loading the Encryption Certificate <a name="loading-the-encryption-certificate"></a>
 
-A `Certificate` object can be created from a PEM file by calling the `EncryptionUtils.loadEncryptionCertificate` method:
+A `Certificate` object can be created from a certificate file by calling the `EncryptionUtils.loadEncryptionCertificate` method:
 ```java
-Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<insert PEM certificate file path>");
+Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<insert certificate file path>");
 ```
+
+Supported certificate formats: PEM, DER.
 
 ### Loading the Decryption Key <a name="loading-the-decryption-key"></a>
 
