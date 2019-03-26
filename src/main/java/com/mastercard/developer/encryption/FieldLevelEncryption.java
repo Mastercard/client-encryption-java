@@ -304,13 +304,13 @@ public class FieldLevelEncryption {
                 .replaceAll("\t", "");
     }
 
-    private static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
+    protected static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER, SUN_JCE);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         return cipher.doFinal(bytes);
     }
 
-    private static byte[] decryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
+    protected static byte[] decryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER, SUN_JCE);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
         return cipher.doFinal(bytes);

@@ -25,7 +25,7 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 public final class FieldLevelEncryptionParams {
 
     private static final Integer SYMMETRIC_KEY_SIZE = 128;
-    private static final String SYMMETRIC_KEY_TYPE = "AES";
+    protected static final String SYMMETRIC_KEY_TYPE = "AES";
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
     private static final String SUN_JCE = "SunJCE";
 
@@ -147,7 +147,7 @@ public final class FieldLevelEncryptionParams {
         }
     }
 
-    private static byte[] wrapSecretKey(FieldLevelEncryptionConfig config, Key key) throws EncryptionException {
+    protected static byte[] wrapSecretKey(FieldLevelEncryptionConfig config, Key key) throws EncryptionException {
         try {
             Key publicEncryptionKey = config.encryptionCertificate.getPublicKey();
             MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(config.oaepPaddingDigestAlgorithm);
@@ -158,6 +158,26 @@ public final class FieldLevelEncryptionParams {
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Failed to wrap secret key!", e);
         }
+    }
+
+    protected static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws EncryptionException {
+        if (!oaepDigestAlgorithm.contains("-")) {
+            oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
+        }
+        try {
+            MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(oaepDigestAlgorithm);
+            Key key = config.decryptionKey;
+            String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
+            Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
+            cipher.init(Cipher.UNWRAP_MODE, key, getOaepParameterSpec(mgf1ParameterSpec));
+            return cipher.unwrap(keyBytes, SYMMETRIC_KEY_TYPE, Cipher.SECRET_KEY);
+        } catch (GeneralSecurityException e) {
+            throw new EncryptionException("Failed to unwrap secret key!", e);
+        }
+    }
+
+    private static OAEPParameterSpec getOaepParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
+        return new OAEPParameterSpec(mgf1ParameterSpec.getDigestAlgorithm(), "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
     }
 
     private static String getOrComputeEncryptionCertificateFingerprint(FieldLevelEncryptionConfig config) throws EncryptionException {
@@ -182,26 +202,6 @@ public final class FieldLevelEncryptionParams {
             byte[] keyFingerprintBytes = sha256digestBytes(config.encryptionCertificate.getPublicKey().getEncoded());
             return encodeBytes(keyFingerprintBytes, FieldValueEncoding.HEX);
         }
-    }
-
-    private static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws EncryptionException {
-        if (!oaepDigestAlgorithm.contains("-")) {
-            oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
-        }
-        try {
-            MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(oaepDigestAlgorithm);
-            Key key = config.decryptionKey;
-            String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-            Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
-            cipher.init(Cipher.UNWRAP_MODE, key, getOaepParameterSpec(mgf1ParameterSpec));
-            return cipher.unwrap(keyBytes, SYMMETRIC_KEY_TYPE, Cipher.SECRET_KEY);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to unwrap secret key!", e);
-        }
-    }
-
-    private static OAEPParameterSpec getOaepParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
-        return new OAEPParameterSpec(mgf1ParameterSpec.getDigestAlgorithm(), "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
     }
 
     private static byte[] sha256digestBytes(byte[] bytes) throws EncryptionException {

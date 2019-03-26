@@ -10,9 +10,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
+import static com.mastercard.developer.encryption.FieldLevelEncryptionParams.SYMMETRIC_KEY_TYPE;
 import static com.mastercard.developer.test.TestUtils.*;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
@@ -22,6 +26,44 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void testEncryptBytes_InteroperabilityTest() throws Exception {
+
+        // GIVEN
+        String ivValue = "VNm/scgd1jhWF0z4+Qh6MA==";
+        String keyValue = "mZzmzoURXI3Vk0vdsPkcFw==";
+        String dataValue = "some data ù€@";
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(Base64.decodeBase64(ivValue));
+        byte[] keyBytes = Base64.decodeBase64(keyValue);
+        SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
+
+        // WHEN
+        byte[] encryptedBytes = FieldLevelEncryption.encryptBytes(symmetricKey, ivParameterSpec, dataValue.getBytes());
+
+        // THEN
+        byte[] expectedEncryptedBytes = Base64.decodeBase64("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
+        Assert.assertArrayEquals(expectedEncryptedBytes, encryptedBytes);
+    }
+
+    @Test
+    public void testDecryptBytes_InteroperabilityTest() throws Exception {
+
+        // GIVEN
+        String ivValue = "VNm/scgd1jhWF0z4+Qh6MA==";
+        String keyValue = "mZzmzoURXI3Vk0vdsPkcFw==";
+        String encryptedDataValue = "Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=";
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(Base64.decodeBase64(ivValue));
+        byte[] keyBytes = Base64.decodeBase64(keyValue);
+        SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
+
+        // WHEN
+        byte[] decryptedBytes = FieldLevelEncryption.decryptBytes(symmetricKey, ivParameterSpec, Base64.decodeBase64(encryptedDataValue));
+
+        // THEN
+        byte[] expectedBytes = "some data ù€@".getBytes();
+        Assert.assertArrayEquals(expectedBytes, decryptedBytes);
+    }
 
     @Test
     public void testEncryptPayload_Nominal() throws Exception {
