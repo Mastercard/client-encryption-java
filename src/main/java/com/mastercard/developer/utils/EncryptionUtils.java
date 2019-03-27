@@ -1,7 +1,5 @@
 package com.mastercard.developer.utils;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,6 +12,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+
+import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 
 /**
  * Utility class for loading certificates and keys.
@@ -47,14 +47,14 @@ public final class EncryptionUtils {
             // OpenSSL / PKCS#1 Base64 PEM encoded file
             keyDataString = keyDataString.replace(PKCS_1_PEM_HEADER, "");
             keyDataString = keyDataString.replace(PKCS_1_PEM_FOOTER, "");
-            return readPkcs1PrivateKey(Base64.decodeBase64(keyDataString));
+            return readPkcs1PrivateKey(base64Decode(keyDataString));
         }
 
         if (keyDataString.contains(PKCS_8_PEM_HEADER)) {
             // PKCS#8 Base64 PEM encoded file
             keyDataString = keyDataString.replace(PKCS_8_PEM_HEADER, "");
             keyDataString = keyDataString.replace(PKCS_8_PEM_FOOTER, "");
-            return readPkcs8PrivateKey(Base64.decodeBase64(keyDataString));
+            return readPkcs8PrivateKey(base64Decode(keyDataString));
         }
 
         // We assume it's a PKCS#8 DER encoded binary file

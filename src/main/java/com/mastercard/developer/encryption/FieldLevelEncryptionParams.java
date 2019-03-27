@@ -1,7 +1,5 @@
 package com.mastercard.developer.encryption;
 
-import org.apache.commons.codec.DecoderException;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -107,7 +105,9 @@ public final class FieldLevelEncryptionParams {
             byte[] encryptedSecretKeyBytes = decodeValue(encryptedKeyValue, config.fieldValueEncoding);
             secretKey = FieldLevelEncryptionParams.unwrapSecretKey(config, encryptedSecretKeyBytes, oaepPaddingDigestAlgorithmValue);
             return secretKey;
-        } catch (DecoderException e) {
+        } catch (EncryptionException e) {
+            throw e;
+        } catch (Exception e) {
             throw new EncryptionException("Failed to decode and unwrap the provided secret key value!", e);
         }
     }
@@ -121,7 +121,7 @@ public final class FieldLevelEncryptionParams {
             byte[] ivByteArray = decodeValue(ivValue, config.fieldValueEncoding);
             ivParameterSpec = new IvParameterSpec(ivByteArray);
             return ivParameterSpec;
-        } catch (DecoderException e) {
+        } catch (Exception e) {
             throw new EncryptionException("Failed to decode the provided IV value!", e);
         }
     }

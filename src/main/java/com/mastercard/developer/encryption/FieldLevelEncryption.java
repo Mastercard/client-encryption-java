@@ -6,7 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.mastercard.developer.json.JsonEngine;
-import org.apache.commons.codec.DecoderException;
 
 import javax.crypto.Cipher;
 import java.io.UnsupportedEncodingException;
@@ -122,7 +121,7 @@ public class FieldLevelEncryption {
 
             // Return the updated payload
             return payloadContext.jsonString();
-        } catch (GeneralSecurityException | DecoderException e) {
+        } catch (GeneralSecurityException e) {
             throw new EncryptionException("Payload decryption failed!", e);
         }
     }
@@ -184,7 +183,7 @@ public class FieldLevelEncryption {
     }
 
     private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
-                                           FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, DecoderException, EncryptionException {
+                                           FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
         JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mastercard.developer.test.TestUtils;
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,6 +17,7 @@ import java.security.InvalidKeyException;
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.encryption.FieldLevelEncryptionParams.SYMMETRIC_KEY_TYPE;
 import static com.mastercard.developer.test.TestUtils.*;
+import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
@@ -34,15 +34,15 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String ivValue = "VNm/scgd1jhWF0z4+Qh6MA==";
         String keyValue = "mZzmzoURXI3Vk0vdsPkcFw==";
         String dataValue = "some data ù€@";
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(Base64.decodeBase64(ivValue));
-        byte[] keyBytes = Base64.decodeBase64(keyValue);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(base64Decode(ivValue));
+        byte[] keyBytes = base64Decode(keyValue);
         SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
         byte[] encryptedBytes = FieldLevelEncryption.encryptBytes(symmetricKey, ivParameterSpec, dataValue.getBytes());
 
         // THEN
-        byte[] expectedEncryptedBytes = Base64.decodeBase64("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
+        byte[] expectedEncryptedBytes = base64Decode("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
         Assert.assertArrayEquals(expectedEncryptedBytes, encryptedBytes);
     }
 
@@ -53,12 +53,12 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String ivValue = "VNm/scgd1jhWF0z4+Qh6MA==";
         String keyValue = "mZzmzoURXI3Vk0vdsPkcFw==";
         String encryptedDataValue = "Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=";
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(Base64.decodeBase64(ivValue));
-        byte[] keyBytes = Base64.decodeBase64(keyValue);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(base64Decode(ivValue));
+        byte[] keyBytes = base64Decode(keyValue);
         SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
-        byte[] decryptedBytes = FieldLevelEncryption.decryptBytes(symmetricKey, ivParameterSpec, Base64.decodeBase64(encryptedDataValue));
+        byte[] decryptedBytes = FieldLevelEncryption.decryptBytes(symmetricKey, ivParameterSpec, base64Decode(encryptedDataValue));
 
         // THEN
         byte[] expectedBytes = "some data ù€@".getBytes();
@@ -124,9 +124,9 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertEquals("SHA256", encryptedData.get("oaepHashingAlgorithm").getAsString());
         assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", encryptedData.get("encryptionKeyFingerprint").getAsString());
         assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", encryptedData.get("encryptionCertificateFingerprint").getAsString());
-        assertTrue(Base64.isBase64(encryptedData.get("encryptedValue").getAsString()));
-        assertTrue(Base64.isBase64(encryptedData.get("encryptedKey").getAsString()));
-        assertTrue(Base64.isBase64(encryptedData.get("iv").getAsString()));
+        assertEquals(16, base64Decode(encryptedData.get("encryptedValue").getAsString()).length);
+        assertEquals(256, base64Decode(encryptedData.get("encryptedKey").getAsString()).length);
+        assertEquals(16, base64Decode(encryptedData.get("iv").getAsString()).length);
     }
 
     @Test
@@ -553,7 +553,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         // THEN
         expectedException.expect(EncryptionException.class);
         expectedException.expectMessage("Failed to wrap secret key!");
-        expectedException.expectCause(isA(InvalidKeyException.class)); // InvalidKeyException: Key must not be null
+        expectedException.expectCause(isA(InvalidKeyException.class));
 
         // WHEN
         FieldLevelEncryption.encryptPayload(payload, config);
@@ -1132,7 +1132,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         // THEN
         expectedException.expect(EncryptionException.class);
         expectedException.expectMessage("Failed to unwrap secret key!");
-        expectedException.expectCause(isA(InvalidKeyException.class)); // InvalidKeyException: Key must not be null
+        expectedException.expectCause(isA(InvalidKeyException.class));
 
         // WHEN
         FieldLevelEncryption.decryptPayload(encryptedPayload, config);
