@@ -56,7 +56,7 @@ public abstract class JsonEngine {
         }
     }
 
-    protected Object asPrimitiveValue(String string) {
+    protected static Object asPrimitiveValue(String string) {
        // Boolean?
         if ("true".equals(string) || "false".equals(string)) {
             return Boolean.valueOf(string);
@@ -66,13 +66,12 @@ public abstract class JsonEngine {
         try {
             return Long.valueOf(string);
         } catch (NumberFormatException e) {
-            // Do nothing
+            // Not a number, do nothing
         }
 
         // String
         return string;
     }
-
 
     public String toJsonString(Object object) {
         if (null == object) {
@@ -83,7 +82,6 @@ public abstract class JsonEngine {
         }
         return getJsonProvider().toJson(object);
     }
-
 
     protected boolean isJsonPrimitive(Object jsonElement) {
         JsonProvider jsonProvider = getJsonProvider();
