@@ -14,37 +14,43 @@ public class JsonEngineTest {
     public void testGetParentJsonPath_Nominal() {
 
         // GIVEN
-        String jsonPath1 = "$['obj1']['obj2']";
+        String jsonPath1 = "$['obj1']['obj2']['obj3']";
         String jsonPath2 = "obj1.obj2";
         String jsonPath3 = "$.obj1.obj2";
+        String jsonPath4 = "obj1";
 
         // WHEN
         String parentJsonPath1 = JsonEngine.getParentJsonPath(jsonPath1);
         String parentJsonPath2 = JsonEngine.getParentJsonPath(jsonPath2);
         String parentJsonPath3 = JsonEngine.getParentJsonPath(jsonPath3);
+        String parentJsonPath4 = JsonEngine.getParentJsonPath(jsonPath4);
 
         // THEN
-        Assert.assertEquals("$['obj1']", parentJsonPath1);
+        Assert.assertEquals("$['obj1']['obj2']", parentJsonPath1);
         Assert.assertEquals("$['obj1']", parentJsonPath2);
         Assert.assertEquals("$['obj1']", parentJsonPath3);
+        Assert.assertEquals("$", parentJsonPath4);
     }
 
     @Test
     public void testGetJsonElementKey_Nominal() {
 
         // GIVEN
-        String jsonPath1 = "$['obj1']['obj2']";
+        String jsonPath1 = "$['obj0']['obj1']['obj2']";
         String jsonPath2 = "obj1.obj2";
         String jsonPath3 = "$.obj1.obj2";
+        String jsonPath4 = "obj2";
 
         // WHEN
         String jsonElementKey1 = JsonEngine.getJsonElementKey(jsonPath1);
         String jsonElementKey2 = JsonEngine.getJsonElementKey(jsonPath2);
         String jsonElementKey3 = JsonEngine.getJsonElementKey(jsonPath3);
+        String jsonElementKey4 = JsonEngine.getJsonElementKey(jsonPath4);
 
         // THEN
         Assert.assertEquals("obj2", jsonElementKey1);
         Assert.assertEquals("obj2", jsonElementKey2);
+        Assert.assertEquals("obj2", jsonElementKey3);
         Assert.assertEquals("obj2", jsonElementKey3);
     }
 
