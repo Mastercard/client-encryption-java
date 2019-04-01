@@ -25,7 +25,7 @@ Library for Mastercard API compliant payload encryption/decryption.
 Java 7+
 
 ### References <a name="references"></a>
-<img src="https://user-images.githubusercontent.com/3964455/55259713-5d771700-525e-11e9-9cf6-af0c01ab176e.png" alt="Encryption of sensitive data" width="75%" height="75%"/>
+<img src="https://user-images.githubusercontent.com/3964455/55345820-c520a280-54a8-11e9-8235-407199fa1d97.png" alt="Encryption of sensitive data" width="75%" height="75%"/>
 
 ## Usage <a name="usage"></a>
 ### Prerequisites <a name="prerequisites"></a>
