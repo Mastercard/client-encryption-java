@@ -1,8 +1,7 @@
-package com.mastercard.developer.interceptor;
+package com.mastercard.developer.interceptors;
 
 import com.google.api.client.http.HttpExecuteInterceptor;
 import com.google.api.client.http.HttpRequest;
-import com.mastercard.developer.interceptors.HttpExecuteInterceptorChain;
 import org.junit.Test;
 
 import java.io.IOException;

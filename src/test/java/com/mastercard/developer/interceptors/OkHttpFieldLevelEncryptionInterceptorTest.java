@@ -1,8 +1,7 @@
-package com.mastercard.developer.interceptor;
+package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.OkHttpFieldLevelEncryptionInterceptor;
 import com.mastercard.developer.test.TestUtils;
 import okhttp3.*;
 import okio.Buffer;

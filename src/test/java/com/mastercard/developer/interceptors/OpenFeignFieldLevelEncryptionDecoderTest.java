@@ -1,8 +1,7 @@
-package com.mastercard.developer.interceptor;
+package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.OpenFeignFieldLevelEncryptionDecoder;
 import feign.Response;
 import feign.Util;
 import feign.codec.DecodeException;

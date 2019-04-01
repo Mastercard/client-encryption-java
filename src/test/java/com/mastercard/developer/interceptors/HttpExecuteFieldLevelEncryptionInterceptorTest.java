@@ -1,9 +1,8 @@
-package com.mastercard.developer.interceptor;
+package com.mastercard.developer.interceptors;
 
 import com.google.api.client.http.*;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.interceptors.HttpExecuteFieldLevelEncryptionInterceptor;
 import com.mastercard.developer.test.TestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
