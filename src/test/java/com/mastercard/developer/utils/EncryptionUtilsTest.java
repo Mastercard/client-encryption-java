@@ -24,7 +24,7 @@ public class EncryptionUtilsTest {
     public void testLoadEncryptionCertificate_ShouldSupportPem() throws Exception {
 
         // GIVEN
-        String certificatePath = "./src/test/resources/test_certificate.pem";
+        String certificatePath = "./src/test/resources/certificates/test_certificate-2048.pem";
 
         // WHEN
         Certificate certificate = EncryptionUtils.loadEncryptionCertificate(certificatePath);
@@ -38,7 +38,7 @@ public class EncryptionUtilsTest {
     public void testLoadEncryptionCertificate_ShouldSupportDer() throws Exception {
 
         // GIVEN
-        String certificatePath = "./src/test/resources/test_certificate.der";
+        String certificatePath = "./src/test/resources/certificates/test_certificate-2048.der";
 
         // WHEN
         Certificate certificate = EncryptionUtils.loadEncryptionCertificate(certificatePath);
@@ -52,7 +52,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs8Der() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_key_pkcs8.der";
+        String keyPath = "./src/test/resources/keys/pkcs8/test_key_pkcs8-2048.der";
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
@@ -67,7 +67,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs8Base64Pem() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_key_pkcs8.pem";
+        String keyPath = "./src/test/resources/keys/pkcs8/test_key_pkcs8-2048.pem";
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
@@ -82,7 +82,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs1Base64Pem_Nominal() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_key_pkcs1.pem";
+        String keyPath = "./src/test/resources/keys/pkcs1/test_key_pkcs1-2048.pem";
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
@@ -97,7 +97,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs1Base64Pem_1024bits() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_key_pkcs1-1024.pem";
+        String keyPath = "./src/test/resources/keys/pkcs1/test_key_pkcs1-1024.pem";
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
@@ -111,7 +111,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs1Base64Pem_4096bits() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_key_pkcs1-4096.pem";
+        String keyPath = "./src/test/resources/keys/pkcs1/test_key_pkcs1-4096.pem";
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
@@ -125,7 +125,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldSupportPkcs12() throws Exception {
 
         // GIVEN
-        String keyContainerPath = "./src/test/resources/test_key.p12";
+        String keyContainerPath = "./src/test/resources/keys/pkcs12/test_key.p12";
         String keyAlias = "mykeyalias";
         String keyPassword = "Password1";
 
@@ -143,7 +143,7 @@ public class EncryptionUtilsTest {
     public void testLoadDecryptionKey_ShouldThrowIllegalArgumentException_WhenInvalidKey() throws Exception {
 
         // GIVEN
-        String keyPath = "./src/test/resources/test_invalid_key.der";
+        String keyPath = "./src/test/resources/keys/pkcs8/test_invalid_key.der";
 
         // THEN
         expectedException.expect(IllegalArgumentException.class);
