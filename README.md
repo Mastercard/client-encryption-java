@@ -431,13 +431,28 @@ See also:
 </configuration>
 ```
 
-##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor`
+##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor` (OpenAPI Generator 3.3.x)
 ```java
 ApiClient client = new ApiClient();
 client.setBasePath("https://sandbox.api.mastercard.com");
 List<Interceptor> interceptors = client.getHttpClient().interceptors();
 interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
+ServiceApi serviceApi = new ServiceApi(client);
+// ...
+```
+
+##### Usage of the `OkHttpFieldLevelEncryptionInterceptor` (OpenAPI Generator 4.x.y)
+```java
+ApiClient client = new ApiClient();
+client.setBasePath("https://sandbox.api.mastercard.com");
+client.setHttpClient(
+    client.getHttpClient()
+        .newBuilder()
+        .addInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config))
+        .addInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey))
+        .build()
+);
 ServiceApi serviceApi = new ServiceApi(client);
 // ...
 ```
