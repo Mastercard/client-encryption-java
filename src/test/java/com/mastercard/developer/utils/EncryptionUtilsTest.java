@@ -94,6 +94,20 @@ public class EncryptionUtilsTest {
     }
 
     @Test
+    public void testLoadDecryptionKey_ShouldSupportPkcs1Base64Pem_512bits() throws Exception {
+
+        // GIVEN
+        String keyPath = "./src/test/resources/keys/pkcs1/test_key_pkcs1-512.pem";
+
+        // WHEN
+        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
+
+        // THEN
+        Assert.assertNotNull(privateKey);
+        Assert.assertEquals("RSA", privateKey.getAlgorithm());
+    }
+
+    @Test
     public void testLoadDecryptionKey_ShouldSupportPkcs1Base64Pem_1024bits() throws Exception {
 
         // GIVEN
