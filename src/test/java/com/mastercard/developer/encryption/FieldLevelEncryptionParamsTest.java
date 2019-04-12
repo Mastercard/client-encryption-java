@@ -59,7 +59,7 @@ public class FieldLevelEncryptionParamsTest {
     }
 
     @Test
-    public void testGetSecretKey_ShouldThrowEncryptionException_WhenFailsToEncryptedKey() throws Exception {
+    public void testGetSecretKey_ShouldThrowEncryptionException_WhenFailsToReadEncryptedKey() throws Exception {
 
         // GIVEN
         FieldLevelEncryptionConfig config = TestUtils.getTestFieldLevelEncryptionConfigBuilder().build();

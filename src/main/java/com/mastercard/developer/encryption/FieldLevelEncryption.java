@@ -98,7 +98,6 @@ public class FieldLevelEncryption {
         return decryptPayload(payload, config, null);
     }
 
-
     /**
      * Decrypt parts of a JSON payload using the given parameters and configuration.
      * @param payload A JSON string
