@@ -30,7 +30,7 @@ public class EncodingUtils {
 
     protected static byte[] hexDecode(String value) {
         if (null == value) {
-            throw new IllegalArgumentException("Can't hex decode null bytes!");
+            throw new IllegalArgumentException("Can't hex decode a null value!");
         }
         if ("".equals(value)) {
             return new byte[0];
