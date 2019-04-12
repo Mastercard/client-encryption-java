@@ -3,6 +3,9 @@ package com.mastercard.developer.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class EncodingUtilsTest {
 
     @Test
@@ -15,6 +18,12 @@ public class EncodingUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testHexEncode_ShouldThrowIllegalArgumentException_WhenNullValue() {
         EncodingUtils.hexEncode(null);
+    }
+
+    @Test
+    public void testHexEncode_ShouldKeepLeadingZeros() throws NoSuchAlgorithmException {
+        String hex = EncodingUtils.hexEncode(MessageDigest.getInstance("SHA-256").digest("WIDDIES".getBytes()));
+        Assert.assertEquals("000000c71f1bda5b63f5165243e10394bc9ebf62e394ef7c6e049c920ea1b181", hex);
     }
 
     @Test
