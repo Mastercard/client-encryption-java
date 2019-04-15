@@ -49,6 +49,9 @@ public final class FieldLevelEncryptionParams {
 
     /**
      * Generate encryption parameters.
+     * @param config A {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig} instance
+     * @return A {@link com.mastercard.developer.encryption.FieldLevelEncryptionParams} instance
+     * @throws EncryptionException
      */
     public static FieldLevelEncryptionParams generate(FieldLevelEncryptionConfig config) throws EncryptionException {
 
