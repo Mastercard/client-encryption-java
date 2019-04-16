@@ -83,7 +83,7 @@ Available engine classes:
 
 ### Loading the Encryption Certificate <a name="loading-the-encryption-certificate"></a>
 
-A `Certificate` object can be created from a file by calling the `EncryptionUtils.loadEncryptionCertificate` method:
+A `Certificate` object can be created from a file by calling `EncryptionUtils.loadEncryptionCertificate`:
 ```java
 Certificate encryptionCertificate = EncryptionUtils.loadEncryptionCertificate("<insert certificate file path>");
 ```
@@ -92,9 +92,9 @@ Supported certificate formats: PEM, DER.
 
 ### Loading the Decryption Key <a name="loading-the-decryption-key"></a>
 
-#### From a PKCS#12 File
+#### From a PKCS#12 Key Store
 
-A `PrivateKey` object can be created from a PKCS#12 file by calling the `EncryptionUtils.loadDecryptionKey` method:
+A `PrivateKey` object can be created from a PKCS#12 key store by calling `EncryptionUtils.loadDecryptionKey` the following way:
 ```java
 PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
                                     "<insert PKCS#12 key file path>", 
@@ -104,7 +104,7 @@ PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey(
 
 #### From an Unencrypted Key File
 
-A `PrivateKey` object can be created from an unencrypted key file by calling the `EncryptionUtils.loadDecryptionKey` method:
+A `PrivateKey` object can be created from an unencrypted key file by calling `EncryptionUtils.loadDecryptionKey` the following way:
 ```java
 PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("<insert key file path>");
 ```
