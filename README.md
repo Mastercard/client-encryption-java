@@ -142,16 +142,16 @@ String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePa
 Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-        .withEncryptionCertificate(encryptionCertificate)
-        .withDecryptionKey(decryptionKey)
-        .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
-        .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
-        .withOaepPaddingDigestAlgorithm("SHA-256")
-        .withEncryptedValueFieldName("encryptedValue")
-        .withEncryptedKeyFieldName("encryptedKey")
-        .withIvFieldName("iv")
-        .withFieldValueEncoding(FieldValueEncoding.HEX)
-        .build();
+    .withEncryptionCertificate(encryptionCertificate)
+    .withDecryptionKey(decryptionKey)
+    .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
+    .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
+    .withOaepPaddingDigestAlgorithm("SHA-256")
+    .withEncryptedValueFieldName("encryptedValue")
+    .withEncryptedKeyFieldName("encryptedKey")
+    .withIvFieldName("iv")
+    .withFieldValueEncoding(FieldValueEncoding.HEX)
+    .build();
 ```
 
 See also:
@@ -165,15 +165,15 @@ Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `Fi
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
 String payload = "{" +
-        "    \"path\": {" +
-        "        \"to\": {" +
-        "            \"foo\": {" +
-        "                \"sensitiveField1\": \"sensitiveValue1\"," +
-        "                \"sensitiveField2\": \"sensitiveValue2\"" +
-        "            }" +
-        "        }" +
-        "    }" +
-        "}";
+    "    \"path\": {" +
+    "        \"to\": {" +
+    "            \"foo\": {" +
+    "                \"sensitiveField1\": \"sensitiveValue1\"," +
+    "                \"sensitiveField2\": \"sensitiveValue2\"" +
+    "            }" +
+    "        }" +
+    "    }" +
+    "}";
 String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
 ```
@@ -200,16 +200,16 @@ Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `F
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
 String encryptedPayload = "{" +
-        "    \"path\": {" +
-        "        \"to\": {" +
-        "            \"encryptedFoo\": {" +
-        "                \"iv\": \"e5d313c056c411170bf07ac82ede78c9\"," +
-        "                \"encryptedKey\": \"e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd\"," +
-        "                \"encryptedValue\": \"809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f\"" +
-        "            }" +
-        "        }" +
-        "    }" +
-        "}";
+    "    \"path\": {" +
+    "        \"to\": {" +
+    "            \"encryptedFoo\": {" +
+    "                \"iv\": \"e5d313c056c411170bf07ac82ede78c9\"," +
+    "                \"encryptedKey\": \"e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd\"," +
+    "                \"encryptedValue\": \"809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f\"" +
+    "            }" +
+    "        }" +
+    "    }" +
+    "}";
 String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
 ```
@@ -234,18 +234,18 @@ Entire payloads can be encrypted using the "$" operator as encryption path:
 
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-        .withEncryptionCertificate(encryptionCertificate)
-        .withEncryptionPath("$", "$")
-        // ...
-        .build();
+    .withEncryptionCertificate(encryptionCertificate)
+    .withEncryptionPath("$", "$")
+    // ...
+    .build();
 ```
 
 Example:
 ```java
 String payload = "{" +
-        "    \"sensitiveField1\": \"sensitiveValue1\"," +
-        "    \"sensitiveField2\": \"sensitiveValue2\"" +
-        "}";
+    "    \"sensitiveField1\": \"sensitiveValue1\"," +
+    "    \"sensitiveField2\": \"sensitiveValue2\"" +
+    "}";
 String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
 ```
@@ -265,19 +265,19 @@ Entire payloads can be decrypted using the "$" operator as decryption path:
 
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-        .withDecryptionKey(decryptionKey)
-        .withDecryptionPath("$", "$")
-        // ...
-        .build();
+    .withDecryptionKey(decryptionKey)
+    .withDecryptionPath("$", "$")
+    // ...
+    .build();
 ```
 
 Example:
 ```java
 String encryptedPayload = "{" +
-        "  \"iv\": \"1b9396c98ab2bfd195de661d70905a45\"," +
-        "  \"encryptedKey\": \"7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13\"," +
-        "  \"encryptedValue\": \"e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515\"" +
-        "}";
+    "  \"iv\": \"1b9396c98ab2bfd195de661d70905a45\"," +
+    "  \"encryptedKey\": \"7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13\"," +
+    "  \"encryptedValue\": \"e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515\"" +
+    "}";
 String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
 ```
@@ -301,17 +301,17 @@ Here is how to configure the library for using HTTP headers instead.
 Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building a `FieldLevelEncryptionConfig` instance. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-        .withEncryptionCertificate(encryptionCertificate)
-        .withDecryptionKey(decryptionKey)
-        .withEncryptionPath("$", "$")
-        .withDecryptionPath("$", "$")
-        .withOaepPaddingDigestAlgorithm("SHA-256")
-        .withEncryptedValueFieldName("data")
-        .withIvHeaderName("x-iv")
-        .withEncryptedKeyHeaderName("x-encrypted-key")
-        // ...
-        .withFieldValueEncoding(FieldValueEncoding.HEX)
-        .build();
+    .withEncryptionCertificate(encryptionCertificate)
+    .withDecryptionKey(decryptionKey)
+    .withEncryptionPath("$", "$")
+    .withDecryptionPath("$", "$")
+    .withOaepPaddingDigestAlgorithm("SHA-256")
+    .withEncryptedValueFieldName("data")
+    .withIvHeaderName("x-iv")
+    .withEncryptedKeyHeaderName("x-encrypted-key")
+    // ...
+    .withFieldValueEncoding(FieldValueEncoding.HEX)
+    .build();
 ```
 
 See also:
@@ -345,9 +345,9 @@ Example using the configuration [above](#configuration-for-using-http-headers):
 
 ```java
 String payload = "{" +
-        "    \"sensitiveField1\": \"sensitiveValue1\"," +
-        "    \"sensitiveField2\": \"sensitiveValue2\"" +
-        "}";
+    "    \"sensitiveField1\": \"sensitiveValue1\"," +
+    "    \"sensitiveField2\": \"sensitiveValue2\"" +
+    "}";
 String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, params);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
 ```
@@ -386,8 +386,8 @@ Example using the configuration [above](#configuration-for-using-http-headers):
 
 ```java
 String encryptedPayload = "{" +
-        "  \"data\": \"53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5\"" +
-        "}";
+    "  \"data\": \"53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5\"" +
+    "}";
 String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
 ```
