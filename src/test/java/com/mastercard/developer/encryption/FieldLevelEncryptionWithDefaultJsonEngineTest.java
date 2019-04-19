@@ -288,27 +288,6 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testEncryptPayload_ShouldComputeCertificateAndKeyFingerprints_WhenFingerprintsNotSetInConfig() throws Exception {
-
-        // GIVEN
-        String payload = "{\"data\": {}, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
-                .withEncryptionPath("data", "encryptedData")
-                .withEncryptionCertificateFingerprint(null)
-                .withEncryptionKeyFingerprint(null)
-                .build();
-
-        // WHEN
-        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
-
-        // THEN
-        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
-        JsonObject encryptedData = (JsonObject) encryptedPayloadObject.get("encryptedData");
-        assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", encryptedData.get("encryptionKeyFingerprint").getAsString());
-        assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", encryptedData.get("encryptionCertificateFingerprint").getAsString());
-    }
-
-    @Test
     public void testEncryptPayload_ShouldNotSetCertificateAndKeyFingerprints_WhenFieldNamesNotSetInConfig() throws Exception {
 
         // GIVEN
@@ -578,8 +557,8 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertEquals(params.getIvValue(), encryptedData.get("iv").getAsString());
         assertEquals(params.getEncryptedKeyValue(), encryptedData.get("encryptedKey").getAsString());
         assertEquals(params.getOaepPaddingDigestAlgorithmValue(), encryptedData.get("oaepHashingAlgorithm").getAsString());
-        assertEquals(params.getEncryptionCertificateFingerprintValue(), encryptedData.get("encryptionCertificateFingerprint").getAsString());
-        assertEquals(params.getEncryptionKeyFingerprintValue(), encryptedData.get("encryptionKeyFingerprint").getAsString());
+        assertEquals(config.encryptionCertificateFingerprint, encryptedData.get("encryptionCertificateFingerprint").getAsString());
+        assertEquals(config.encryptionKeyFingerprint, encryptedData.get("encryptionKeyFingerprint").getAsString());
     }
 
     @Test
@@ -1189,7 +1168,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String encryptionCertificateFingerprintValue = "80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279";
         String encryptionKeyFingerprintValue = "761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79";
         FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepHashingAlgorithmValue,
-                                                                           encryptionCertificateFingerprintValue, encryptionKeyFingerprintValue, config);
+                                                                           config);
 
         // WHEN
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);

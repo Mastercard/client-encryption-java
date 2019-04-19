@@ -53,8 +53,7 @@ public class OpenFeignFieldLevelEncryptionDecoder implements Decoder {
                 response = removeHeader(response, config.getEncryptedKeyHeaderName());
                 response = removeHeader(response, config.getEncryptionCertificateFingerprintHeaderName());
                 response = removeHeader(response, config.getEncryptionKeyFingerprintHeaderName());
-                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
-                                                                                   null, null, config);
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue, config);
                 decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
             } else {
                 // Encryption params are stored in the payload

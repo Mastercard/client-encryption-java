@@ -175,4 +175,12 @@ public class FieldLevelEncryptionConfig {
     public String getEncryptionKeyFingerprintHeaderName() {
         return encryptionKeyFingerprintHeaderName;
     }
+
+    public String getEncryptionCertificateFingerprint() {
+        return encryptionCertificateFingerprint;
+    }
+
+    public String getEncryptionKeyFingerprint() {
+        return encryptionKeyFingerprint;
+    }
 }

@@ -14,151 +14,6 @@ public class FieldLevelEncryptionConfigBuilderTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteDecryptionPath() throws Exception {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for decryption must point to a single item!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withDecryptionPath("$.encryptedPayloads[*]", "$.payload")
-                .withDecryptionKey(TestUtils.getTestDecryptionKey())
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingDecryptionKey() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Can't decrypt without decryption key!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withDecryptionPath("$.encryptedPayload", "$.payload")
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteEncryptionPath() throws Exception {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for encryption must point to a single item!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withEncryptionPath("$.payloads[*]", "$.encryptedPayload")
-                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingEncryptionCertificate() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Can't encrypt without encryption key!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withEncryptionPath("$.payload", "$.encryptedPayload")
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingOaepPaddingDigestAlgorithm() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("The digest algorithm for OAEP cannot be null!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenUnsupportedOaepPaddingDigestAlgorithm() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Unsupported OAEP digest algorithm: SHA-720!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-720")
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingEncryptedValueFieldName() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Encrypted value field name cannot be null!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothEncryptedKeyFieldNameAndHeaderName() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("At least one of encrypted key field name or encrypted key header name must be set!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothIvFieldNameAndHeaderName() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("At least one of IV field name or IV header name must be set!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingFieldValueEncoding() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Value encoding for fields and headers cannot be null!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvHeaderNamesNotBothSetOrUnset() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("IV header name and encrypted key header name must be both set or both unset!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyHeaderName("x-encrypted-key")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withIvFieldName("iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvFieldNamesNotBothSetOrUnset() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("IV field name and encrypted key field name must be both set or both unset!");
-        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withOaepPaddingDigestAlgorithm("SHA-512")
-                .withEncryptedValueFieldName("encryptedValue")
-                .withEncryptedKeyFieldName("encryptedKey")
-                .withEncryptedKeyHeaderName("x-encrypted-key")
-                .withIvHeaderName("x-iv")
-                .withFieldValueEncoding(HEX)
-                .build();
-    }
-
-    @Test
     public void testBuild_Nominal() throws Exception {
         FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptionPath("$.payload", "$.encryptedPayload")
@@ -201,5 +56,162 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
         Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
         Assert.assertEquals(HEX, config.fieldValueEncoding);
+    }
+
+    @Test
+    public void testBuild_ShouldComputeCertificateAndKeyFingerprints_WhenFingerprintsNotSet() throws Exception {
+        FieldLevelEncryptionConfig config = TestUtils.getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionCertificateFingerprint(null)
+                .withEncryptionKeyFingerprint(null)
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", config.encryptionKeyFingerprint);
+        Assert.assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", config.encryptionCertificateFingerprint);
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteDecryptionPath() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for decryption must point to a single item!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withDecryptionPath("$.encryptedPayloads[*]", "$.payload")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingDecryptionKey() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Can't decrypt without decryption key!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withDecryptionPath("$.encryptedPayload", "$.payload")
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteEncryptionPath() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for encryption must point to a single item!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.payloads[*]", "$.encryptedPayload")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingEncryptionCertificate() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Can't encrypt without encryption key!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.payload", "$.encryptedPayload")
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingOaepPaddingDigestAlgorithm() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("The digest algorithm for OAEP cannot be null!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenUnsupportedOaepPaddingDigestAlgorithm() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Unsupported OAEP digest algorithm: SHA-720!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-720")
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingEncryptedValueFieldName() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Encrypted value field name cannot be null!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothEncryptedKeyFieldNameAndHeaderName() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("At least one of encrypted key field name or encrypted key header name must be set!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingBothIvFieldNameAndHeaderName() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("At least one of IV field name or IV header name must be set!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingFieldValueEncoding() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Value encoding for fields and headers cannot be null!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvHeaderNamesNotBothSetOrUnset() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("IV header name and encrypted key header name must be both set or both unset!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withIvFieldName("iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenEncryptedKeyAndIvFieldNamesNotBothSetOrUnset() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("IV field name and encrypted key field name must be both set or both unset!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvHeaderName("x-iv")
+                .withFieldValueEncoding(HEX)
+                .build();
     }
 }

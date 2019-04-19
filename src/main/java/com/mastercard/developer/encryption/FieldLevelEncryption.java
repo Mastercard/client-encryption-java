@@ -171,10 +171,10 @@ public class FieldLevelEncryption {
             payloadContext.put(jsonPathOut, config.encryptedKeyFieldName, params.getEncryptedKeyValue());
         }
         if (!isNullOrEmpty(config.encryptionCertificateFingerprintFieldName)) {
-            payloadContext.put(jsonPathOut, config.encryptionCertificateFingerprintFieldName, params.getEncryptionCertificateFingerprintValue());
+            payloadContext.put(jsonPathOut, config.encryptionCertificateFingerprintFieldName, config.encryptionCertificateFingerprint);
         }
         if (!isNullOrEmpty(config.encryptionKeyFingerprintFieldName)) {
-            payloadContext.put(jsonPathOut, config.encryptionKeyFingerprintFieldName, params.getEncryptionKeyFingerprintValue());
+            payloadContext.put(jsonPathOut, config.encryptionKeyFingerprintFieldName, config.encryptionKeyFingerprint);
         }
         if (!isNullOrEmpty(config.oaepPaddingDigestAlgorithmFieldName)) {
             payloadContext.put(jsonPathOut, config.oaepPaddingDigestAlgorithmFieldName, params.getOaepPaddingDigestAlgorithmValue());
@@ -210,8 +210,7 @@ public class FieldLevelEncryption {
             Object ivJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.ivFieldName);
             readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionCertificateFingerprintFieldName);
             readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
-            params = new FieldLevelEncryptionParams(jsonEngine.toJsonString(ivJsonElement), jsonEngine.toJsonString(encryptedKeyJsonElement),
-                                                    oaepDigestAlgorithm, null, null, config);
+            params = new FieldLevelEncryptionParams(jsonEngine.toJsonString(ivJsonElement), jsonEngine.toJsonString(encryptedKeyJsonElement), oaepDigestAlgorithm, config);
         }
 
         // Decrypt data

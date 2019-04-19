@@ -50,8 +50,8 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
                 FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
                 updateHeader(headers, config.getIvHeaderName(), params.getIvValue());
                 updateHeader(headers, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
-                updateHeader(headers, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
-                updateHeader(headers, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(headers, config.getEncryptionCertificateFingerprintHeaderName(), config.getEncryptionCertificateFingerprint());
+                updateHeader(headers, config.getEncryptionKeyFingerprintHeaderName(), config.getEncryptionKeyFingerprint());
                 updateHeader(headers, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
                 encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config, params);
             } else {
@@ -91,8 +91,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptor implements HttpExecuteIn
                 removeHeader(headers, config.getOaepPaddingDigestAlgorithmHeaderName());
                 removeHeader(headers, config.getEncryptionCertificateFingerprintHeaderName());
                 removeHeader(headers, config.getEncryptionKeyFingerprintHeaderName());
-                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
-                                                                                   null, null, config);
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue, config);
                 decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
             } else {
                 // Encryption params are stored in the payload

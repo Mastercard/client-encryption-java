@@ -49,8 +49,8 @@ public class OpenFeignFieldLevelEncryptionEncoder implements Encoder {
                 FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
                 updateHeader(requestTemplate, config.getIvHeaderName(), params.getIvValue());
                 updateHeader(requestTemplate, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
-                updateHeader(requestTemplate, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
-                updateHeader(requestTemplate, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(requestTemplate, config.getEncryptionCertificateFingerprintHeaderName(), config.getEncryptionCertificateFingerprint());
+                updateHeader(requestTemplate, config.getEncryptionKeyFingerprintHeaderName(), config.getEncryptionKeyFingerprint());
                 updateHeader(requestTemplate, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
                 encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config, params);
             } else {

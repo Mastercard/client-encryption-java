@@ -54,8 +54,8 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                 FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
                 updateHeader(requestBuilder, config.getIvHeaderName(), params.getIvValue());
                 updateHeader(requestBuilder, config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
-                updateHeader(requestBuilder, config.getEncryptionCertificateFingerprintHeaderName(), params.getEncryptionCertificateFingerprintValue());
-                updateHeader(requestBuilder, config.getEncryptionKeyFingerprintHeaderName(), params.getEncryptionKeyFingerprintValue());
+                updateHeader(requestBuilder, config.getEncryptionCertificateFingerprintHeaderName(), config.getEncryptionCertificateFingerprint());
+                updateHeader(requestBuilder, config.getEncryptionKeyFingerprintHeaderName(), config.getEncryptionKeyFingerprint());
                 updateHeader(requestBuilder, config.getOaepPaddingDigestAlgorithmHeaderName(), params.getOaepPaddingDigestAlgorithmValue());
                 encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config, params);
             } else {
@@ -103,8 +103,7 @@ public class OkHttp2FieldLevelEncryptionInterceptor implements Interceptor {
                 removeHeader(responseBuilder, config.getOaepPaddingDigestAlgorithmHeaderName());
                 removeHeader(responseBuilder, config.getEncryptionCertificateFingerprintHeaderName());
                 removeHeader(responseBuilder, config.getEncryptionKeyFingerprintHeaderName());
-                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue,
-                                                                                   null, null, config);
+                FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, oaepPaddingDigestAlgorithmValue, config);
                 decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config, params);
             } else {
                 // Encryption params are stored in the payload

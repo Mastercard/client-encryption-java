@@ -8,14 +8,11 @@ import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.MGF1ParameterSpec;
 
-import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.utils.EncodingUtils.decodeValue;
 import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
-import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 
 /**
  * Encryption parameters for computing field level encryption/decryption.
@@ -30,20 +27,14 @@ public final class FieldLevelEncryptionParams {
     private final String ivValue;
     private final String encryptedKeyValue;
     private final String oaepPaddingDigestAlgorithmValue;
-    private final String encryptionCertificateFingerprintValue;
-    private final String encryptionKeyFingerprintValue;
     private final FieldLevelEncryptionConfig config;
     private Key secretKey;
     private IvParameterSpec ivParameterSpec;
 
-    public FieldLevelEncryptionParams(String ivValue, String encryptedKeyValue,
-                                      String oaepPaddingDigestAlgorithmValue, String encryptionCertificateFingerprintValue,
-                                      String encryptionKeyFingerprintValue, FieldLevelEncryptionConfig config) {
+    public FieldLevelEncryptionParams(String ivValue, String encryptedKeyValue, String oaepPaddingDigestAlgorithmValue, FieldLevelEncryptionConfig config) {
         this.ivValue = ivValue;
         this.encryptedKeyValue = encryptedKeyValue;
         this.oaepPaddingDigestAlgorithmValue = oaepPaddingDigestAlgorithmValue;
-        this.encryptionCertificateFingerprintValue = encryptionCertificateFingerprintValue;
-        this.encryptionKeyFingerprintValue = encryptionKeyFingerprintValue;
         this.config = config;
     }
 
@@ -66,14 +57,12 @@ public final class FieldLevelEncryptionParams {
         byte[] encryptedSecretKeyBytes = wrapSecretKey(config, secretKey);
         String encryptedKeyValue = encodeBytes(encryptedSecretKeyBytes, config.fieldValueEncoding);
 
-        // Compute fingerprints and OAEP padding digest algorithm
-        String encryptionCertificateFingerprint = getOrComputeEncryptionCertificateFingerprint(config);
-        String encryptionKeyFingerprint = getOrComputeEncryptionKeyFingerprint(config);
+        // Compute the OAEP padding digest algorithm
         String oaepPaddingDigestAlgorithmValue = config.oaepPaddingDigestAlgorithm.replace("-", "");
 
         FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivSpecValue, encryptedKeyValue,
-                                                                           oaepPaddingDigestAlgorithmValue, encryptionCertificateFingerprint,
-                                                                           encryptionKeyFingerprint, config);
+                                                                           oaepPaddingDigestAlgorithmValue,
+                                                                           config);
         params.secretKey = secretKey;
         params.ivParameterSpec = ivParameterSpec;
         return params;
@@ -85,14 +74,6 @@ public final class FieldLevelEncryptionParams {
 
     public String getEncryptedKeyValue() {
         return encryptedKeyValue;
-    }
-
-    public String getEncryptionCertificateFingerprintValue() {
-        return encryptionCertificateFingerprintValue;
-    }
-
-    public String getEncryptionKeyFingerprintValue() {
-        return encryptionKeyFingerprintValue;
     }
 
     public String getOaepPaddingDigestAlgorithmValue() {
@@ -181,39 +162,5 @@ public final class FieldLevelEncryptionParams {
 
     private static OAEPParameterSpec getOaepParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
         return new OAEPParameterSpec(mgf1ParameterSpec.getDigestAlgorithm(), "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
-    }
-
-    private static String getOrComputeEncryptionCertificateFingerprint(FieldLevelEncryptionConfig config) throws EncryptionException {
-        try {
-            String providedCertificateFingerprintValue = config.encryptionCertificateFingerprint;
-            if (!isNullOrEmpty(providedCertificateFingerprintValue)) {
-                return providedCertificateFingerprintValue;
-            } else {
-                byte[] certificateFingerprintBytes = sha256digestBytes(config.encryptionCertificate.getEncoded());
-                return encodeBytes(certificateFingerprintBytes, FieldValueEncoding.HEX);
-            }
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to compute encryption certificate fingerprint!", e);
-        }
-    }
-
-    private static String getOrComputeEncryptionKeyFingerprint(FieldLevelEncryptionConfig config) throws EncryptionException {
-        String providedKeyFingerprintValue = config.encryptionKeyFingerprint;
-        if (!isNullOrEmpty(providedKeyFingerprintValue)) {
-            return providedKeyFingerprintValue;
-        } else {
-            byte[] keyFingerprintBytes = sha256digestBytes(config.encryptionCertificate.getPublicKey().getEncoded());
-            return encodeBytes(keyFingerprintBytes, FieldValueEncoding.HEX);
-        }
-    }
-
-    private static byte[] sha256digestBytes(byte[] bytes) throws EncryptionException {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(bytes);
-            return messageDigest.digest();
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to digest bytes!", e);
-        }
     }
 }

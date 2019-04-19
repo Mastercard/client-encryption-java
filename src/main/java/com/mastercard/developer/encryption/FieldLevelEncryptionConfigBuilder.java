@@ -2,6 +2,8 @@ package com.mastercard.developer.encryption;
 
 import com.jayway.jsonpath.JsonPath;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
@@ -9,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
+import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
+import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 import static java.security.spec.MGF1ParameterSpec.SHA256;
 import static java.security.spec.MGF1ParameterSpec.SHA512;
 
@@ -201,12 +205,16 @@ public final class FieldLevelEncryptionConfigBuilder {
 
     /**
      * Build a {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig}.
+     * @throws EncryptionException
      */
-    public FieldLevelEncryptionConfig build() {
+    public FieldLevelEncryptionConfig build() throws EncryptionException {
 
         checkJsonPathParameterValues();
         checkParameterValues();
         checkParameterConsistency();
+
+        computeEncryptionCertificateFingerprintWhenNeeded();
+        computeEncryptionKeyFingerprintWhenNeeded();
 
         FieldLevelEncryptionConfig config = new FieldLevelEncryptionConfig();
         config.encryptionCertificateFingerprintFieldName = this.encryptionCertificateFingerprintFieldName;
@@ -290,5 +298,37 @@ public final class FieldLevelEncryptionConfigBuilder {
                 || ivFieldName == null && encryptedKeyFieldName != null) {
             throw new IllegalArgumentException("IV field name and encrypted key field name must be both set or both unset!");
         }
+    }
+
+    private void computeEncryptionCertificateFingerprintWhenNeeded() throws EncryptionException {
+        try {
+            if (encryptionCertificate == null || !isNullOrEmpty(encryptionCertificateFingerprint)) {
+                // No encryption certificate set or certificate fingerprint already provided
+                return;
+            }
+            byte[] certificateFingerprintBytes = sha256digestBytes(encryptionCertificate.getEncoded());
+            encryptionCertificateFingerprint = encodeBytes(certificateFingerprintBytes, FieldValueEncoding.HEX);
+        } catch (Exception e) {
+            throw new EncryptionException("Failed to compute encryption certificate fingerprint!", e);
+        }
+    }
+
+    private void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
+        try {
+            if (encryptionCertificate == null || !isNullOrEmpty(encryptionKeyFingerprint)) {
+                // No encryption certificate set or key fingerprint already provided
+                return;
+            }
+            byte[] keyFingerprintBytes = sha256digestBytes(encryptionCertificate.getPublicKey().getEncoded());
+            encryptionKeyFingerprint = encodeBytes(keyFingerprintBytes, FieldValueEncoding.HEX);
+        } catch (Exception e) {
+            throw new EncryptionException("Failed to compute encryption key fingerprint!", e);
+        }
+    }
+
+    private static byte[] sha256digestBytes(byte[] bytes) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        messageDigest.update(bytes);
+        return messageDigest.digest();
     }
 }

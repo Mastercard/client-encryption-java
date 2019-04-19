@@ -35,8 +35,6 @@ public class FieldLevelEncryptionParamsTest {
         assertNotNull(params.getIvSpec());
         assertNotNull(params.getEncryptedKeyValue());
         assertNotNull(params.getSecretKey());
-        assertEquals("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279", params.getEncryptionCertificateFingerprintValue());
-        assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", params.getEncryptionKeyFingerprintValue());
         assertEquals("SHA256", params.getOaepPaddingDigestAlgorithmValue());
     }
 
@@ -45,10 +43,7 @@ public class FieldLevelEncryptionParamsTest {
 
         // GIVEN
         FieldLevelEncryptionConfig config = TestUtils.getTestFieldLevelEncryptionConfigBuilder().build();
-        FieldLevelEncryptionParams params = new FieldLevelEncryptionParams("INVALID VALUE", null,
-                                                                           null, null,
-                                                                           null, config);
-
+        FieldLevelEncryptionParams params = new FieldLevelEncryptionParams("INVALID VALUE", null, null, config);
         // THEN
         expectedException.expect(EncryptionException.class);
         expectedException.expectMessage("Failed to decode the provided IV value!");
@@ -63,9 +58,7 @@ public class FieldLevelEncryptionParamsTest {
 
         // GIVEN
         FieldLevelEncryptionConfig config = TestUtils.getTestFieldLevelEncryptionConfigBuilder().build();
-        FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(null, "INVALID VALUE",
-                                                                           null, null,
-                                                                           null, config);
+        FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(null, "INVALID VALUE", null, config);
 
         // THEN
         expectedException.expect(EncryptionException.class);
