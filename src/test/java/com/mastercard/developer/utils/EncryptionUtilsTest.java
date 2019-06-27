@@ -34,6 +34,20 @@ public class EncryptionUtilsTest {
     }
 
     @Test
+    public void testLoadEncryptionCertificate_FromInputStream() throws Exception {
+
+        // GIVEN
+        InputStream inputStream = getClass().getResourceAsStream("/certificates/test_certificate-2048.pem");
+
+        // WHEN
+        Certificate certificate = EncryptionUtils.loadEncryptionCertificate(inputStream);
+
+        // THEN
+        Assert.assertNotNull(certificate);
+        Assert.assertEquals("X.509", certificate.getType());
+    }
+
+    @Test
     public void testLoadEncryptionCertificate_ShouldSupportDer() throws Exception {
 
         // GIVEN

@@ -30,8 +30,15 @@ public final class EncryptionUtils {
      * Populate a X509 encryption certificate object with the certificate data at the given file path.
      */
     public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, NoSuchProviderException, FileNotFoundException {
+        return loadEncryptionCertificate(new FileInputStream(certificatePath));
+    }
+
+    /**
+     * Populate a X509 encryption certificate object with the certificate data at the given file path.
+     */
+    public static Certificate loadEncryptionCertificate(InputStream inputStream) throws CertificateException, NoSuchProviderException {
         CertificateFactory factory = CertificateFactory.getInstance("X.509", "SUN");
-        return factory.generateCertificate(new FileInputStream(certificatePath));
+        return factory.generateCertificate(inputStream);
     }
 
     /**
