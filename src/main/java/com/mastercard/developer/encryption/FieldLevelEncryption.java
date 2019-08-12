@@ -223,9 +223,9 @@ public class FieldLevelEncryption {
         checkOrCreateOutObject(payloadContext, jsonPathOut);
         addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
 
-        // Remove the input object if now empty
-        inJsonObject = readJsonObject(payloadContext, jsonPathIn);
-        if (inJsonObject != null && 0 == jsonProvider.length(inJsonObject) && !"$".equals(jsonPathIn)) {
+        // Remove the input if now empty
+        Object inJsonElement  = readJsonElement(payloadContext, jsonPathIn);
+        if (inJsonElement != null && 0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
     }

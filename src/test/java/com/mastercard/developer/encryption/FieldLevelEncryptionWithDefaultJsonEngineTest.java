@@ -14,6 +14,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.encryption.FieldLevelEncryptionParams.SYMMETRIC_KEY_TYPE;
@@ -1035,7 +1036,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath() throws Exception {
+    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath_ObjectData() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -1058,6 +1059,40 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertEquals("\"field1Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
         assertEquals("\"field2Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
+    }
+
+    /**
+     * https://github.com/Mastercard/client-encryption-java/issues/3
+     */
+    @Test
+    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath_PrimitiveTypeData() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"data\": {" +
+                "        \"encryptedData\": {" +
+                "            \"encryptedValue\": \"Qiw1g87OCwa5/IXPC5nIJw==\"," +
+                "            \"iv\": \"OZt7FRV644fEFbb75VNdjA==\"," +
+                "            \"encryptedKey\": \"AyI8R1/ziGTZ6Uhy2JGsy+PYf+KXcrzn5v56tP3WnuFM2Qt24T9t4WXE+B1cqiDjo1LQIEgXJWZ5XX/fbYh/Y1qmycit/QmPVEjGqoKLNSB1Js00Cghyt7lChuSUIWRnYbNAa0q6EgPS5vyDrXDVZH0vkTM6egc7d76O9Sw+rXGzv9d9wiQlhxFXkb+GH/BCiswb064w53LcXdoBcup1sEEn6UIuORtiCGeQcNqS6yvkR3HWc0lrAJpCikJoTCMQli7MJYAVj+w4LZCUZMcwWMuiMhLQQdjTAhCCK9+fKItwA5xSDaXictspUALTi/drdcj2zXbxX3E2t+q1PgWPUg==\"," +
+                "            \"publicKeyFingerprint\": \"29f8a7cea970886829226864c79195088ee464a89d8bc835d392c1f6666326c6\"," +
+                "            \"oaepPaddingDigestAlgorithm\": \"SHA256\"" +
+                "        }" +
+                "    }" +
+                "}";
+
+        PrivateKey decryptionKey = EncryptionUtils.loadDecryptionKey("./src/test/resources/keys/pkcs8/github-issue#3.pem");
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionKey(decryptionKey)
+                .withDecryptionPath("$.data.encryptedData", "$.data.encryptedData")
+                .withFieldValueEncoding(FieldValueEncoding.BASE64)
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
+        assertEquals("India", payloadObject.get("data").getAsJsonObject().get("encryptedData").getAsString());
     }
 
     @Test
