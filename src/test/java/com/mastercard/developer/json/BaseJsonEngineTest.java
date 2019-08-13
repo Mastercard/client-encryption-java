@@ -1,11 +1,17 @@
 package com.mastercard.developer.json;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class JsonEngineTest {
+import java.util.Collections;
+
+@Ignore
+public abstract class BaseJsonEngineTest {
+
+    protected static JsonEngine instanceUnderTest;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -20,10 +26,10 @@ public class JsonEngineTest {
         String jsonPath4 = "obj1";
 
         // WHEN
-        String parentJsonPath1 = JsonEngine.getParentJsonPath(jsonPath1);
-        String parentJsonPath2 = JsonEngine.getParentJsonPath(jsonPath2);
-        String parentJsonPath3 = JsonEngine.getParentJsonPath(jsonPath3);
-        String parentJsonPath4 = JsonEngine.getParentJsonPath(jsonPath4);
+        String parentJsonPath1 = instanceUnderTest.getParentJsonPath(jsonPath1);
+        String parentJsonPath2 = instanceUnderTest.getParentJsonPath(jsonPath2);
+        String parentJsonPath3 = instanceUnderTest.getParentJsonPath(jsonPath3);
+        String parentJsonPath4 = instanceUnderTest.getParentJsonPath(jsonPath4);
 
         // THEN
         Assert.assertEquals("$['obj1']['obj2']", parentJsonPath1);
@@ -42,16 +48,16 @@ public class JsonEngineTest {
         String jsonPath4 = "obj2";
 
         // WHEN
-        String jsonElementKey1 = JsonEngine.getJsonElementKey(jsonPath1);
-        String jsonElementKey2 = JsonEngine.getJsonElementKey(jsonPath2);
-        String jsonElementKey3 = JsonEngine.getJsonElementKey(jsonPath3);
-        String jsonElementKey4 = JsonEngine.getJsonElementKey(jsonPath4);
+        String jsonElementKey1 = instanceUnderTest.getJsonElementKey(jsonPath1);
+        String jsonElementKey2 = instanceUnderTest.getJsonElementKey(jsonPath2);
+        String jsonElementKey3 = instanceUnderTest.getJsonElementKey(jsonPath3);
+        String jsonElementKey4 = instanceUnderTest.getJsonElementKey(jsonPath4);
 
         // THEN
         Assert.assertEquals("obj2", jsonElementKey1);
         Assert.assertEquals("obj2", jsonElementKey2);
         Assert.assertEquals("obj2", jsonElementKey3);
-        Assert.assertEquals("obj2", jsonElementKey3);
+        Assert.assertEquals("obj2", jsonElementKey4);
     }
 
     @Test
@@ -65,7 +71,7 @@ public class JsonEngineTest {
         expectedException.expectMessage("json can not be null or empty");
 
         // WHEN
-        JsonEngine.getParentJsonPath(jsonPath);
+        instanceUnderTest.getParentJsonPath(jsonPath);
     }
 
     @Test
@@ -79,7 +85,7 @@ public class JsonEngineTest {
         expectedException.expectMessage("json can not be null or empty");
 
         // WHEN
-        JsonEngine.getJsonElementKey(jsonPath);
+        instanceUnderTest.getJsonElementKey(jsonPath);
     }
 
     @Test
@@ -93,7 +99,7 @@ public class JsonEngineTest {
         expectedException.expectMessage("Unable to find parent for '$'");
 
         // WHEN
-        JsonEngine.getParentJsonPath(jsonPath);
+        instanceUnderTest.getParentJsonPath(jsonPath);
     }
 
     @Test
@@ -107,6 +113,29 @@ public class JsonEngineTest {
         expectedException.expectMessage("Unable to find object key for '$'");
 
         // WHEN
-        JsonEngine.getJsonElementKey(jsonPath);
+        instanceUnderTest.getJsonElementKey(jsonPath);
+    }
+
+    @Test
+    public void testToJsonString_ShouldThrowIllegalStateException_WhenNullObject() {
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("Can't get a JSON string from a null object!");
+        instanceUnderTest.toJsonString(null);
+    }
+
+    @Test
+    public void testIsNullOrEmptyJson_Nominal() {
+        Assert.assertTrue(instanceUnderTest.isNullOrEmptyJson(null));
+        Assert.assertTrue(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("{}")));
+        Assert.assertFalse(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("string")));
+        Assert.assertFalse(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("true")));
+        Assert.assertFalse(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("false")));
+        Assert.assertFalse(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("123")));
+        Assert.assertFalse(instanceUnderTest.isNullOrEmptyJson(instanceUnderTest.parse("{\"data\":123}")));
+    }
+
+    @Test
+    public void testGetPropertyKeys_ShouldReturnEmptyList_WhenNullObject() {
+        Assert.assertEquals(Collections.emptyList(), instanceUnderTest.getPropertyKeys(null));
     }
 }
