@@ -1035,7 +1035,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath() throws Exception {
+    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath_ObjectData() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -1058,6 +1058,36 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
         assertEquals("\"field1Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field1").toString());
         assertEquals("\"field2Value\"", payloadObject.get("encryptedData").getAsJsonObject().get("field2").toString());
+    }
+
+    /**
+     * https://github.com/Mastercard/client-encryption-java/issues/3
+     */
+    @Test
+    public void testDecryptPayload_ShouldOverwriteInputObject_WhenOutPathSameAsInPath_PrimitiveTypeData() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"data\": {" +
+                "        \"encryptedValue\": \"e2d6a3a76ea6e605e55b400e5a4eba11\"," +
+                "        \"iv\": \"3ce861359fa1630c7a794901ee14bf41\"," +
+                "        \"encryptedKey\": \"02bb8d5c7d113ef271f199c09f0d76db2b6d5d2d209ad1a20dbc4dd0d04576a92ceb917eea5f403ccf64c3c39dda564046909af96c82fad62f89c3cbbec880ea3105a0a171af904cd3b86ea68991202a2795dca07050ca58252701b7ecea06055fd43e96f4beee48b6275e86af93c88c21994ff46f0610171bd388a2c0a1f518ffc8346f7f513f3283feae5b102c8596ddcb2aea5e62ceb17222e646c599f258463405d28ac012bfd4cc431f94111ee07d79e660948485e38c13cdb8bba8e1df3f7dba0f4c77696f71930533c955f3a430658edaa03b0b0c393934d60f5ac3ea5c06ed64bf969fc01942eac432b8e0c56f7538659a72859d445d150c169ae690\"," +
+                "        \"encryptionCertificateFingerprint\": \"80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279\"," +
+                "        \"encryptionKeyFingerprint\": \"761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("$.data", "$.data")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        JsonObject payloadObject = new Gson().fromJson(payload, JsonObject.class);
+        assertEquals("string", payloadObject.get("data").getAsString());
     }
 
     @Test

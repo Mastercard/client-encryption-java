@@ -75,7 +75,7 @@ public abstract class JsonEngine {
 
     public String toJsonString(Object object) {
         if (null == object) {
-            throw new IllegalStateException("Can get a JSON string from a null object!");
+            throw new IllegalStateException("Can't get a JSON string from a null object!");
         }
         if (isJsonPrimitive(object)) {
             return object.toString();
