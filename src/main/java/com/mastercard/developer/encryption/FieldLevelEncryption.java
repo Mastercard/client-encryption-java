@@ -225,7 +225,7 @@ public class FieldLevelEncryption {
 
         // Remove the input if now empty
         Object inJsonElement  = readJsonElement(payloadContext, jsonPathIn);
-        if (inJsonElement != null && 0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
+        if (0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
     }
