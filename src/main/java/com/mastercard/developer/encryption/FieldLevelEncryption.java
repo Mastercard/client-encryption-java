@@ -27,7 +27,6 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
  */
 public class FieldLevelEncryption {
 
-    private static final String SUN_JCE = "SunJCE";
     private static final String SYMMETRIC_CYPHER = "AES/CBC/PKCS5Padding";
 
     private static JsonEngine jsonEngine;
@@ -302,13 +301,13 @@ public class FieldLevelEncryption {
     }
 
     protected static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER, SUN_JCE);
+        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         return cipher.doFinal(bytes);
     }
 
     protected static byte[] decryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER, SUN_JCE);
+        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
         return cipher.doFinal(bytes);
     }

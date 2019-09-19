@@ -32,7 +32,7 @@ public final class EncryptionUtils {
      * Populate a X509 encryption certificate object with the certificate data at the given file path.
      */
     public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, NoSuchProviderException, FileNotFoundException {
-        CertificateFactory factory = CertificateFactory.getInstance("X.509", "SUN");
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
         return factory.generateCertificate(new FileInputStream(certificatePath));
     }
 
@@ -67,7 +67,7 @@ public final class EncryptionUtils {
     public static PrivateKey loadDecryptionKey(String pkcs12KeyFilePath,
                                             String decryptionKeyAlias,
                                             String decryptionKeyPassword) throws GeneralSecurityException, IOException {
-        KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12", "SunJSSE");
+        KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12");
         pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), decryptionKeyPassword.toCharArray());
         return (PrivateKey) pkcs12KeyStore.getKey(decryptionKeyAlias, decryptionKeyPassword.toCharArray());
     }
@@ -76,7 +76,7 @@ public final class EncryptionUtils {
      * Create a PrivateKey instance from raw PKCS#8 bytes.
      */
     private static PrivateKey readPkcs8PrivateKey(byte[] pkcs8Bytes) throws GeneralSecurityException {
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "SunRsaSign");
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8Bytes);
         try {
             return keyFactory.generatePrivate(keySpec);

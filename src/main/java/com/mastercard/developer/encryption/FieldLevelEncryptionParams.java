@@ -22,7 +22,6 @@ public final class FieldLevelEncryptionParams {
     private static final Integer SYMMETRIC_KEY_SIZE = 128;
     protected static final String SYMMETRIC_KEY_TYPE = "AES";
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
-    private static final String SUN_JCE = "SunJCE";
 
     private final String ivValue;
     private final String encryptedKeyValue;
@@ -112,7 +111,7 @@ public final class FieldLevelEncryptionParams {
 
     private static IvParameterSpec generateIv() throws EncryptionException {
         try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             byte[] ivBytes = new byte[16];
             secureRandom.nextBytes(ivBytes);
             return new IvParameterSpec(ivBytes);
@@ -123,7 +122,7 @@ public final class FieldLevelEncryptionParams {
 
     private static SecretKey generateSecretKey() throws EncryptionException {
         try {
-            KeyGenerator generator = KeyGenerator.getInstance(SYMMETRIC_KEY_TYPE, SUN_JCE);
+            KeyGenerator generator = KeyGenerator.getInstance(SYMMETRIC_KEY_TYPE);
             generator.init(SYMMETRIC_KEY_SIZE);
             return generator.generateKey();
         } catch (GeneralSecurityException e) {
@@ -136,7 +135,7 @@ public final class FieldLevelEncryptionParams {
             Key publicEncryptionKey = config.encryptionCertificate.getPublicKey();
             MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(config.oaepPaddingDigestAlgorithm);
             String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-            Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
+            Cipher cipher = Cipher.getInstance(asymmetricCipher);
             cipher.init(Cipher.WRAP_MODE, publicEncryptionKey, getOaepParameterSpec(mgf1ParameterSpec));
             return cipher.wrap(key);
         } catch (GeneralSecurityException e) {
@@ -152,7 +151,7 @@ public final class FieldLevelEncryptionParams {
             MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(oaepDigestAlgorithm);
             Key key = config.decryptionKey;
             String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-            Cipher cipher = Cipher.getInstance(asymmetricCipher, SUN_JCE);
+            Cipher cipher = Cipher.getInstance(asymmetricCipher);
             cipher.init(Cipher.UNWRAP_MODE, key, getOaepParameterSpec(mgf1ParameterSpec));
             return cipher.unwrap(keyBytes, SYMMETRIC_KEY_TYPE, Cipher.SECRET_KEY);
         } catch (GeneralSecurityException e) {
