@@ -31,7 +31,7 @@ public final class EncryptionUtils {
     /**
      * Populate a X509 encryption certificate object with the certificate data at the given file path.
      */
-    public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, NoSuchProviderException, FileNotFoundException {
+    public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, FileNotFoundException {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         return factory.generateCertificate(new FileInputStream(certificatePath));
     }
