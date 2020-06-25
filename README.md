@@ -156,7 +156,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
 
 See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
-* [Service configurations in Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-in-Java) wiki page
+* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
 #### Performing Encryption <a name="performing-encryption"></a>
 
