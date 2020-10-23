@@ -2,7 +2,7 @@
 
 [![](https://travis-ci.org/Mastercard/client-encryption-java.svg?branch=master)](https://travis-ci.org/Mastercard/client-encryption-java)
 [![](https://sonarcloud.io/api/project_badges/measure?project=Mastercard_client-encryption-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mastercard_client-encryption-java)
-[![](https://github.com/Mastercard/client-encryption-java/workflows/Broken%20Links%3F/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3ABroken%20Links%3F)
+[![](https://github.com/Mastercard/client-encryption-java/workflows/broken%20links%3F/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3Abroken)
 [![](https://img.shields.io/maven-central/v/com.mastercard.developer/client-encryption.svg)](https://search.maven.org/artifact/com.mastercard.developer/client-encryption/)
 [![](https://www.javadoc.io/badge/com.mastercard.developer/client-encryption.svg?color=blue)](https://www.javadoc.io/doc/com.mastercard.developer/client-encryption)
 [![](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/Mastercard/client-encryption-java/blob/master/LICENSE)
@@ -317,7 +317,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
 
 See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
-* [Service configurations in Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-in-Java) wiki page
+* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
 ##### Encrypting Using HTTP Headers
 
