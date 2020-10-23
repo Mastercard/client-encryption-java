@@ -1,7 +1,8 @@
 # client-encryption-java
 
 [![](https://travis-ci.org/Mastercard/client-encryption-java.svg?branch=master)](https://travis-ci.org/Mastercard/client-encryption-java)
-[![](https://sonarcloud.io/api/project_badges/measure?project=Mastercard_client-encryption-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mastercard_client-encryption-java) 
+[![](https://sonarcloud.io/api/project_badges/measure?project=Mastercard_client-encryption-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mastercard_client-encryption-java)
+[![](https://github.com/Mastercard/client-encryption-java/workflows/Broken%20Links%3F/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3ABroken%20Links%3F)
 [![](https://img.shields.io/maven-central/v/com.mastercard.developer/client-encryption.svg)](https://search.maven.org/artifact/com.mastercard.developer/client-encryption/)
 [![](https://www.javadoc.io/badge/com.mastercard.developer/client-encryption.svg?color=blue)](https://www.javadoc.io/doc/com.mastercard.developer/client-encryption)
 [![](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/Mastercard/client-encryption-java/blob/master/LICENSE)
