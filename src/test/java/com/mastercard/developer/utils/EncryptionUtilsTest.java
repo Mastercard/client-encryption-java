@@ -15,7 +15,7 @@ import java.security.spec.InvalidKeySpecException;
 import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static org.hamcrest.CoreMatchers.isA;
 
-class EncryptionUtilsTest {
+public class EncryptionUtilsTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
