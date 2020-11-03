@@ -25,7 +25,7 @@ import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 
-public class FieldLevelEncryptionWithDefaultJsonEngineTest {
+class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -157,7 +157,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"\"string\"", "false", "1984"})
-    public void testEncryptPayload_ShouldEncryptPrimitiveTypes(String data) throws Exception {
+    void testEncryptPayload_ShouldEncryptPrimitiveTypes(String data) throws Exception {
 
         // GIVEN
         String payload = String.format("{\"data\": %s, \"encryptedData\": {}}", data);
