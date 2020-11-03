@@ -8,6 +8,8 @@ import com.mastercard.developer.utils.EncryptionUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.rules.ExpectedException;
 
 import javax.crypto.SecretKey;
@@ -23,7 +25,7 @@ import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 
-public class FieldLevelEncryptionWithDefaultJsonEngineTest {
+class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -153,11 +155,12 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertEquals(16, base64Decode(encryptedData.get("iv").getAsString()).length);
     }
 
-    @Test
-    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_String() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"\"string\"", "false", "1984"})
+    void testEncryptPayload_ShouldEncryptPrimitiveTypes(String data) throws Exception {
 
         // GIVEN
-        String payload = "{\"data\": \"string\", \"encryptedData\": {}}";
+        String payload = String.format("{\"data\": %s, \"encryptedData\": {}}", data);
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionPath("data", "encryptedData")
                 .withDecryptionPath("encryptedData", "data")
@@ -171,49 +174,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
         assertNull(encryptedPayloadObject.get("data"));
         assertNotNull(encryptedPayloadObject.get("encryptedData"));
-        assertDecryptedPayloadEquals("{\"data\":\"string\"}", encryptedPayload, config);
-    }
-
-    @Test
-    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_Integer() throws Exception {
-
-        // GIVEN
-        String payload = "{\"data\": 1984, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
-                .withEncryptionPath("data", "encryptedData")
-                .withDecryptionPath("encryptedData", "data")
-                .withOaepPaddingDigestAlgorithm("SHA-256")
-                .build();
-
-        // WHEN
-        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
-
-        // THEN
-        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
-        assertNull(encryptedPayloadObject.get("data"));
-        assertNotNull(encryptedPayloadObject.get("encryptedData"));
-        assertDecryptedPayloadEquals("{\"data\":1984}", encryptedPayload, config);
-    }
-
-    @Test
-    public void testEncryptPayload_ShouldEncryptPrimitiveTypes_Boolean() throws Exception {
-
-        // GIVEN
-        String payload = "{\"data\": false, \"encryptedData\": {}}";
-        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
-                .withEncryptionPath("data", "encryptedData")
-                .withDecryptionPath("encryptedData", "data")
-                .withOaepPaddingDigestAlgorithm("SHA-256")
-                .build();
-
-        // WHEN
-        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
-
-        // THEN
-        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
-        assertNull(encryptedPayloadObject.get("data"));
-        assertNotNull(encryptedPayloadObject.get("encryptedData"));
-        assertDecryptedPayloadEquals("{\"data\":false}", encryptedPayload, config);
+        assertDecryptedPayloadEquals(String.format("{\"data\":%s}", data), encryptedPayload, config);
     }
 
     @Test

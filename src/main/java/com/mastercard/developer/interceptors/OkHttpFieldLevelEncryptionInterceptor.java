@@ -63,7 +63,7 @@ public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
                 encryptedPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
             }
 
-            RequestBody encryptedBody = RequestBody.create(requestBody.contentType(), encryptedPayload);
+            RequestBody encryptedBody = RequestBody.create(encryptedPayload, requestBody.contentType());
             return requestBuilder
                     .method(request.method(), encryptedBody)
                     .header("Content-Length", String.valueOf(encryptedBody.contentLength()))
@@ -110,7 +110,7 @@ public class OkHttpFieldLevelEncryptionInterceptor implements Interceptor {
                 decryptedPayload = FieldLevelEncryption.decryptPayload(responsePayload, config);
             }
 
-            try (ResponseBody decryptedBody = ResponseBody.create(responseBody.contentType(), decryptedPayload)) {
+            try (ResponseBody decryptedBody = ResponseBody.create(decryptedPayload, responseBody.contentType())) {
                 return responseBuilder
                         .body(decryptedBody)
                         .header("Content-Length", String.valueOf(decryptedBody.contentLength()))
