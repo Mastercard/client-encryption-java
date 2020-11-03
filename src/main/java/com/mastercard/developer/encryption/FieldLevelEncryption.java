@@ -295,9 +295,9 @@ public class FieldLevelEncryption {
     }
 
     private static String sanitizeJson(String json) {
-        return json.replaceAll("\n", "")
-                .replaceAll("\r", "")
-                .replaceAll("\t", "");
+        return json.replace("\n", "")
+                .replace("\r", "")
+                .replace("\t", "");
     }
 
     protected static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
