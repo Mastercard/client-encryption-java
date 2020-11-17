@@ -25,4 +25,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName=oauth1-signer-java -Dsonar.projectKey=Mastercard_oauth1-signer-java -Dsonar.organization=mastercard -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.exclusions=**/*.xml -Dgpg.signature.skip=true
+      run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName=client-encryption-java -Dsonar.projectKey=Mastercard_client-encryption-java -Dsonar.organization=mastercard -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.exclusions=**/*.xml -Dgpg.signature.skip=true
