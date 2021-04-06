@@ -19,6 +19,7 @@
         <feign-version>9.7.0</feign-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gpg.signature.skip>false</gpg.signature.skip>
+        <nimbusds-jose-jwt.version>8.19</nimbusds-jose-jwt.version>
     </properties>
 
     <scm>
@@ -64,6 +65,18 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.12</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${nimbusds-jose-jwt.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>json-smart</artifactId>
+                    <groupId>net.minidev</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

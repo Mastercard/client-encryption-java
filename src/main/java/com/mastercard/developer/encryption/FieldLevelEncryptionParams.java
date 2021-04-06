@@ -143,7 +143,7 @@ public final class FieldLevelEncryptionParams {
         }
     }
 
-    protected static Key unwrapSecretKey(FieldLevelEncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws EncryptionException {
+    protected static Key unwrapSecretKey(EncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws EncryptionException {
         if (!oaepDigestAlgorithm.contains("-")) {
             oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
         }

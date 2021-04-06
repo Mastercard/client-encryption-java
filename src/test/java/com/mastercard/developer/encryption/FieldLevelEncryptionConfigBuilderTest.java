@@ -59,6 +59,32 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_ResultShouldBeAssignableToGenericEncryptionConfig() throws Exception {
+        EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.payload", "$.encryptedPayload")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withEncryptionCertificateFingerprint("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B")
+                .withEncryptionKeyFingerprint("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810")
+                .withEncryptionCertificateFingerprintFieldName("publicCertificateFingerprint")
+                .withEncryptionCertificateFingerprintHeaderName("x-public-certificate-fingerprint")
+                .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
+                .withEncryptionKeyFingerprintHeaderName("x-public-key-fingerprint")
+                .withDecryptionPath("$.encryptedPayload", "$.payload")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withOaepPaddingDigestAlgorithmFieldName("oaepPaddingDigestAlgorithm")
+                .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvFieldName("iv")
+                .withIvHeaderName("x-iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+        Assert.assertNotNull(config);
+    }
+
+    @Test
     public void testBuild_ShouldComputeCertificateAndKeyFingerprints_WhenFingerprintsNotSet() throws Exception {
         FieldLevelEncryptionConfig config = TestUtils.getTestFieldLevelEncryptionConfigBuilder()
                 .withEncryptionCertificateFingerprint(null)

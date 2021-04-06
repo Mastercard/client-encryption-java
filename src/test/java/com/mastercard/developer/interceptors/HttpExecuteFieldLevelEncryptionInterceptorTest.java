@@ -1,6 +1,7 @@
 package com.mastercard.developer.interceptors;
 
 import com.google.api.client.http.*;
+import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.test.TestUtils;
@@ -32,6 +33,16 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void testFrom_ShouldReturnTheCorrectInterceptor() throws Exception {
+        // GIVEN
+        EncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .build();
+
+        HttpExecuteEncryptionInterceptor interceptor = HttpExecuteEncryptionInterceptor.from(config);
+        assertTrue(interceptor instanceof HttpExecuteFieldLevelEncryptionInterceptor);
+    }
 
     @Test
     public void testIntercept_ShouldEncryptRequestPayloadAndUpdateContentLengthHeader() throws Exception {
@@ -117,7 +128,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
                 .build();
         HttpResponse response = mock(HttpResponse.class);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentLength(100l);
+        httpHeaders.setContentLength(100L);
         when(response.parseAsString()).thenReturn(encryptedPayload);
         when(response.getHeaders()).thenReturn(httpHeaders);
 
@@ -167,7 +178,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
                 .build();
         HttpResponse response = mock(HttpResponse.class);
         when(response.parseAsString()).thenReturn(encryptedPayload);
-        
+
         // THEN
         expectedException.expect(IOException.class);
         expectedException.expectMessage("Failed to intercept and decrypt response!");
@@ -240,7 +251,7 @@ public class HttpExecuteFieldLevelEncryptionInterceptorTest {
         httpHeaders.set("x-oaep-padding-digest-algorithm", "SHA256");
         httpHeaders.set("x-encryption-key-fingerprint", "761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79");
         httpHeaders.set("x-encryption-certificate-fingerprint", "80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279");
-        httpHeaders.setContentLength(100l);
+        httpHeaders.setContentLength(100L);
         when(response.parseAsString()).thenReturn(encryptedPayload);
         when(response.getHeaders()).thenReturn(httpHeaders);
 

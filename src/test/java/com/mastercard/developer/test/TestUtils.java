@@ -3,6 +3,7 @@ package com.mastercard.developer.test;
 import com.mastercard.developer.encryption.FieldLevelEncryption;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfigBuilder;
+import com.mastercard.developer.encryption.JweConfigBuilder;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.security.PrivateKey;
@@ -44,6 +45,12 @@ public class TestUtils {
                 .withEncryptionKeyFingerprintFieldName("encryptionKeyFingerprint")
                 .withEncryptionKeyFingerprint("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79")
                 .withFieldValueEncoding(FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
+    }
+
+    public static JweConfigBuilder getTestJweConfigBuilder() throws Exception {
+        return JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey());
     }
 
     public static void assertDecryptedPayloadEquals(String expectedPayload, String encryptedPayload, FieldLevelEncryptionConfig config) throws Exception {
