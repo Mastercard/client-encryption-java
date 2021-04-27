@@ -28,14 +28,14 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         config.encryptionKeyFingerprint = this.encryptionKeyFingerprint;
         config.decryptionKey = this.decryptionKey;
         config.encryptionPaths = this.encryptionPaths.isEmpty() ? Collections.singletonMap("$", "$") : this.encryptionPaths;
-        config.decryptionPaths = this.decryptionPaths.isEmpty() ? Collections.singletonMap("$.encryptedPayload", "$") : this.decryptionPaths;
-        config.encryptedValueFieldName = this.encryptedValueFieldName == null ? "encryptedPayload" : this.encryptedValueFieldName;
+        config.decryptionPaths = this.decryptionPaths.isEmpty() ? Collections.singletonMap("$.encryptedData", "$") : this.decryptionPaths;
+        config.encryptedValueFieldName = this.encryptedValueFieldName == null ? "encryptedData" : this.encryptedValueFieldName;
         config.scheme = EncryptionConfig.Scheme.JWE;
         return config;
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptionCertificate}.
+     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptionCertificate}.
      */
     public JweConfigBuilder withEncryptionCertificate(Certificate encryptionCertificate) {
         this.encryptionCertificate = encryptionCertificate;
@@ -43,7 +43,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#decryptionKey}.
+     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#decryptionKey}.
      */
     public JweConfigBuilder withDecryptionKey(PrivateKey decryptionKey) {
         this.decryptionKey = decryptionKey;
@@ -51,7 +51,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptionPaths}.
+     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptionPaths}.
      */
     public JweConfigBuilder withEncryptionPath(String jsonPathIn, String jsonPathOut) {
         this.encryptionPaths.put(jsonPathIn, jsonPathOut);
@@ -59,7 +59,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#decryptionPaths}.
+     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#decryptionPaths}.
      */
     public JweConfigBuilder withDecryptionPath(String jsonPathIn, String jsonPathOut) {
         this.decryptionPaths.put(jsonPathIn, jsonPathOut);
@@ -67,7 +67,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#encryptedValueFieldName}.
+     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptedValueFieldName}.
      */
     public JweConfigBuilder withEncryptedValueFieldName(String encryptedValueFieldName) {
         this.encryptedValueFieldName = encryptedValueFieldName;

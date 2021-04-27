@@ -21,7 +21,7 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 /**
  * Performs field level encryption on HTTP payloads.
  */
-public class FieldLevelEncryption extends CryptoProvider {
+public class FieldLevelEncryption {
 
     private static final String SYMMETRIC_CYPHER = "AES/CBC/PKCS5Padding";
 
@@ -32,7 +32,7 @@ public class FieldLevelEncryption extends CryptoProvider {
     public static String encryptPayload(String payload, FieldLevelEncryptionConfig config, Object params) throws EncryptionException {
         try {
             // Parse the given payload
-            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
 
             // Perform encryption (if needed)
             for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
@@ -55,7 +55,7 @@ public class FieldLevelEncryption extends CryptoProvider {
     public static String decryptPayload(String payload, FieldLevelEncryptionConfig config, Object params) throws EncryptionException {
         try {
             // Parse the given payload
-            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
 
             // Perform decryption (if needed)
             for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
@@ -74,7 +74,7 @@ public class FieldLevelEncryption extends CryptoProvider {
     private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
                                            FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
-        Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
+        Object inJsonElement = JsonParser.readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
             return;
@@ -86,7 +86,7 @@ public class FieldLevelEncryption extends CryptoProvider {
         }
 
         // Encrypt data at the given JSON path
-        String inJsonString = sanitizeJson(jsonEngine.toJsonString(inJsonElement));
+        String inJsonString = sanitizeJson(JsonParser.jsonEngine.toJsonString(inJsonElement));
         byte[] inJsonBytes = null;
         try {
             inJsonBytes = inJsonString.getBytes(StandardCharsets.UTF_8.name());
@@ -101,14 +101,14 @@ public class FieldLevelEncryption extends CryptoProvider {
             payloadContext.delete(jsonPathIn);
         } else {
             // Delete keys one by one
-            Collection<String> propertyKeys = new ArrayList<>(jsonEngine.getPropertyKeys(inJsonElement));
+            Collection<String> propertyKeys = new ArrayList<>(JsonParser.jsonEngine.getPropertyKeys(inJsonElement));
             for (String key : propertyKeys) {
                 payloadContext.delete(jsonPathIn + "." + key);
             }
         }
 
         // Add encrypted data and encryption fields at the given JSON path
-        checkOrCreateOutObject(payloadContext, jsonPathOut);
+        JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
         payloadContext.put(jsonPathOut, config.encryptedValueFieldName, encryptedValue);
         if (!isNullOrEmpty(config.ivFieldName)) {
             payloadContext.put(jsonPathOut, config.ivFieldName, params.getIvValue());
@@ -130,8 +130,8 @@ public class FieldLevelEncryption extends CryptoProvider {
     private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
                                            FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
-        Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
+        JsonProvider jsonProvider = JsonParser.jsonPathConfig.jsonProvider();
+        Object inJsonObject = JsonParser.readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {
             // Nothing to decrypt
             return;
@@ -139,7 +139,7 @@ public class FieldLevelEncryption extends CryptoProvider {
 
         // Read and remove encrypted data and encryption fields at the given JSON path
         Object encryptedValueJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedValueFieldName);
-        if (jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
+        if (JsonParser.jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
             // Nothing to decrypt
             return;
         }
@@ -151,26 +151,26 @@ public class FieldLevelEncryption extends CryptoProvider {
         if (params == null) {
             // Read encryption params from the payload
             Object oaepDigestAlgorithmJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.oaepPaddingDigestAlgorithmFieldName);
-            String oaepDigestAlgorithm = jsonEngine.isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : jsonEngine.toJsonString(oaepDigestAlgorithmJsonElement);
+            String oaepDigestAlgorithm = JsonParser.jsonEngine.isNullOrEmptyJson(oaepDigestAlgorithmJsonElement) ? config.oaepPaddingDigestAlgorithm : JsonParser.jsonEngine.toJsonString(oaepDigestAlgorithmJsonElement);
             Object encryptedKeyJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedKeyFieldName);
             Object ivJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.ivFieldName);
             readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionCertificateFingerprintFieldName);
             readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptionKeyFingerprintFieldName);
-            params = new FieldLevelEncryptionParams(jsonEngine.toJsonString(ivJsonElement), jsonEngine.toJsonString(encryptedKeyJsonElement), oaepDigestAlgorithm, config);
+            params = new FieldLevelEncryptionParams(JsonParser.jsonEngine.toJsonString(ivJsonElement), JsonParser.jsonEngine.toJsonString(encryptedKeyJsonElement), oaepDigestAlgorithm, config);
         }
 
         // Decrypt data
-        byte[] encryptedValueBytes = decodeValue(jsonEngine.toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
+        byte[] encryptedValueBytes = decodeValue(JsonParser.jsonEngine.toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
         byte[] decryptedValueBytes = decryptBytes(params.getSecretKey(), params.getIvSpec(), encryptedValueBytes);
 
         // Add decrypted data at the given JSON path
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
         decryptedValue = sanitizeJson(decryptedValue);
-        checkOrCreateOutObject(payloadContext, jsonPathOut);
-        addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+        JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
+        JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
 
         // Remove the input if now empty
-        Object inJsonElement  = readJsonElement(payloadContext, jsonPathIn);
+        Object inJsonElement  = JsonParser.readJsonElement(payloadContext, jsonPathIn);
         if (0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
@@ -193,7 +193,7 @@ public class FieldLevelEncryption extends CryptoProvider {
             // Do nothing
             return null;
         }
-        JsonProvider jsonProvider = jsonPathConfig.jsonProvider();
+        JsonProvider jsonProvider = JsonParser.jsonPathConfig.jsonProvider();
         Object value = jsonProvider.getMapValue(object, key);
         context.delete(objectPath + "." + key);
         return value;

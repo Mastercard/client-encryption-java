@@ -10,6 +10,6 @@ public class FieldLevelEncryptionWithJsonOrgJsonEngineTest extends FieldLevelEnc
 
     @BeforeClass
     public static void setUpJsonProvider() {
-        FieldLevelEncryption.withJsonEngine(new JsonOrgJsonEngine());
+        JsonParser.withJsonEngine(new JsonOrgJsonEngine());
     }
 }

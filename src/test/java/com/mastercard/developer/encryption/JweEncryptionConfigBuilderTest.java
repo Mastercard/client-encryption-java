@@ -65,7 +65,7 @@ public class JweEncryptionConfigBuilderTest {
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .build();
-        Assert.assertEquals(Collections.singletonMap("$.encryptedPayload", "$"), config.decryptionPaths);
+        Assert.assertEquals(Collections.singletonMap("$.encryptedData", "$"), config.decryptionPaths);
         Assert.assertEquals(Collections.singletonMap("$", "$"), config.encryptionPaths);
     }
 

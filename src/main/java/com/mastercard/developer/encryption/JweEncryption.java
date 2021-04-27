@@ -2,31 +2,27 @@ package com.mastercard.developer.encryption;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.JWEEncrypter;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.RSADecrypter;
-import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.mastercard.developer.encryption.jwe.JWEHeader;
+import com.mastercard.developer.encryption.jwe.JWEObject;
 
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.mastercard.developer.encryption.JsonParser.*;
 import static com.mastercard.developer.utils.EncryptionUtils.sanitizeJson;
 
-public class JweEncryption extends CryptoProvider {
+public class JweEncryption {
+
+    private static final String CYPHER = "AES/GCM/NoPadding";
+    private static final String ALGORITHM = "RSA-OAEP-256";
+    private static final String ENCRYPTION = "A256GCM";
+    private static final String CONTENT_TYPE = "application/json";
 
     public static String encryptPayload(String payload, JweConfig config) throws EncryptionException {
         try {
             // Parse the given payload
-            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
 
             // Perform encryption
             for (Map.Entry<String, String> entry : config.getEncryptionPaths().entrySet()) {
@@ -37,7 +33,7 @@ public class JweEncryption extends CryptoProvider {
 
             // Return the updated payload
             return payloadContext.jsonString();
-        } catch (JOSEException e) {
+        } catch (Exception e) {
             throw new EncryptionException("Payload encryption failed!", e);
         }
     }
@@ -45,7 +41,7 @@ public class JweEncryption extends CryptoProvider {
     public static String decryptPayload(String payload, JweConfig config) throws EncryptionException {
         try {
             // Parse the given payload
-            DocumentContext payloadContext = JsonPath.parse(payload, jsonPathConfig);
+            DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
 
             // Perform decryption
             for (Map.Entry<String, String> entry : config.getDecryptionPaths().entrySet()) {
@@ -56,13 +52,12 @@ public class JweEncryption extends CryptoProvider {
 
             // Return the updated payload
             return payloadContext.jsonString();
-        } catch (ParseException | JOSEException e) {
+        } catch (Exception e) {
             throw new EncryptionException("Payload decryption failed!", e);
         }
     }
 
-    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws JOSEException {
-
+    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException {
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
@@ -70,16 +65,9 @@ public class JweEncryption extends CryptoProvider {
         }
 
         String inJsonString = sanitizeJson(jsonEngine.toJsonString(inJsonElement));
-        RSAPublicKey rsaPublicKey = (RSAPublicKey) config.getEncryptionCertificate().getPublicKey();
-        JWEEncrypter jweEncrypter = new RSAEncrypter(rsaPublicKey);
+        JWEHeader myHeader = new JWEHeader(ALGORITHM, ENCRYPTION, config.encryptionKeyFingerprint, CONTENT_TYPE);
 
-        JWEHeader jweHeader = new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
-                .keyID(config.getEncryptionKeyFingerprint())
-                .contentType("application/json")
-                .build();
-        JWEObject jweObject = new JWEObject(jweHeader, new Payload(inJsonString));
-        jweObject.encrypt(jweEncrypter);
-        String encryptedValue = jweObject.serialize();
+        String payload = JWEObject.encrypt(config, inJsonString, myHeader);
 
         // Delete data in clear
         if (!"$".equals(jsonPathIn)) {
@@ -94,10 +82,10 @@ public class JweEncryption extends CryptoProvider {
 
         // Add encrypted data and encryption fields at the given JSON path
         checkOrCreateOutObject(payloadContext, jsonPathOut);
-        payloadContext.put(jsonPathOut, config.encryptedValueFieldName, encryptedValue);
+        payloadContext.put(jsonPathOut, config.encryptedValueFieldName, payload);
     }
 
-    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws ParseException, JOSEException {
+    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException {
 
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {
@@ -112,22 +100,18 @@ public class JweEncryption extends CryptoProvider {
             return;
         }
 
-        JWEDecrypter jweDecrypter = new RSADecrypter(config.getDecryptionKey());
-        JWEObject jweObject = JWEObject.parse(jsonEngine.toJsonString(encryptedValueJsonElement));
+        String encryptedValue = jsonEngine.toJsonString(encryptedValueJsonElement);
 
-        // Decrypt data
-        jweObject.decrypt(jweDecrypter);
-        String decryptedValue = sanitizeJson(jweObject.getPayload().toString());
+        JWEObject obj = JWEObject.parse(encryptedValue, jsonEngine);
+
+        String payload = obj.decrypt(config, CYPHER);
 
         // Add decrypted data at the given JSON path
         checkOrCreateOutObject(payloadContext, jsonPathOut);
-        addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+        JsonParser.addDecryptedDataToPayload(payloadContext, payload, jsonPathOut);
 
-        // Remove the input if now empty
-        Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
-        if (inJsonElement != null && 0 == jsonPathConfig.jsonProvider().length(inJsonElement) && !"$".equals(jsonPathIn)) {
-            payloadContext.delete(jsonPathIn);
-        }
+        // Remove the input
+        payloadContext.delete(jsonPathIn);
     }
 
     private static Object readAndDeleteJsonKey(DocumentContext context, Object object, String key) {
@@ -135,7 +119,7 @@ public class JweEncryption extends CryptoProvider {
         return object;
     }
 
-    protected static Object readJsonObject(DocumentContext context, String jsonPathString) {
+    private static Object readJsonObject(DocumentContext context, String jsonPathString) {
         Object jsonElement = readJsonElement(context, jsonPathString);
         if (jsonElement == null) {
             return null;

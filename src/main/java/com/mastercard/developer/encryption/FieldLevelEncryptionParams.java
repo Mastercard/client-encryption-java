@@ -8,11 +8,11 @@ import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.SecureRandom;
 import java.security.spec.MGF1ParameterSpec;
 
 import static com.mastercard.developer.utils.EncodingUtils.decodeValue;
 import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
+import static com.mastercard.developer.utils.EncryptionUtils.generateIv;
 
 /**
  * Encryption parameters for computing field level encryption/decryption.
@@ -106,17 +106,6 @@ public final class FieldLevelEncryptionParams {
             return ivParameterSpec;
         } catch (Exception e) {
             throw new EncryptionException("Failed to decode the provided IV value!", e);
-        }
-    }
-
-    private static IvParameterSpec generateIv() throws EncryptionException {
-        try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            byte[] ivBytes = new byte[16];
-            secureRandom.nextBytes(ivBytes);
-            return new IvParameterSpec(ivBytes);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to generate an IV value!", e);
         }
     }
 

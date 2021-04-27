@@ -10,6 +10,6 @@ public class FieldLevelEncryptionWithJettisonJsonEngineTest extends FieldLevelEn
 
     @BeforeClass
     public static void setUpJsonProvider() {
-        FieldLevelEncryption.withJsonEngine(new JettisonJsonEngine());
+        JsonParser.withJsonEngine(new JettisonJsonEngine());
     }
 }

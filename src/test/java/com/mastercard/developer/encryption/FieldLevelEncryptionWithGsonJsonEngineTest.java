@@ -10,6 +10,6 @@ public class FieldLevelEncryptionWithGsonJsonEngineTest extends FieldLevelEncryp
 
     @BeforeClass
     public static void setUpJsonProvider() {
-        FieldLevelEncryption.withJsonEngine(new GsonJsonEngine());
+        JsonParser.withJsonEngine(new GsonJsonEngine());
     }
 }

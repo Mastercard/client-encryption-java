@@ -10,7 +10,7 @@ import com.mastercard.developer.json.JsonEngine;
 import java.util.Collection;
 import java.util.Collections;
 
-abstract class CryptoProvider {
+final class JsonParser {
 
     static JsonEngine jsonEngine;
     static Configuration jsonPathConfig = withJsonEngine(JsonEngine.getDefault());
@@ -21,8 +21,8 @@ abstract class CryptoProvider {
      * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} instance
      */
     static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
-        CryptoProvider.jsonEngine = jsonEngine;
-        CryptoProvider.jsonPathConfig = new Configuration.ConfigurationBuilder()
+        JsonParser.jsonEngine = jsonEngine;
+        JsonParser.jsonPathConfig = new Configuration.ConfigurationBuilder()
                 .jsonProvider(jsonEngine.getJsonProvider())
                 .options(Option.SUPPRESS_EXCEPTIONS)
                 .build();
