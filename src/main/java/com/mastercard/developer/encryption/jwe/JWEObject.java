@@ -10,7 +10,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -43,8 +43,8 @@ public class JWEObject {
         SecretKey cek = decryptKey(config, Base64Codec.decode(this.getEncryptedKey()));
         String encodedHeader = this.getRawHeader();
 
-        byte[] aad = encodedHeader.getBytes(Charset.forName("ASCII"));
-        byte[] plainText = new byte[0];
+        byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
+        byte[] plainText;
 
         SecretKey aesKey = new SecretKeySpec(cek.getEncoded(), "AES");
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, Base64Codec.decode(this.getIv()));
@@ -55,7 +55,7 @@ public class JWEObject {
             cipher.updateAAD(aad);
             plainText = cipher.doFinal(ByteUtils.concat(Base64Codec.decode(this.getCipherText()), Base64Codec.decode(this.getAuthTag())));
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            throw new EncryptionException("Payload decryption failed!", e);
         }
 
         return new String(plainText);
@@ -73,11 +73,11 @@ public class JWEObject {
         String headerString = header.toJSONObject().toString();
         String encodedHeader = base64Encode(headerString);
 
-        byte[] aad = encodedHeader.getBytes(Charset.forName("ASCII"));
+        byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
 
         SecretKeySpec aesKey = new SecretKeySpec(cek.getEncoded(), "AES");
 
-        byte[] cipherOutput = new byte[0];
+        byte[] cipherOutput;
 
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -85,7 +85,7 @@ public class JWEObject {
             cipher.updateAAD(aad);
             cipherOutput = cipher.doFinal(payloadBytes);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            throw new EncryptionException("Payload encryption failed!", e);
         }
 
         int tagPos = cipherOutput.length - ByteUtils.byteLength(128);
@@ -110,11 +110,11 @@ public class JWEObject {
 
     private static String base64Encode(String text) {
         byte[] bytes = text.getBytes();
-        return Base64Codec.encodeToString(bytes, true);
+        return Base64Codec.encodeToString(bytes);
     }
 
     private static String base64Encode(byte[] bytes) {
-        return Base64Codec.encodeToString(bytes, true);
+        return Base64Codec.encodeToString(bytes);
     }
 
     private static byte[] encryptKey(JweConfig config, Key key) throws EncryptionException {

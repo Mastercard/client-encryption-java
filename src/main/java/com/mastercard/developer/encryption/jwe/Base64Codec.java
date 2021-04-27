@@ -2,49 +2,43 @@ package com.mastercard.developer.encryption.jwe;
 
 import java.util.Arrays;
 
-public class Base64Codec {
+class Base64Codec {
 
-    static int computeEncodedLength(final int inputLength, final boolean urlSafe) {
+    static int computeEncodedLength(final int inputLength) {
 
         if (inputLength == 0) {
             return 0;
         }
 
-        if (urlSafe) {
+        // Compute the number of complete quads (4-char blocks)
+        int fullQuadLength = (inputLength / 3) << 2;
 
-            // Compute the number of complete quads (4-char blocks)
-            int fullQuadLength = (inputLength / 3) << 2;
+        // Compute the remaining bytes at the end
+        int remainder = inputLength % 3;
 
-            // Compute the remaining bytes at the end
-            int remainder = inputLength % 3;
-
-            // Compute the total
-            return remainder == 0 ? fullQuadLength : fullQuadLength + remainder + 1;
-        } else {
-            // Original Mig code
-            return ((inputLength - 1) / 3 + 1) << 2;
-        }
+        // Compute the total
+        return remainder == 0 ? fullQuadLength : fullQuadLength + remainder + 1;
     }
 
-    static int tpSelect(int bool, int when_true, int when_false) {
+    private static int tpSelect(int bool, int whenTrue, int whenFalse) {
 
         // Will be 0x00000000 when bool == 1, or 0xFFFFFFFF when bool == 0
         final int mask = bool - 1;
 
-        return when_true ^ (mask & (when_true ^ when_false));
+        return whenTrue ^ (mask & (whenTrue ^ whenFalse));
     }
 
-    static int tpLT(int a, int b) {
+    private static int tpLT(int a, int b) {
 
         return (int) (((long) a - (long) b) >>> 63);
     }
 
-    static int tpGT(int a, int b) {
+    private static int tpGT(int a, int b) {
 
         return (int) (((long) b - (long) a) >>> 63);
     }
 
-    static int tpEq(int a, int b) {
+    private static int tpEq(int a, int b) {
 
         // This is magic but it will make sense
         // if you think about it for 30 minutes
@@ -54,50 +48,21 @@ public class Base64Codec {
         return msb_iff_zero_diff >>> 63;
     }
 
-    static byte encodeDigitBase64(int digit_idx) {
+    private static byte encodeDigitBase64URL(int digitIdx) {
 
-        assert digit_idx >= 0 && digit_idx <= 63;
-
-        // Figure out which type of digit this should be
-        final int is_uppercase = tpLT(digit_idx, 26);
-        final int is_lowercase = tpGT(digit_idx, 25) & tpLT(digit_idx, 52);
-        final int is_decimal   = tpGT(digit_idx, 51) & tpLT(digit_idx, 62);
-        final int is_62        = tpEq(digit_idx, 62);
-        final int is_63        = tpEq(digit_idx, 63);
-
-        // Translate from digit index to ASCII for each hypothetical scenario
-        final int as_uppercase = digit_idx -  0 + 65;
-        final int as_lowercase = digit_idx - 26 + 97;
-        final int as_decimal   = digit_idx - 52 + 48;
-        final int as_62        = (int) '+';
-        final int as_63        = (int) '/';
-
-        // Zero out all scenarios except for the right one, and combine
-        final int ascii =
-                tpSelect(is_uppercase, as_uppercase, 0) |
-                        tpSelect(is_lowercase, as_lowercase, 0) |
-                        tpSelect(is_decimal  , as_decimal  , 0) |
-                        tpSelect(is_62       , as_62       , 0) |
-                        tpSelect(is_63       , as_63       , 0);
-
-        return (byte) ascii;
-    }
-
-    static byte encodeDigitBase64URL(int digit_idx) {
-
-        assert digit_idx >= 0 && digit_idx <= 63;
+        assert digitIdx >= 0 && digitIdx <= 63;
 
         // Figure out which type of digit this should be
-        final int is_uppercase = tpLT(digit_idx, 26);
-        final int is_lowercase = tpGT(digit_idx, 25) & tpLT(digit_idx, 52);
-        final int is_decimal   = tpGT(digit_idx, 51) & tpLT(digit_idx, 62);
-        final int is_62        = tpEq(digit_idx, 62);
-        final int is_63        = tpEq(digit_idx, 63);
+        final int is_uppercase = tpLT(digitIdx, 26);
+        final int is_lowercase = tpGT(digitIdx, 25) & tpLT(digitIdx, 52);
+        final int is_decimal   = tpGT(digitIdx, 51) & tpLT(digitIdx, 62);
+        final int is_62        = tpEq(digitIdx, 62);
+        final int is_63        = tpEq(digitIdx, 63);
 
         // Translate from digit index to ASCII for each hypothetical scenario
-        final int as_uppercase = digit_idx -  0 + 65;
-        final int as_lowercase = digit_idx - 26 + 97;
-        final int as_decimal   = digit_idx - 52 + 48;
+        final int as_uppercase = digitIdx + 65;
+        final int as_lowercase = digitIdx - 26 + 97;
+        final int as_decimal   = digitIdx - 52 + 48;
         final int as_62        = (int) '-';
         final int as_63        = (int) '_';
 
@@ -112,7 +77,7 @@ public class Base64Codec {
         return (byte) ascii;
     }
 
-    static int decodeDigit(byte ascii) {
+    private static int decodeDigit(byte ascii) {
 
         // Figure out which type of digit this is
         final int is_uppercase = tpGT(ascii, 64) & tpLT(ascii, 91);
@@ -125,7 +90,7 @@ public class Base64Codec {
         final int is_valid = is_uppercase | is_lowercase | is_decimal | is_62 | is_63;
 
         // Translate from ASCII to digit index for each hypothetical scenario
-        final int from_uppercase = ascii - 65 +  0;
+        final int from_uppercase = ascii - 65;
         final int from_lowercase = ascii - 97 + 26;
         final int from_decimal   = ascii - 48 + 52;
         final int from_62        = 62;
@@ -145,7 +110,7 @@ public class Base64Codec {
         return digit_idx;
     }
 
-    public static String encodeToString(byte[] byteArray, final boolean urlSafe) {
+    static String encodeToString(byte[] byteArray) {
 
         // Check special case
         final int sLen = byteArray != null ? byteArray.length : 0;
@@ -155,7 +120,7 @@ public class Base64Codec {
         }
 
         final int eLen = (sLen / 3) * 3;                      // Length of even 24-bits.
-        final int dLen = computeEncodedLength(sLen, urlSafe); // Returned byte count
+        final int dLen = computeEncodedLength(sLen); // Returned byte count
         final byte[] out = new byte[dLen];
 
         // Encode even 24-bits
@@ -165,17 +130,10 @@ public class Base64Codec {
             final int i = (byteArray[s++] & 0xff) << 16 | (byteArray[s++] & 0xff) << 8 | (byteArray[s++] & 0xff);
 
             // Encode the int into four chars
-            if (urlSafe) {
-                out[d++] = encodeDigitBase64URL((i >>> 18) & 0x3f);
-                out[d++] = encodeDigitBase64URL((i >>> 12) & 0x3f);
-                out[d++] = encodeDigitBase64URL((i >>> 6) & 0x3f);
-                out[d++] = encodeDigitBase64URL(i & 0x3f);
-            } else {
-                out[d++] = encodeDigitBase64((i >>> 18) & 0x3f);
-                out[d++] = encodeDigitBase64((i >>> 12) & 0x3f);
-                out[d++] = encodeDigitBase64((i >>> 6) & 0x3f);
-                out[d++] = encodeDigitBase64(i & 0x3f);
-            }
+            out[d++] = encodeDigitBase64URL((i >>> 18) & 0x3f);
+            out[d++] = encodeDigitBase64URL((i >>> 12) & 0x3f);
+            out[d++] = encodeDigitBase64URL((i >>> 6) & 0x3f);
+            out[d++] = encodeDigitBase64URL(i & 0x3f);
         }
 
         // Pad and encode last bits if source isn't even 24 bits
@@ -185,30 +143,20 @@ public class Base64Codec {
             // Prepare the int
             final int i = ((byteArray[eLen] & 0xff) << 10) | (left == 2 ? ((byteArray[sLen - 1] & 0xff) << 2) : 0);
 
-            // Set last four chars
-            if (urlSafe) {
-
-                if (left == 2) {
-                    out[dLen - 3] = encodeDigitBase64URL(i >> 12);
-                    out[dLen - 2] = encodeDigitBase64URL((i >>> 6) & 0x3f);
-                    out[dLen - 1] = encodeDigitBase64URL(i & 0x3f);
-                } else {
-                    out[dLen - 2] = encodeDigitBase64URL(i >> 12);
-                    out[dLen - 1] = encodeDigitBase64URL((i >>> 6) & 0x3f);
-                }
+            if (left == 2) {
+                out[dLen - 3] = encodeDigitBase64URL(i >> 12);
+                out[dLen - 2] = encodeDigitBase64URL((i >>> 6) & 0x3f);
+                out[dLen - 1] = encodeDigitBase64URL(i & 0x3f);
             } else {
-                // Original Mig code with padding
-                out[dLen - 4] = encodeDigitBase64(i >> 12);
-                out[dLen - 3] = encodeDigitBase64((i >>> 6) & 0x3f);
-                out[dLen - 2] = left == 2 ? encodeDigitBase64(i & 0x3f) : (byte) '=';
-                out[dLen - 1] = (byte) '=';
+                out[dLen - 2] = encodeDigitBase64URL(i >> 12);
+                out[dLen - 1] = encodeDigitBase64URL((i >>> 6) & 0x3f);
             }
         }
 
         return new String(out);
     }
 
-    public static byte[] decode(final String b64String) {
+    static byte[] decode(final String b64String) {
 
         // Check special case
         if (b64String == null || b64String.isEmpty()) {
