@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
 public class AESGCM {
-    private static final String CIPHER = "AES/GCM/NoPadding";
+    private static final String CYPHER = "AES/GCM/NoPadding";
 
     public static byte[] decrypt(SecretKey cek, JWEObject obj) throws EncryptionException {
         byte[] aad = obj.getRawHeader().getBytes(StandardCharsets.US_ASCII);
@@ -18,7 +18,7 @@ public class AESGCM {
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, Base64Codec.decode(obj.getIv()));
 
         try {
-            Cipher cipher = Cipher.getInstance(CIPHER);
+            Cipher cipher = Cipher.getInstance(CYPHER);
             cipher.init(2, aesKey, gcmSpec);
             cipher.updateAAD(aad);
             return cipher.doFinal(ByteUtils.concat(Base64Codec.decode(obj.getCipherText()), Base64Codec.decode(obj.getAuthTag())));
