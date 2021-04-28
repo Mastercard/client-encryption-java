@@ -28,6 +28,8 @@ public class JWEObject {
     private String cipherText;
     private String authTag;
 
+    private static final String A128CBC_HS256 = "A128CBC-HS256";
+    private static final String A256GCM = "A256GCM";
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 
     private JWEObject(JWEHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
@@ -39,23 +41,18 @@ public class JWEObject {
         this.authTag = authTag;
     }
 
-    public String decrypt(JweConfig config, String cypher) throws EncryptionException {
+    public String decrypt(JweConfig config) throws EncryptionException {
         SecretKey cek = decryptKey(config, Base64Codec.decode(this.getEncryptedKey()));
-        String encodedHeader = this.getRawHeader();
+        String encryptionMethod = this.header.getEnc();
 
-        byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
         byte[] plainText;
 
-        SecretKey aesKey = new SecretKeySpec(cek.getEncoded(), "AES");
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, Base64Codec.decode(this.getIv()));
-
-        try {
-            Cipher cipher = Cipher.getInstance(cypher);
-            cipher.init(2, aesKey, gcmSpec);
-            cipher.updateAAD(aad);
-            plainText = cipher.doFinal(ByteUtils.concat(Base64Codec.decode(this.getCipherText()), Base64Codec.decode(this.getAuthTag())));
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Payload decryption failed!", e);
+        if(encryptionMethod.equals(A256GCM)) {
+            plainText = AESGCM.decrypt(cek, this);
+        } else if(encryptionMethod.equals(A128CBC_HS256)) {
+            plainText = AESCBC.decrypt(cek, this);
+        } else {
+            throw new EncryptionException(String.format("Encryption method %s not supported", encryptionMethod));
         }
 
         return new String(plainText);
@@ -166,21 +163,21 @@ public class JWEObject {
         return header;
     }
 
-    private String getRawHeader() { return rawHeader; }
+    String getRawHeader() { return rawHeader; }
 
     private String getEncryptedKey() {
         return encryptedKey;
     }
 
-    private String getIv() {
+    public String getIv() {
         return iv;
     }
 
-    private String getCipherText() {
+    String getCipherText() {
         return cipherText;
     }
 
-    private String getAuthTag() {
+    String getAuthTag() {
         return authTag;
     }
 }

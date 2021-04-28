@@ -18,7 +18,7 @@ public final class JWEHeader {
         this.cty = cty;
     }
 
-    public JSONObject toJSONObject() {
+    JSONObject toJSONObject() {
         JSONObject obj = new JSONObject();
         if(this.kid != null) {
             obj.put("kid", this.kid);
@@ -35,7 +35,7 @@ public final class JWEHeader {
         return obj;
     }
 
-    public static JWEHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
+    static JWEHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
         LinkedHashMap headerObj = (LinkedHashMap) jsonEngine.parse(new String(Base64Codec.decode(encodedHeader)));
         return new JWEHeader(
                 headerObj.get("alg").toString(),
@@ -43,4 +43,6 @@ public final class JWEHeader {
                 headerObj.get("kid").toString(),
                 headerObj.get("cty") != null ? headerObj.get("cty").toString() : null);
     }
+
+    String getEnc() { return enc; }
 }

@@ -127,6 +127,39 @@ public class OkHttpJweInterceptorTest {
     }
 
     @Test
+    public void testInterceptResponse_ShouldDecryptWithA128CBC_HS256Encryption() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "\"encryptedPayload\":\"eyJraWQiOiI3NjFiMDAzYzFlYWRlM2E1NDkwZTUwMDBkMzc4ODdiYWE1ZTZlYzBlMjI2YzA3NzA2ZTU5OTQ1MWZjMDMyYTc5IiwiY3R5IjoiYXBwbGljYXRpb25cL2pzb24iLCJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.5bsamlChk0HR3Nqg2UPJ2Fw4Y0MvC2pwWzNv84jYGkOXyqp1iwQSgETGaplIa7JyLg1ZWOqwNHEx3N7gsN4nzwAnVgz0eta6SsoQUE9YQ-5jek0COslUkoqIQjlQYJnYur7pqttDibj87fcw13G2agle5fL99j1QgFPjNPYqH88DMv481XGFa8O3VfJhW93m73KD2gvE5GasOPOkFK9wjKXc9lMGSgSArp3Awbc_oS2Cho_SbsvuEQwkhnQc2JKT3IaSWu8yK7edNGwD6OZJLhMJzWJlY30dUt2Eqe1r6kMT0IDRl7jHJnVIr2Qpe56CyeZ9V0aC5RH1mI5dYk4kHg.yI0CS3NdBrz9CCW2jwBSDw.6zr2pOSmAGdlJG0gbH53Eg.UFgf3-P9UjgMocEu7QA_vQ\"}";
+
+        JweConfig config = getTestJweConfigBuilder()
+                .withDecryptionPath("$.encryptedPayload", "$.foo")
+                .build();
+        Request request = mock(Request.class);
+        Response encryptedResponse = new Response.Builder()
+                .body(ResponseBody.create(JSON_MEDIA_TYPE, encryptedPayload))
+                .request(request)
+                .code(200)
+                .protocol(Protocol.HTTP_1_1)
+                .message("")
+                .build();
+        Chain chain = mock(Chain.class);
+        when(request.body()).thenReturn(null);
+        when(chain.request()).thenReturn(request);
+        when(chain.proceed(any(Request.class))).thenReturn(encryptedResponse);
+
+        // WHEN
+        OkHttpJweInterceptor instanceUnderTest = new OkHttpJweInterceptor(config);
+        Response response = instanceUnderTest.intercept(chain);
+
+        // THEN
+        String payload = response.body().string();
+        assertPayloadEquals("{\"foo\":\"bar\"}", payload);
+        assertEquals(payload.length(), response.body().contentLength());
+    }
+
+    @Test
     public void testIntercept_ShouldDoNothing_WhenResponseWithoutPayload() throws Exception {
 
         // GIVEN

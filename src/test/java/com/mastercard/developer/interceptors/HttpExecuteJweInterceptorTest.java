@@ -121,6 +121,58 @@ public class HttpExecuteJweInterceptorTest {
     }
 
     @Test
+    public void testInterceptResponse_ShouldDecryptWithA128CBC_HS256Encryption() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "\"encryptedPayload\":\"eyJraWQiOiI3NjFiMDAzYzFlYWRlM2E1NDkwZTUwMDBkMzc4ODdiYWE1ZTZlYzBlMjI2YzA3NzA2ZTU5OTQ1MWZjMDMyYTc5IiwiY3R5IjoiYXBwbGljYXRpb25cL2pzb24iLCJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.5bsamlChk0HR3Nqg2UPJ2Fw4Y0MvC2pwWzNv84jYGkOXyqp1iwQSgETGaplIa7JyLg1ZWOqwNHEx3N7gsN4nzwAnVgz0eta6SsoQUE9YQ-5jek0COslUkoqIQjlQYJnYur7pqttDibj87fcw13G2agle5fL99j1QgFPjNPYqH88DMv481XGFa8O3VfJhW93m73KD2gvE5GasOPOkFK9wjKXc9lMGSgSArp3Awbc_oS2Cho_SbsvuEQwkhnQc2JKT3IaSWu8yK7edNGwD6OZJLhMJzWJlY30dUt2Eqe1r6kMT0IDRl7jHJnVIr2Qpe56CyeZ9V0aC5RH1mI5dYk4kHg.yI0CS3NdBrz9CCW2jwBSDw.6zr2pOSmAGdlJG0gbH53Eg.UFgf3-P9UjgMocEu7QA_vQ\"}";
+
+        JweConfig config = getTestJweConfigBuilder()
+                .withDecryptionPath("$.encryptedPayload", "$.foo")
+                .build();
+        HttpResponse response = mock(HttpResponse.class);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentLength(100L);
+        when(response.parseAsString()).thenReturn(encryptedPayload);
+        when(response.getHeaders()).thenReturn(httpHeaders);
+
+        // WHEN
+        HttpExecuteJweInterceptor instanceUnderTest = new HttpExecuteJweInterceptor(config);
+        instanceUnderTest.interceptResponse(response);
+
+        // THEN
+        Field contentField = response.getClass().getDeclaredField("content");
+        contentField.setAccessible(true);
+        InputStream payloadInputStream = (InputStream) contentField.get(response);
+        String payload = IOUtils.toString(payloadInputStream, StandardCharsets.UTF_8);
+        assertPayloadEquals("{\"foo\":\"bar\"}", payload);
+        assertEquals(payload.length(), httpHeaders.getContentLength().intValue());
+    }
+
+    @Test
+    public void testInterceptResponse_ShouldThrowAnExceptionWhenEncryptionNotSupported() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "\"encryptedPayload\":\"eyJraWQiOiI3NjFiMDAzYzFlYWRlM2E1NDkwZTUwMDBkMzc4ODdiYWE1ZTZlYzBlMjI2YzA3NzA2ZTU5OTQ1MWZjMDMyYTc5IiwiY3R5IjoiYXBwbGljYXRpb25cL2pzb24iLCJlbmMiOiJBMTkyR0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.peSgTt_lPbcNStWh-gI3yMzhOGtFCwExFwLxKeHwjzsXvHB0Fml5XnG0jRbJSfOHzKx02d0NVBzoDDRSAnafuabbbMKcoaUK-jZNHSg4BHdyBZpCO82kzvWeEm3TTNHIMBTfM00EmdFB03z_a0PaWsT-FIOzu4Sd5Z_nsNLhP9941CtVS-YtZ9WkgDezGipxA7ejQ3X5gFVy2RH1gL8OTbzIYCwBcrfSjAiCQgunNbLxPPlfZHB_6prPK7_50NS6FvuMnAhiqUiiAka8DHMdeGBWOie2Q0FV_bsRDHx_6CY8kQA3F_NXz1dELIclJhdZFfRt1y-TEfwOIj4nDi2JnA.8BYMB5MkH2ZNyFGS._xb3uDsUQcPT5fQyZw.O0MzJ5OvNyj_QMuqaloTWA\"}";
+
+        JweConfig config = getTestJweConfigBuilder()
+                .withDecryptionPath("$.encryptedPayload", "$.foo")
+                .build();
+        HttpResponse response = mock(HttpResponse.class);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentLength(100L);
+        when(response.parseAsString()).thenReturn(encryptedPayload);
+        when(response.getHeaders()).thenReturn(httpHeaders);
+
+        // THEN
+        expectedException.expect(IOException.class);
+        expectedException.expectCause(isA(EncryptionException.class));
+        HttpExecuteJweInterceptor instanceUnderTest = new HttpExecuteJweInterceptor(config);
+        instanceUnderTest.interceptResponse(response);
+    }
+
+    @Test
     public void testInterceptResponse_ShouldDoNothing_WhenNoPayload() throws Exception {
 
         // GIVEN

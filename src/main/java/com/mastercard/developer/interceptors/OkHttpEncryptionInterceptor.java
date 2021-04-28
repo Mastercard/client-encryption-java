@@ -44,7 +44,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
             Request.Builder requestBuilder = request.newBuilder();
             String encryptedPayload = encryptPayload(request, requestBuilder, requestPayload);
 
-            RequestBody encryptedBody = RequestBody.create(encryptedPayload, requestBody.contentType());
+            RequestBody encryptedBody = RequestBody.create(requestBody.contentType(), encryptedPayload);
             return requestBuilder
                     .method(request.method(), encryptedBody)
                     .header("Content-Length", String.valueOf(encryptedBody.contentLength()))
@@ -75,7 +75,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
             Response.Builder responseBuilder = response.newBuilder();
             String decryptedPayload = decryptPayload(response, responseBuilder, responsePayload);
 
-            try (ResponseBody decryptedBody = ResponseBody.create(decryptedPayload, responseBody.contentType())) {
+            try (ResponseBody decryptedBody = ResponseBody.create(responseBody.contentType(), decryptedPayload)) {
                 return responseBuilder
                         .body(decryptedBody)
                         .header("Content-Length", String.valueOf(decryptedBody.contentLength()))
