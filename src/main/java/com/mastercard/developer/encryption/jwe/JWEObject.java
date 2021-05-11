@@ -1,36 +1,34 @@
 package com.mastercard.developer.encryption.jwe;
 
 import com.mastercard.developer.encryption.EncryptionException;
+import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.encryption.JweConfig;
+import com.mastercard.developer.encryption.aes.AESCBC;
+import com.mastercard.developer.encryption.aes.AESEncryption;
+import com.mastercard.developer.encryption.aes.AESGCM;
+import com.mastercard.developer.encryption.rsa.RSA;
 import com.mastercard.developer.json.JsonEngine;
+import com.mastercard.developer.utils.ByteUtils;
+import com.mastercard.developer.utils.EncodingUtils;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.MGF1ParameterSpec;
-
-import static com.mastercard.developer.utils.EncryptionUtils.generateIv;
+import java.util.Base64;
 
 public class JWEObject {
-    private JWEHeader header;
-    private String rawHeader;
-    private String encryptedKey;
-    private String iv;
-    private String cipherText;
-    private String authTag;
+    private final JWEHeader header;
+    private final String rawHeader;
+    private final String encryptedKey;
+    private final String iv;
+    private final String cipherText;
+    private final String authTag;
 
     private static final String A128CBC_HS256 = "A128CBC-HS256";
     private static final String A256GCM = "A256GCM";
-    private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 
     private JWEObject(JWEHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
         this.header = header;
@@ -41,8 +39,8 @@ public class JWEObject {
         this.authTag = authTag;
     }
 
-    public String decrypt(JweConfig config) throws EncryptionException {
-        SecretKey cek = decryptKey(config, Base64Codec.decode(this.getEncryptedKey()));
+    public String decrypt(JweConfig config) throws EncryptionException, GeneralSecurityException {
+        Key cek = RSA.unwrapSecretKey(config.getDecryptionKey(), Base64.getUrlDecoder().decode(this.getEncryptedKey()), "SHA-256");
         String encryptionMethod = this.header.getEnc();
 
         byte[] plainText;
@@ -58,32 +56,23 @@ public class JWEObject {
         return new String(plainText);
     }
 
-    public static String encrypt(JweConfig config, String payload, JWEHeader header) throws EncryptionException {
-        SecretKeySpec cek = generateCek();
-        byte[] encryptedSecretKeyBytes = encryptKey(config, cek);
+    public static String encrypt(JweConfig config, String payload, JWEHeader header) throws EncryptionException, GeneralSecurityException {
+        SecretKeySpec cek = AESEncryption.generateCek(256);
+        byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionCertificate().getPublicKey(), cek, "SHA-256");
         String encryptedKey = base64Encode(encryptedSecretKeyBytes);
 
-        byte[] iv = generateIv().getIV();
+        byte[] iv = AESEncryption.generateIv().getIV();
         byte[] payloadBytes = payload.getBytes();
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
 
-        String headerString = header.toJSONObject().toString();
-        String encodedHeader = base64Encode(headerString);
+        String headerString = header.toJson();
+        String encodedHeader = base64Encode(headerString.getBytes());
 
         byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
 
         SecretKeySpec aesKey = new SecretKeySpec(cek.getEncoded(), "AES");
 
-        byte[] cipherOutput;
-
-        try {
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            cipher.init(1, aesKey, gcmSpec);
-            cipher.updateAAD(aad);
-            cipherOutput = cipher.doFinal(payloadBytes);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Payload encryption failed!", e);
-        }
+        byte[] cipherOutput = AESGCM.cipher(aesKey, gcmSpec, payloadBytes, aad, Cipher.ENCRYPT_MODE);
 
         int tagPos = cipherOutput.length - ByteUtils.byteLength(128);
         byte[] cipherText = ByteUtils.subArray(cipherOutput, 0, tagPos);
@@ -105,47 +94,8 @@ public class JWEObject {
         return sb.toString();
     }
 
-    private static String base64Encode(String text) {
-        byte[] bytes = text.getBytes();
-        return Base64Codec.encodeToString(bytes);
-    }
-
     private static String base64Encode(byte[] bytes) {
-        return Base64Codec.encodeToString(bytes);
-    }
-
-    private static byte[] encryptKey(JweConfig config, Key key) throws EncryptionException {
-        try {
-            AlgorithmParameters algp = AlgorithmParameters.getInstance("OAEP");
-            Key publicEncryptionKey = config.getEncryptionCertificate().getPublicKey();
-            AlgorithmParameterSpec paramSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
-            algp.init(paramSpec);
-            Cipher cipher = Cipher.getInstance(ASYMMETRIC_CYPHER);
-            cipher.init(Cipher.ENCRYPT_MODE, publicEncryptionKey, algp);
-            return cipher.doFinal(key.getEncoded());
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to wrap secret key!", e);
-        }
-    }
-
-    private static SecretKeySpec decryptKey(JweConfig config, byte[] encryptedCEK) throws EncryptionException {
-        try {
-            AlgorithmParameters algp = AlgorithmParameters.getInstance("OAEP");
-            AlgorithmParameterSpec paramSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
-            algp.init(paramSpec);
-            Cipher cipher = Cipher.getInstance(ASYMMETRIC_CYPHER);
-            cipher.init(Cipher.DECRYPT_MODE, config.getDecryptionKey(), algp);
-            return new SecretKeySpec(cipher.doFinal(encryptedCEK), "AES");
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to wrap secret key!", e);
-        }
-    }
-
-    private static SecretKeySpec generateCek() {
-        SecureRandom random = new SecureRandom();
-        byte[] cekMaterial = new byte[ByteUtils.byteLength(256)];
-        random.nextBytes(cekMaterial);
-        return new SecretKeySpec(cekMaterial, "AES");
+        return EncodingUtils.encodeBytes(bytes, FieldLevelEncryptionConfig.FieldValueEncoding.BASE64);
     }
 
     public static JWEObject parse(String encryptedPayload, JsonEngine jsonEngine) {
@@ -163,7 +113,7 @@ public class JWEObject {
         return header;
     }
 
-    String getRawHeader() { return rawHeader; }
+    public String getRawHeader() { return rawHeader; }
 
     private String getEncryptedKey() {
         return encryptedKey;
@@ -173,11 +123,11 @@ public class JWEObject {
         return iv;
     }
 
-    String getCipherText() {
+    public String getCipherText() {
         return cipherText;
     }
 
-    String getAuthTag() {
+    public String getAuthTag() {
         return authTag;
     }
 }

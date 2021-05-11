@@ -14,7 +14,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * Build a {@link com.mastercard.developer.encryption.JweConfig}.
+     * Build a {@link JweConfig}.
      *
      * @throws EncryptionException
      */
@@ -35,7 +35,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptionCertificate}.
+     * See: {@link EncryptionConfig#encryptionCertificate}.
      */
     public JweConfigBuilder withEncryptionCertificate(Certificate encryptionCertificate) {
         this.encryptionCertificate = encryptionCertificate;
@@ -43,7 +43,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#decryptionKey}.
+     * See: {@link EncryptionConfig#decryptionKey}.
      */
     public JweConfigBuilder withDecryptionKey(PrivateKey decryptionKey) {
         this.decryptionKey = decryptionKey;
@@ -51,7 +51,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptionPaths}.
+     * See: {@link EncryptionConfig#encryptionPaths}.
      */
     public JweConfigBuilder withEncryptionPath(String jsonPathIn, String jsonPathOut) {
         this.encryptionPaths.put(jsonPathIn, jsonPathOut);
@@ -59,7 +59,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#decryptionPaths}.
+     * See: {@link EncryptionConfig#decryptionPaths}.
      */
     public JweConfigBuilder withDecryptionPath(String jsonPathIn, String jsonPathOut) {
         this.decryptionPaths.put(jsonPathIn, jsonPathOut);
@@ -67,7 +67,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
-     * See: {@link com.mastercard.developer.encryption.EncryptionConfig#encryptedValueFieldName}.
+     * See: {@link EncryptionConfig#encryptedValueFieldName}.
      */
     public JweConfigBuilder withEncryptedValueFieldName(String encryptedValueFieldName) {
         this.encryptedValueFieldName = encryptedValueFieldName;

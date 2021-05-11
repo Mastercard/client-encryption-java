@@ -1,8 +1,5 @@
 package com.mastercard.developer.utils;
 
-import com.mastercard.developer.encryption.EncryptionException;
-
-import javax.crypto.spec.IvParameterSpec;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -75,17 +72,6 @@ public final class EncryptionUtils {
         KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12");
         pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), decryptionKeyPassword.toCharArray());
         return (PrivateKey) pkcs12KeyStore.getKey(decryptionKeyAlias, decryptionKeyPassword.toCharArray());
-    }
-
-    public static IvParameterSpec generateIv() throws EncryptionException {
-        try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            byte[] ivBytes = new byte[16];
-            secureRandom.nextBytes(ivBytes);
-            return new IvParameterSpec(ivBytes);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to generate an IV value!", e);
-        }
     }
 
     /**

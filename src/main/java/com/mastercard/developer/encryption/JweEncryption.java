@@ -5,7 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.mastercard.developer.encryption.jwe.JWEHeader;
 import com.mastercard.developer.encryption.jwe.JWEObject;
 
-import java.security.interfaces.RSAPublicKey;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class JweEncryption {
         }
     }
 
-    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException {
+    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
@@ -84,7 +84,7 @@ public class JweEncryption {
         payloadContext.put(jsonPathOut, config.encryptedValueFieldName, payload);
     }
 
-    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException {
+    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
 
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {

@@ -3,12 +3,12 @@ package com.mastercard.developer.encryption;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.mastercard.developer.encryption.aes.AESCBC;
+
 import javax.crypto.Cipher;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -22,8 +22,6 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
  * Performs field level encryption on HTTP payloads.
  */
 public class FieldLevelEncryption {
-
-    private static final String SYMMETRIC_CYPHER = "AES/CBC/PKCS5Padding";
 
     public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
         return encryptPayload(payload, config, null);
@@ -93,7 +91,7 @@ public class FieldLevelEncryption {
         } catch (UnsupportedEncodingException e) {
             // Should not happen
         }
-        byte[] encryptedValueBytes = encryptBytes(params.getSecretKey(), params.getIvSpec(), inJsonBytes);
+        byte[] encryptedValueBytes = AESCBC.cipher(params.getSecretKey(), params.getIvSpec(), inJsonBytes, Cipher.ENCRYPT_MODE);
         String encryptedValue = encodeBytes(encryptedValueBytes, config.fieldValueEncoding);
 
         // Delete data in clear
@@ -161,7 +159,7 @@ public class FieldLevelEncryption {
 
         // Decrypt data
         byte[] encryptedValueBytes = decodeValue(JsonParser.jsonEngine.toJsonString(encryptedValueJsonElement), config.fieldValueEncoding);
-        byte[] decryptedValueBytes = decryptBytes(params.getSecretKey(), params.getIvSpec(), encryptedValueBytes);
+        byte[] decryptedValueBytes = AESCBC.cipher(params.getSecretKey(), params.getIvSpec(), encryptedValueBytes, Cipher.DECRYPT_MODE);
 
         // Add decrypted data at the given JSON path
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
@@ -174,18 +172,6 @@ public class FieldLevelEncryption {
         if (0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
-    }
-
-    static byte[] encryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        return cipher.doFinal(bytes);
-    }
-
-    static byte[] decryptBytes(Key key, AlgorithmParameterSpec iv, byte[] bytes) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(SYMMETRIC_CYPHER);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        return cipher.doFinal(bytes);
     }
 
     private static Object readAndDeleteJsonKey(DocumentContext context, String objectPath, Object object, String key) {

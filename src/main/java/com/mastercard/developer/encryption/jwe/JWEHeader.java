@@ -1,7 +1,7 @@
 package com.mastercard.developer.encryption.jwe;
 
 import com.mastercard.developer.json.JsonEngine;
-import net.minidev.json.JSONObject;
+import com.mastercard.developer.utils.EncodingUtils;
 
 import java.util.LinkedHashMap;
 
@@ -18,25 +18,27 @@ public final class JWEHeader {
         this.cty = cty;
     }
 
-    JSONObject toJSONObject() {
-        JSONObject obj = new JSONObject();
+    String toJson() {
+        JsonEngine engine = JsonEngine.getDefault();
+        Object obj = engine.parse("{}");
+
         if(this.kid != null) {
-            obj.put("kid", this.kid);
+            engine.addProperty(obj, "kid", this.kid);
         }
         if(this.cty != null) {
-            obj.put("cty", this.cty);
+            engine.addProperty(obj, "cty", this.cty);
         }
         if(this.enc != null) {
-            obj.put("enc", this.enc);
+            engine.addProperty(obj, "enc", this.enc);
         }
         if(this.alg != null) {
-            obj.put("alg", this.alg);
+            engine.addProperty(obj, "alg", this.alg);
         }
-        return obj;
+        return engine.toJsonString(obj);
     }
 
     static JWEHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
-        LinkedHashMap headerObj = (LinkedHashMap) jsonEngine.parse(new String(Base64Codec.decode(encodedHeader)));
+        LinkedHashMap headerObj = (LinkedHashMap) jsonEngine.parse(new String(EncodingUtils.base64Decode(encodedHeader)));
         return new JWEHeader(
                 headerObj.get("alg").toString(),
                 headerObj.get("enc").toString(),
@@ -45,4 +47,7 @@ public final class JWEHeader {
     }
 
     String getEnc() { return enc; }
+    String getAlg() { return alg; }
+    String getKid() { return kid; }
+    String getCty() { return cty; }
 }

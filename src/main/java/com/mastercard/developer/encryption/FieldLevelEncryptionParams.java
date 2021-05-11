@@ -1,18 +1,16 @@
 package com.mastercard.developer.encryption;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.spec.MGF1ParameterSpec;
+
+import com.mastercard.developer.encryption.aes.AESEncryption;
+import com.mastercard.developer.encryption.rsa.RSA;
 
 import static com.mastercard.developer.utils.EncodingUtils.decodeValue;
 import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
-import static com.mastercard.developer.utils.EncryptionUtils.generateIv;
 
 /**
  * Encryption parameters for computing field level encryption/decryption.
@@ -20,8 +18,7 @@ import static com.mastercard.developer.utils.EncryptionUtils.generateIv;
 public final class FieldLevelEncryptionParams {
 
     private static final Integer SYMMETRIC_KEY_SIZE = 128;
-    protected static final String SYMMETRIC_KEY_TYPE = "AES";
-    private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
+    static final String SYMMETRIC_KEY_TYPE = "AES";
 
     private final String ivValue;
     private final String encryptedKeyValue;
@@ -46,14 +43,14 @@ public final class FieldLevelEncryptionParams {
     public static FieldLevelEncryptionParams generate(FieldLevelEncryptionConfig config) throws EncryptionException {
 
         // Generate a random IV
-        IvParameterSpec ivParameterSpec = generateIv();
+        IvParameterSpec ivParameterSpec = AESEncryption.generateIv();
         String ivSpecValue = encodeBytes(ivParameterSpec.getIV(), config.fieldValueEncoding);
 
         // Generate an AES secret key
         SecretKey secretKey = generateSecretKey();
 
         // Encrypt the secret key
-        byte[] encryptedSecretKeyBytes = wrapSecretKey(config, secretKey);
+        byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.encryptionCertificate.getPublicKey(), secretKey, config.oaepPaddingDigestAlgorithm);
         String encryptedKeyValue = encodeBytes(encryptedSecretKeyBytes, config.fieldValueEncoding);
 
         // Compute the OAEP padding digest algorithm
@@ -79,14 +76,14 @@ public final class FieldLevelEncryptionParams {
         return oaepPaddingDigestAlgorithmValue;
     }
 
-    public Key getSecretKey() throws EncryptionException {
+    Key getSecretKey() throws EncryptionException {
         try {
             if (secretKey != null) {
                 return secretKey;
             }
             // Decrypt the AES secret key
             byte[] encryptedSecretKeyBytes = decodeValue(encryptedKeyValue, config.fieldValueEncoding);
-            secretKey = FieldLevelEncryptionParams.unwrapSecretKey(config, encryptedSecretKeyBytes, oaepPaddingDigestAlgorithmValue);
+            secretKey = RSA.unwrapSecretKey(config.decryptionKey, encryptedSecretKeyBytes, oaepPaddingDigestAlgorithmValue);
             return secretKey;
         } catch (EncryptionException e) {
             throw e;
@@ -95,7 +92,7 @@ public final class FieldLevelEncryptionParams {
         }
     }
 
-    public IvParameterSpec getIvSpec() throws EncryptionException {
+    IvParameterSpec getIvSpec() throws EncryptionException {
         try {
             if (ivParameterSpec != null) {
                 return ivParameterSpec;
@@ -117,38 +114,5 @@ public final class FieldLevelEncryptionParams {
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Failed to generate a secret key!", e);
         }
-    }
-
-    protected static byte[] wrapSecretKey(FieldLevelEncryptionConfig config, Key key) throws EncryptionException {
-        try {
-            Key publicEncryptionKey = config.encryptionCertificate.getPublicKey();
-            MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(config.oaepPaddingDigestAlgorithm);
-            String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-            Cipher cipher = Cipher.getInstance(asymmetricCipher);
-            cipher.init(Cipher.WRAP_MODE, publicEncryptionKey, getOaepParameterSpec(mgf1ParameterSpec));
-            return cipher.wrap(key);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to wrap secret key!", e);
-        }
-    }
-
-    protected static Key unwrapSecretKey(EncryptionConfig config, byte[] keyBytes, String oaepDigestAlgorithm) throws EncryptionException {
-        if (!oaepDigestAlgorithm.contains("-")) {
-            oaepDigestAlgorithm = oaepDigestAlgorithm.replace("SHA", "SHA-");
-        }
-        try {
-            MGF1ParameterSpec mgf1ParameterSpec = new MGF1ParameterSpec(oaepDigestAlgorithm);
-            Key key = config.decryptionKey;
-            String asymmetricCipher = ASYMMETRIC_CYPHER.replace("{ALG}", mgf1ParameterSpec.getDigestAlgorithm());
-            Cipher cipher = Cipher.getInstance(asymmetricCipher);
-            cipher.init(Cipher.UNWRAP_MODE, key, getOaepParameterSpec(mgf1ParameterSpec));
-            return cipher.unwrap(keyBytes, SYMMETRIC_KEY_TYPE, Cipher.SECRET_KEY);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionException("Failed to unwrap secret key!", e);
-        }
-    }
-
-    private static OAEPParameterSpec getOaepParameterSpec(MGF1ParameterSpec mgf1ParameterSpec) {
-        return new OAEPParameterSpec(mgf1ParameterSpec.getDigestAlgorithm(), "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
     }
 }
