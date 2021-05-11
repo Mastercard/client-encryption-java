@@ -1,9 +1,8 @@
 package com.mastercard.developer.encryption.jwe;
 
+import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.mastercard.developer.json.JsonEngine;
 import com.mastercard.developer.utils.EncodingUtils;
-
-import java.util.LinkedHashMap;
 
 public final class JWEHeader {
     private final String enc;
@@ -38,12 +37,13 @@ public final class JWEHeader {
     }
 
     static JWEHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
-        LinkedHashMap headerObj = (LinkedHashMap) jsonEngine.parse(new String(EncodingUtils.base64Decode(encodedHeader)));
-        return new JWEHeader(
-                headerObj.get("alg").toString(),
-                headerObj.get("enc").toString(),
-                headerObj.get("kid").toString(),
-                headerObj.get("cty") != null ? headerObj.get("cty").toString() : null);
+        Object headerObj = jsonEngine.parse(new String(EncodingUtils.base64Decode(encodedHeader)));
+        JsonProvider jsonProvider = jsonEngine.getJsonProvider();
+        String alg = jsonProvider.getMapValue(headerObj, "alg").toString();
+        String enc = jsonProvider.getMapValue(headerObj, "enc").toString();
+        String kid = jsonProvider.getMapValue(headerObj, "kid").toString();
+        Object cty = jsonProvider.getMapValue(headerObj, "cty");
+        return new JWEHeader(alg, enc, kid, cty != null ? cty.toString() : null);
     }
 
     String getEnc() { return enc; }

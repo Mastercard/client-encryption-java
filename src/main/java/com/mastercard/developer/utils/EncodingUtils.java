@@ -50,14 +50,11 @@ public class EncodingUtils {
         if (null == value) {
             throw new IllegalArgumentException("Can't base64 decode a null value!");
         }
+        value = value.replaceAll("\n", "");
         try {
             return Base64.getDecoder().decode(value);
         } catch (Exception ex) {
-            try {
-                return Base64.getUrlDecoder().decode(value);
-            } catch (Exception e) {
-                return Base64.getMimeDecoder().decode(value);
-            }
+            return Base64.getUrlDecoder().decode(value);
         }
     }
 
