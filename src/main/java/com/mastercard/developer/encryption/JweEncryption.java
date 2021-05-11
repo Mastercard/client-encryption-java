@@ -99,7 +99,7 @@ public class JweEncryption {
             return;
         }
 
-        String encryptedValue = jsonEngine.toJsonString(encryptedValueJsonElement);
+        String encryptedValue = jsonEngine.toJsonString(encryptedValueJsonElement).replaceAll("\"", "");
         JWEObject jweObject = JWEObject.parse(encryptedValue, jsonEngine);
         String payload = jweObject.decrypt(config);
 

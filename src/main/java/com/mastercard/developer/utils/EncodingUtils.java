@@ -53,11 +53,7 @@ public class EncodingUtils {
         try {
             return Base64.getDecoder().decode(value);
         } catch (Exception ex) {
-            try {
-                return Base64.getUrlDecoder().decode(value);
-            } catch (Exception e) {
-                return Base64.getMimeDecoder().decode(value);
-            }
+            return Base64.getUrlDecoder().decode(value);
         }
     }
 
