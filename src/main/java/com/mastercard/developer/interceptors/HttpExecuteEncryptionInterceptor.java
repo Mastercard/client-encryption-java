@@ -63,6 +63,7 @@ public abstract class HttpExecuteEncryptionInterceptor implements HttpExecuteInt
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S3011")
     public void interceptResponse(HttpResponse response) throws IOException {
         try {
             // Read response payload
