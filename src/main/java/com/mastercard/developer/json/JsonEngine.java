@@ -47,6 +47,11 @@ public abstract class JsonEngine {
         throw new IllegalStateException(message);
     }
 
+
+    public void addProperty(Object obj, String key, Object val) {
+        getJsonProvider().setProperty(obj, key, val);
+    }
+
     private static boolean isClassFound(String className) {
         try {
             Class.forName(className);

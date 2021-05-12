@@ -3,6 +3,7 @@ package com.mastercard.developer.encryption;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mastercard.developer.encryption.aes.AESCBC;
 import com.mastercard.developer.test.TestUtils;
 import com.mastercard.developer.utils.EncryptionUtils;
 import org.junit.Assert;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.rules.ExpectedException;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,7 +44,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
-        byte[] encryptedBytes = FieldLevelEncryption.encryptBytes(symmetricKey, ivParameterSpec, dataValue.getBytes());
+        byte[] encryptedBytes = AESCBC.cipher(symmetricKey, ivParameterSpec, dataValue.getBytes(), Cipher.ENCRYPT_MODE);
 
         // THEN
         byte[] expectedEncryptedBytes = base64Decode("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
@@ -61,7 +63,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
-        byte[] decryptedBytes = FieldLevelEncryption.decryptBytes(symmetricKey, ivParameterSpec, base64Decode(encryptedDataValue));
+        byte[] decryptedBytes = AESCBC.cipher(symmetricKey, ivParameterSpec, base64Decode(encryptedDataValue), Cipher.DECRYPT_MODE);
 
         // THEN
         byte[] expectedBytes = "some data ù€@".getBytes();

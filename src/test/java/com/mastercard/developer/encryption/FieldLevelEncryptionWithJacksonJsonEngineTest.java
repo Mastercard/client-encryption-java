@@ -10,6 +10,6 @@ public class FieldLevelEncryptionWithJacksonJsonEngineTest extends FieldLevelEnc
 
     @BeforeClass
     public static void setUpJsonProvider() {
-        FieldLevelEncryption.withJsonEngine(new JacksonJsonEngine());
+        JsonParser.withJsonEngine(new JacksonJsonEngine());
     }
 }

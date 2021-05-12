@@ -1,5 +1,6 @@
 package com.mastercard.developer.interceptors;
 
+import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.test.TestUtils;
@@ -25,6 +26,16 @@ public class OkHttpFieldLevelEncryptionInterceptorTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void testFrom_ShouldReturnTheCorrectInterceptor() throws Exception {
+        // GIVEN
+        EncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .build();
+
+        OkHttpEncryptionInterceptor interceptor = OkHttpEncryptionInterceptor.from(config);
+        assertTrue(interceptor instanceof OkHttpFieldLevelEncryptionInterceptor);
+    }
 
     @Test
     public void testIntercept_ShouldEncryptRequestPayloadAndUpdateContentLengthHeader() throws Exception {

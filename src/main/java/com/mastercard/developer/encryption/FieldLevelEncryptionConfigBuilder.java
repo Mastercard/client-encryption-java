@@ -1,16 +1,8 @@
 package com.mastercard.developer.encryption;
 
-import com.jayway.jsonpath.JsonPath;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
 import static com.mastercard.developer.utils.EncodingUtils.encodeBytes;
 import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 import static java.security.spec.MGF1ParameterSpec.SHA256;
@@ -19,14 +11,9 @@ import static java.security.spec.MGF1ParameterSpec.SHA512;
 /**
  * A builder class for {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig}.
  */
-public final class FieldLevelEncryptionConfigBuilder {
+public class FieldLevelEncryptionConfigBuilder extends EncryptionConfigBuilder {
 
-    private Certificate encryptionCertificate;
     private String encryptionCertificateFingerprint;
-    private String encryptionKeyFingerprint;
-    private PrivateKey decryptionKey;
-    private Map<String, String> encryptionPaths = new HashMap<>();
-    private Map<String, String> decryptionPaths = new HashMap<>();
     private String oaepPaddingDigestAlgorithm;
     private String ivFieldName;
     private String ivHeaderName;
@@ -34,15 +21,10 @@ public final class FieldLevelEncryptionConfigBuilder {
     private String oaepPaddingDigestAlgorithmHeaderName;
     private String encryptedKeyFieldName;
     private String encryptedKeyHeaderName;
-    private String encryptedValueFieldName;
     private String encryptionCertificateFingerprintFieldName;
     private String encryptionCertificateFingerprintHeaderName;
     private String encryptionKeyFingerprintFieldName;
     private String encryptionKeyFingerprintHeaderName;
-    private FieldValueEncoding fieldValueEncoding;
-
-    private FieldLevelEncryptionConfigBuilder() {
-    }
 
     /**
      * Get an instance of the builder.
@@ -158,7 +140,7 @@ public final class FieldLevelEncryptionConfigBuilder {
     /**
      * See: {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig#fieldValueEncoding}.
      */
-    public FieldLevelEncryptionConfigBuilder withFieldValueEncoding(FieldValueEncoding fieldValueEncoding) {
+    public FieldLevelEncryptionConfigBuilder withFieldValueEncoding(FieldLevelEncryptionConfig.FieldValueEncoding fieldValueEncoding) {
         this.fieldValueEncoding = fieldValueEncoding;
         return this;
     }
@@ -236,21 +218,8 @@ public final class FieldLevelEncryptionConfigBuilder {
         config.encryptedKeyHeaderName = this.encryptedKeyHeaderName;
         config.encryptionCertificateFingerprintHeaderName = this.encryptionCertificateFingerprintHeaderName;
         config.encryptionKeyFingerprintHeaderName = this.encryptionKeyFingerprintHeaderName;
+        config.scheme = EncryptionConfig.Scheme.LEGACY;
         return config;
-    }
-
-    private void checkJsonPathParameterValues() {
-        for (Entry<String, String> entry : decryptionPaths.entrySet()) {
-            if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                throw new IllegalArgumentException("JSON paths for decryption must point to a single item!");
-            }
-        }
-
-        for (Entry<String, String> entry : encryptionPaths.entrySet()) {
-            if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                throw new IllegalArgumentException("JSON paths for encryption must point to a single item!");
-            }
-        }
     }
 
     private void checkParameterValues() {
@@ -280,7 +249,7 @@ public final class FieldLevelEncryptionConfigBuilder {
         }
     }
 
-    private void checkParameterConsistency () {
+    private void checkParameterConsistency() {
         if (!decryptionPaths.isEmpty() && decryptionKey == null) {
             throw new IllegalArgumentException("Can't decrypt without decryption key!");
         }
@@ -307,28 +276,9 @@ public final class FieldLevelEncryptionConfigBuilder {
                 return;
             }
             byte[] certificateFingerprintBytes = sha256digestBytes(encryptionCertificate.getEncoded());
-            encryptionCertificateFingerprint = encodeBytes(certificateFingerprintBytes, FieldValueEncoding.HEX);
+            encryptionCertificateFingerprint = encodeBytes(certificateFingerprintBytes, FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
         } catch (Exception e) {
             throw new EncryptionException("Failed to compute encryption certificate fingerprint!", e);
         }
-    }
-
-    private void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
-        try {
-            if (encryptionCertificate == null || !isNullOrEmpty(encryptionKeyFingerprint)) {
-                // No encryption certificate set or key fingerprint already provided
-                return;
-            }
-            byte[] keyFingerprintBytes = sha256digestBytes(encryptionCertificate.getPublicKey().getEncoded());
-            encryptionKeyFingerprint = encodeBytes(keyFingerprintBytes, FieldValueEncoding.HEX);
-        } catch (Exception e) {
-            throw new EncryptionException("Failed to compute encryption key fingerprint!", e);
-        }
-    }
-
-    private static byte[] sha256digestBytes(byte[] bytes) throws NoSuchAlgorithmException {
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(bytes);
-        return messageDigest.digest();
     }
 }

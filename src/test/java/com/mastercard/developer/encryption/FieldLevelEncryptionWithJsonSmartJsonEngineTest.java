@@ -10,6 +10,6 @@ public class FieldLevelEncryptionWithJsonSmartJsonEngineTest extends FieldLevelE
 
     @BeforeClass
     public static void setUpJsonProvider() {
-        FieldLevelEncryption.withJsonEngine(new JsonSmartJsonEngine());
+        JsonParser.withJsonEngine(new JsonSmartJsonEngine());
     }
 }
