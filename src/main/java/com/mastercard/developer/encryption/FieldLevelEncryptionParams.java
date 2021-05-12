@@ -92,6 +92,7 @@ public final class FieldLevelEncryptionParams {
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S3329")
     IvParameterSpec getIvSpec() throws EncryptionException {
         try {
             if (ivParameterSpec != null) {

@@ -24,6 +24,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
         return handleResponse(encryptedResponse);
     }
 
+    @java.lang.SuppressWarnings("squid:S1874")
     private Request handleRequest(Request request) throws IOException {
         try {
             // Check request actually has a payload
@@ -55,6 +56,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S1874")
     private Response handleResponse(Response response) throws IOException {
         try {
             // Check response actually has a payload
