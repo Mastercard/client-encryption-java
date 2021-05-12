@@ -12,6 +12,10 @@ import java.util.Collections;
 
 final class JsonParser {
 
+    private JsonParser() {
+        // Nothing to do here
+    }
+
     static JsonEngine jsonEngine;
     static Configuration jsonPathConfig = withJsonEngine(JsonEngine.getDefault());
 

@@ -10,6 +10,10 @@ import java.security.SecureRandom;
 
 public class AESEncryption {
 
+    private AESEncryption() {
+        // Nothing to do here
+    }
+
     public static IvParameterSpec generateIv() throws EncryptionException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");

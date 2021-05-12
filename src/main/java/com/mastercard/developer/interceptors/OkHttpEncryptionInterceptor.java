@@ -86,7 +86,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
         }
     }
 
-    protected static void removeHeader(Response.Builder responseBuilder, String name) {
+    static void removeHeader(Response.Builder responseBuilder, String name) {
         if (name == null) {
             // Do nothing
             return;
@@ -94,7 +94,7 @@ public abstract class OkHttpEncryptionInterceptor implements Interceptor {
         responseBuilder.removeHeader(name);
     }
 
-    protected static void updateHeader(Request.Builder requestBuilder, String name, String value) {
+    static void updateHeader(Request.Builder requestBuilder, String name, String value) {
         if (name == null) {
             // Do nothing
             return;

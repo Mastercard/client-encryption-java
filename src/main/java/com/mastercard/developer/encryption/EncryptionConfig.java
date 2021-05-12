@@ -21,24 +21,24 @@ public abstract class EncryptionConfig {
     /**
      * The encryption scheme to be used
      */
-    protected Scheme scheme = Scheme.LEGACY;
+    Scheme scheme = Scheme.LEGACY;
 
     /**
      * The SHA-256 hex-encoded digest of the key used for encryption (optional, the digest will be
      * automatically computed if this field is null or empty).
      * Example: "c3f8ef7053c4fb306f7476e7d1956f0aa992ff9dfdd5244b912a1d377ff3a84f"
      */
-    protected String encryptionKeyFingerprint;
+    String encryptionKeyFingerprint;
 
     /**
      * A certificate object whose public key will be used for encryption.
      */
-    protected Certificate encryptionCertificate;
+    Certificate encryptionCertificate;
 
     /**
      * A private key object to be used for decryption.
      */
-    protected PrivateKey decryptionKey;
+    PrivateKey decryptionKey;
 
     /**
      * A list of JSON paths to encrypt in request payloads.
@@ -51,7 +51,7 @@ public abstract class EncryptionConfig {
      * }
      * </pre>
      */
-    protected Map<String, String> encryptionPaths = Collections.emptyMap();
+    Map<String, String> encryptionPaths = Collections.emptyMap();
 
     /**
      * A list of JSON paths to decrypt in response payloads.
@@ -64,12 +64,12 @@ public abstract class EncryptionConfig {
      * }
      * </pre>
      */
-    protected Map<String, String> decryptionPaths = Collections.emptyMap();
+    Map<String, String> decryptionPaths = Collections.emptyMap();
 
     /**
      * The name of the payload field where to write/read the encrypted data value.
      */
-    protected String encryptedValueFieldName = null;
+    String encryptedValueFieldName = null;
 
     public String getEncryptionKeyFingerprint() { return encryptionKeyFingerprint; }
 
@@ -83,15 +83,15 @@ public abstract class EncryptionConfig {
 
     public Scheme getScheme() { return scheme; }
 
-    public Map<String, String> getEncryptionPaths() {
+    Map<String, String> getEncryptionPaths() {
         return encryptionPaths;
     }
 
-    public Map<String, String> getDecryptionPaths() {
+    Map<String, String> getDecryptionPaths() {
         return decryptionPaths;
     }
 
-    public String getEncryptedValueFieldName() {
+    String getEncryptedValueFieldName() {
         return encryptedValueFieldName;
     }
 }

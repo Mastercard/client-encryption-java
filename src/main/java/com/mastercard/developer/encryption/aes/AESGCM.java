@@ -1,6 +1,6 @@
 package com.mastercard.developer.encryption.aes;
 
-import com.mastercard.developer.encryption.jwe.JWEObject;
+import com.mastercard.developer.encryption.jwe.JweObject;
 import com.mastercard.developer.utils.ByteUtils;
 import com.mastercard.developer.utils.EncodingUtils;
 
@@ -15,11 +15,12 @@ import java.security.Key;
 public class AESGCM {
 
     private AESGCM() {
+        // Nothing to do here
     }
 
     private static final String CYPHER = "AES/GCM/NoPadding";
 
-    public static byte[] decrypt(Key cek, JWEObject object) throws GeneralSecurityException {
+    public static byte[] decrypt(Key cek, JweObject object) throws GeneralSecurityException {
         byte[] aad = object.getRawHeader().getBytes(StandardCharsets.US_ASCII);
         SecretKey aesKey = new SecretKeySpec(cek.getEncoded(), "AES");
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, EncodingUtils.base64Decode(object.getIv()));

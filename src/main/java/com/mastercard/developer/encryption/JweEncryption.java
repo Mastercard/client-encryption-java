@@ -2,8 +2,8 @@ package com.mastercard.developer.encryption;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.mastercard.developer.encryption.jwe.JWEHeader;
-import com.mastercard.developer.encryption.jwe.JWEObject;
+import com.mastercard.developer.encryption.jwe.JweHeader;
+import com.mastercard.developer.encryption.jwe.JweObject;
 
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -14,6 +14,10 @@ import static com.mastercard.developer.encryption.JsonParser.*;
 import static com.mastercard.developer.utils.EncryptionUtils.sanitizeJson;
 
 public class JweEncryption {
+
+    private JweEncryption() {
+        // Nothing to do here
+    }
 
     private static final String ALGORITHM = "RSA-OAEP-256";
     private static final String ENCRYPTION = "A256GCM";
@@ -65,8 +69,8 @@ public class JweEncryption {
         }
 
         String inJsonString = sanitizeJson(jsonEngine.toJsonString(inJsonElement));
-        JWEHeader myHeader = new JWEHeader(ALGORITHM, ENCRYPTION, config.encryptionKeyFingerprint, CONTENT_TYPE);
-        String payload = JWEObject.encrypt(config, inJsonString, myHeader);
+        JweHeader myHeader = new JweHeader(ALGORITHM, ENCRYPTION, config.encryptionKeyFingerprint, CONTENT_TYPE);
+        String payload = JweObject.encrypt(config, inJsonString, myHeader);
 
         // Delete data in clear
         if (!"$".equals(jsonPathIn)) {
@@ -100,7 +104,7 @@ public class JweEncryption {
         }
 
         String encryptedValue = jsonEngine.toJsonString(encryptedValueJsonElement).replace("\"", "");
-        JWEObject jweObject = JWEObject.parse(encryptedValue, jsonEngine);
+        JweObject jweObject = JweObject.parse(encryptedValue, jsonEngine);
         String payload = jweObject.decrypt(config);
 
         // Add decrypted data at the given JSON path

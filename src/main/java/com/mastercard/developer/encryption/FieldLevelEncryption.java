@@ -23,6 +23,10 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
  */
 public class FieldLevelEncryption {
 
+    private FieldLevelEncryption() {
+        // Nothing to do here
+    }
+
     public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
         return encryptPayload(payload, config, null);
     }

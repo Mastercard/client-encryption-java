@@ -1,6 +1,6 @@
 package com.mastercard.developer.encryption.aes;
 
-import com.mastercard.developer.encryption.jwe.JWEObject;
+import com.mastercard.developer.encryption.jwe.JweObject;
 import com.mastercard.developer.utils.EncodingUtils;
 
 import javax.crypto.Cipher;
@@ -17,7 +17,7 @@ public class AESCBC {
 
     private static final String CYPHER = "AES/CBC/PKCS5Padding";
 
-    public static byte[] decrypt(Key secretKey, JWEObject object) throws GeneralSecurityException {
+    public static byte[] decrypt(Key secretKey, JweObject object) throws GeneralSecurityException {
         SecretKeySpec aesKey = new SecretKeySpec(secretKey.getEncoded(), 16, 16, "AES");
 
         byte[] cipherText = EncodingUtils.base64Decode(object.getCipherText());

@@ -4,13 +4,13 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.mastercard.developer.json.JsonEngine;
 import com.mastercard.developer.utils.EncodingUtils;
 
-public final class JWEHeader {
+public final class JweHeader {
     private final String enc;
     private final String kid;
     private final String alg;
     private final String cty;
 
-    public JWEHeader(String alg, String enc, String kid, String cty) {
+    public JweHeader(String alg, String enc, String kid, String cty) {
         this.alg = alg;
         this.enc = enc;
         this.kid = kid;
@@ -36,14 +36,14 @@ public final class JWEHeader {
         return engine.toJsonString(obj);
     }
 
-    static JWEHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
+    static JweHeader parseJweHeader(String encodedHeader, JsonEngine jsonEngine) {
         Object headerObj = jsonEngine.parse(new String(EncodingUtils.base64Decode(encodedHeader)));
         JsonProvider jsonProvider = jsonEngine.getJsonProvider();
         String alg = jsonProvider.getMapValue(headerObj, "alg").toString();
         String enc = jsonProvider.getMapValue(headerObj, "enc").toString();
         String kid = jsonProvider.getMapValue(headerObj, "kid").toString();
         Object cty = jsonProvider.getMapValue(headerObj, "cty");
-        return new JWEHeader(alg, enc, kid, cty != null ? cty.toString() : null);
+        return new JweHeader(alg, enc, kid, cty != null ? cty.toString() : null);
     }
 
     String getEnc() { return enc; }

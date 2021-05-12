@@ -12,6 +12,11 @@ import java.security.PublicKey;
 import java.security.spec.MGF1ParameterSpec;
 
 public class RSA {
+
+    private RSA() {
+        // Nothing to do here
+    }
+
     private static final String ASYMMETRIC_CYPHER = "RSA/ECB/OAEPWith{ALG}AndMGF1Padding";
     private static final String SYMMETRIC_KEY_TYPE = "AES";
 

@@ -23,7 +23,7 @@ public abstract class OpenFeignEncoderExecutor implements Encoder {
 
     private final Encoder delegate;
 
-    protected OpenFeignEncoderExecutor(Encoder delegate) {
+    OpenFeignEncoderExecutor(Encoder delegate) {
         this.delegate = delegate;
     }
 

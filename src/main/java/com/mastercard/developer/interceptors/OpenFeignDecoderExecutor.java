@@ -25,7 +25,7 @@ public abstract class OpenFeignDecoderExecutor implements Decoder {
 
     private final Decoder delegate;
 
-    protected OpenFeignDecoderExecutor(Decoder delegate) {
+    OpenFeignDecoderExecutor(Decoder delegate) {
         this.delegate = delegate;
     }
 

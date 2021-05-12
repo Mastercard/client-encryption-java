@@ -3,6 +3,11 @@ package com.mastercard.developer.utils;
 import java.nio.ByteBuffer;
 
 public class ByteUtils {
+
+    private ByteUtils() {
+        // Nothing to do here
+    }
+
     public static byte[] concat(byte[] array1, byte[] array2) {
         return ByteBuffer.allocate(array1.length + array2.length)
                 .put(array1)

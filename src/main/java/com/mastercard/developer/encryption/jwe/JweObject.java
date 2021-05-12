@@ -19,8 +19,8 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Base64;
 
-public class JWEObject {
-    private final JWEHeader header;
+public class JweObject {
+    private final JweHeader header;
     private final String rawHeader;
     private final String encryptedKey;
     private final String iv;
@@ -30,7 +30,7 @@ public class JWEObject {
     private static final String A128CBC_HS256 = "A128CBC-HS256";
     private static final String A256GCM = "A256GCM";
 
-    private JWEObject(JWEHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
+    private JweObject(JweHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
         this.header = header;
         this.rawHeader = rawHeader;
         this.encryptedKey = encryptedKey;
@@ -56,7 +56,7 @@ public class JWEObject {
         return new String(plainText);
     }
 
-    public static String encrypt(JweConfig config, String payload, JWEHeader header) throws EncryptionException, GeneralSecurityException {
+    public static String encrypt(JweConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
         SecretKeySpec cek = AESEncryption.generateCek(256);
         byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionCertificate().getPublicKey(), cek, "SHA-256");
         String encryptedKey = base64Encode(encryptedSecretKeyBytes);
@@ -82,34 +82,32 @@ public class JWEObject {
     }
 
     private static String serialize(String header, String encryptedKey, String iv, String cipherText, String authTag) {
-        StringBuilder sb = new StringBuilder(header);
-        sb.append('.');
-        sb.append(encryptedKey);
-        sb.append('.');
-        sb.append(iv);
-        sb.append('.');
-        sb.append(cipherText);
-        sb.append('.');
-        sb.append(authTag);
-        return sb.toString();
+        return header + '.' +
+                encryptedKey +
+                '.' +
+                iv +
+                '.' +
+                cipherText +
+                '.' +
+                authTag;
     }
 
     private static String base64Encode(byte[] bytes) {
         return EncodingUtils.encodeBytes(bytes, FieldLevelEncryptionConfig.FieldValueEncoding.BASE64);
     }
 
-    public static JWEObject parse(String encryptedPayload, JsonEngine jsonEngine) {
+    public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {
         String t = encryptedPayload.trim();
         int dot1 = t.indexOf('.');
         int dot2 = t.indexOf('.', dot1 + 1);
         int dot3 = t.indexOf('.', dot2 + 1);
         int dot4 = t.indexOf('.', dot3 + 1);
-        JWEHeader header = JWEHeader.parseJweHeader(t.substring(0, dot1), jsonEngine);
+        JweHeader header = JweHeader.parseJweHeader(t.substring(0, dot1), jsonEngine);
 
-        return new JWEObject(header, t.substring(0, dot1), t.substring(dot1 + 1, dot2), t.substring(dot2 + 1, dot3), t.substring(dot3 + 1, dot4), t.substring(dot4 + 1));
+        return new JweObject(header, t.substring(0, dot1), t.substring(dot1 + 1, dot2), t.substring(dot2 + 1, dot3), t.substring(dot3 + 1, dot4), t.substring(dot4 + 1));
     }
 
-    public JWEHeader getHeader() {
+    public JweHeader getHeader() {
         return header;
     }
 

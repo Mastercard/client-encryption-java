@@ -9,7 +9,7 @@ public class JWEObjectTest {
 
     @Test
     public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsCbcEncrypted() throws Exception {
-        JWEObject jweObject = TestUtils.getTestCbcJweObject();
+        JweObject jweObject = TestUtils.getTestCbcJweObject();
         String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder().build());
 
         assertEquals("{\"foo\":\"bar\"}", decryptedPayload);
@@ -17,7 +17,7 @@ public class JWEObjectTest {
 
     @Test
     public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsGcmEncrypted() throws Exception {
-        JWEObject jweObject = TestUtils.getTestGcmJweObject();
+        JweObject jweObject = TestUtils.getTestGcmJweObject();
         String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder().build());
 
         assertEquals("bar", decryptedPayload);
