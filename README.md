@@ -151,7 +151,7 @@ String responsePayload = JweEncryption.decryptPayload(encryptedResponsePayload, 
 ```
 
 #### Configuring the JWE Encryption <a name="configuring-the-jwe-encryption"></a>
-Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
+Use the `JweConfigBuilder` to create `EncryptionConfig` instances. Example:
 ```java
 EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
@@ -167,7 +167,7 @@ See also:
 
 #### Performing JWE Encryption <a name="performing-jwe-encryption"></a>
 
-Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.
+Call `JweEncryption.encryptPayload` with a JSON request payload and an `EncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-jwe-encryption):
 ```java
@@ -200,7 +200,7 @@ Output:
 
 #### Performing JWE Decryption <a name="performing-jwe-decryption"></a>
 
-Call `JweEncryption.decryptPayload` with a JSON response payload and a `JweConfig` instance.
+Call `JweEncryption.decryptPayload` with a JSON response payload and an `EncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-jwe-encryption):
 ```java
@@ -236,7 +236,7 @@ Output:
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
 ```java
-JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withEncryptionPath("$", "$")
     // ...
@@ -249,7 +249,7 @@ String payload = "{" +
     "    \"sensitiveField1\": \"sensitiveValue1\"," +
     "    \"sensitiveField2\": \"sensitiveValue2\"" +
     "}";
-String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+String encryptedPayload = JweEncryption.encryptPayload(payload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
 ```
 
@@ -265,7 +265,7 @@ Output:
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
 ```java
-JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withDecryptionKey(decryptionKey)
     .withDecryptionPath("$", "$")
     // ...
@@ -315,9 +315,9 @@ String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePa
 ```
 
 #### Configuring the Field Level Encryption <a name="configuring-the-field-level-encryption"></a>
-Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
+Use the `FieldLevelEncryptionConfigBuilder` to create `EncryptionConfig` instances. Example:
 ```java
-FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withDecryptionKey(decryptionKey)
     .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
@@ -336,7 +336,7 @@ See also:
 
 #### Performing Field Level Encryption <a name="performing-field-level-encryption"></a>
 
-Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
+Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and an `EncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
@@ -371,7 +371,7 @@ Output:
 
 #### Performing Field Level Decryption <a name="performing-field-level-decryption"></a>
 
-Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
+Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and an `EncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
@@ -409,7 +409,7 @@ Output:
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
 ```java
-FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withEncryptionPath("$", "$")
     // ...
@@ -440,7 +440,7 @@ Output:
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
 ```java
-FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withDecryptionKey(decryptionKey)
     .withDecryptionPath("$", "$")
     // ...
@@ -474,9 +474,9 @@ Here is how to configure the library for using HTTP headers instead.
 
 ##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
 
-Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building a `FieldLevelEncryptionConfig` instance. Example:
+Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building an `EncryptionConfig` instance. Example:
 ```java
-FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withDecryptionKey(decryptionKey)
     .withEncryptionPath("$", "$")
