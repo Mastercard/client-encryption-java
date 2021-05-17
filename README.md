@@ -19,7 +19,7 @@
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
   * [Performing Encryption and Decryption](#performing-encryption-and-decryption)
-  * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries) // Make Generic
+  * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
 
 ## Overview <a name="overview"></a>
 Library for Mastercard API compliant payload encryption/decryption.
@@ -126,7 +126,7 @@ Supported RSA key formats:
 
 This library supports 2 different types of encryption/decryption. Field level encryption (deprecated) and JWE encryption.
 
-#### JWE Encryption <a name="jwe-encryption-and-decryption"></a>
+#### JWE Encryption and Decryption <a name="jwe-encryption-and-decryption"></a>
 
 + [Introduction](#jwe-introduction)
 + [Configuring the JWE Encryption](#configuring-the-jwe-encryption)
@@ -198,7 +198,7 @@ Output:
 }
 ```
 
-#### Performing Decryption <a name="performing-jwe-decryption"></a>
+#### Performing JWE Decryption <a name="performing-jwe-decryption"></a>
 
 Call `JweEncryption.decryptPayload` with a JSON response payload and a `JweConfig` instance.
 
@@ -289,17 +289,17 @@ Output:
 }
 ```
 
-#### Performing Field Level Encryption <a name="field-level-encryption-and-decryption"></a>
+#### Field Level Encryption and Decryption <a name="field-level-encryption-and-decryption"></a>
 
-+ [Introduction](#introduction)
++ [Introduction](#fle-introduction)
 + [Configuring the Field Level Encryption](#configuring-the-field-level-encryption)
-+ [Performing Encryption](#performing-encryption)
-+ [Performing Decryption](#performing-decryption)
-+ [Encrypting Entire Payloads](#encrypting-entire-payloads)
-+ [Decrypting Entire Payloads](#decrypting-entire-payloads)
++ [Performing Field Level Encryption](#performing-field-level-encryption)
++ [Performing Field Level Decryption](#performing-field-level-decryption)
++ [Encrypting Entire Field Level Encryption Payloads](#encrypting-entire-fle-payloads)
++ [Decrypting Entire Field Level Encryption Payloads](#decrypting-entire-fle-payloads)
 + [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
-#### Introduction <a name="introduction"></a>
+#### Introduction <a name="fle-introduction"></a>
 
 The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
@@ -334,7 +334,7 @@ See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
 * [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
-#### Performing Encryption <a name="performing-encryption"></a>
+#### Performing Field Level Encryption <a name="performing-field-level-encryption"></a>
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -369,7 +369,7 @@ Output:
 }
 ```
 
-#### Performing Decryption <a name="performing-decryption"></a>
+#### Performing Field Level Decryption <a name="performing-field-level-decryption"></a>
 
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -404,7 +404,7 @@ Output:
 }
 ```
 
-#### Encrypting Entire Payloads <a name="encrypting-entire-payloads"></a>
+#### Encrypting Entire Payloads <a name="encrypting-entire-fle-payloads"></a>
 
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
@@ -435,7 +435,7 @@ Output:
 }
 ```
 
-#### Decrypting Entire Payloads <a name="decrypting-entire-payloads"></a>
+#### Decrypting Entire Payloads <a name="decrypting-entire-fle-payloads"></a>
 
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
