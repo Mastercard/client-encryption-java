@@ -18,14 +18,14 @@
   * [Selecting a JSON Engine](#selecting-a-json-engine)
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
-  * [Performing Field Level Encryption and Decryption](#performing-field-level-encryption-and-decryption)
-  * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
+  * [Performing Encryption and Decryption](#performing-encryption-and-decryption)
+  * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries) // Make Generic
 
 ## Overview <a name="overview"></a>
 Library for Mastercard API compliant payload encryption/decryption.
 
 ### Compatibility <a name="compatibility"></a>
-Java 7+
+Java 8+
 
 ### References <a name="references"></a>
 <img src="https://user-images.githubusercontent.com/3964455/55345820-c520a280-54a8-11e9-8235-407199fa1d97.png" alt="Encryption of sensitive data" width="75%" height="75%"/>
@@ -69,11 +69,11 @@ This library requires one of the following dependencies to be added to your clas
 * [Jettison](https://search.maven.org/artifact/org.codehaus.jettison/jettison) 1.0+
 * [Org JSON](https://search.maven.org/artifact/org.json/json) 20070829+
 
-You can either let the library choose for you, or force the one to be used by calling `withJsonEngine` on the `FieldLevelEncryption` class.
+You can either let the library choose for you, or force the one to be used by calling `withJsonEngine` on the `JsonParser` class.
 Example:
 
 ```java
-FieldLevelEncryption.withJsonEngine(new JettisonJsonEngine());
+JsonParser.withJsonEngine(new JettisonJsonEngine());
 ```
 
 Available engine classes: 
@@ -116,7 +116,180 @@ Supported RSA key formats:
 * PKCS#8 PEM (starts with "-----BEGIN PRIVATE KEY-----")
 * Binary DER-encoded PKCS#8
 
-### Performing Field Level Encryption and Decryption <a name="performing-field-level-encryption-and-decryption"></a>
+### Performing Encryption and Decryption <a name="performing-encryption-and-decryption"></a>
+
++ [Introduction](#introduction)
++ [JWE Encryption and Decryption](#jwe-encryption-and-decryption)
++ [Field Level Encryption and Decryption](#field-level-encryption-and-decryption)
+
+#### Introduction <a name="introduction"></a>
+
+This library supports 2 different types of encryption/decryption. Field level encryption (deprecated) and JWE encryption.
+
+#### JWE Encryption <a name="jwe-encryption-and-decryption"></a>
+
++ [Introduction](#jwe-introduction)
++ [Configuring the JWE Encryption](#configuring-the-jwe-encryption)
++ [Performing JWE Encryption](#performing-jwe-encryption)
++ [Performing JWE Decryption](#performing-jwe-decryption)
++ [Encrypting Entire JWE Payloads](#encrypting-entire-jwe-payloads)
++ [Decrypting Entire JWE Payloads](#decrypting-entire-jwe-payloads)
+
+#### Introduction <a name="jwe-introduction"></a>
+
+The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `JweEncryption` class.
+
+* `encryptPayload` usage:
+```java
+String encryptedRequestPayload = JweEncryption.encryptPayload(requestPayload, config);
+
+```
+
+* `decryptPayload` usage:
+```java
+String responsePayload = JweEncryption.decryptPayload(encryptedResponsePayload, config);
+```
+
+#### Configuring the JWE Encryption <a name="configuring-the-jwe-encryption"></a>
+Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
+```java
+EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withEncryptionCertificate(encryptionCertificate)
+    .withDecryptionKey(decryptionKey)
+    .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
+    .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
+    .withEncryptedValueFieldName("encryptedValue")
+    .build();
+```
+
+See also:
+* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
+
+#### Performing JWE Encryption <a name="performing-jwe-encryption"></a>
+
+Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.
+
+Example using the configuration [above](#configuring-the-jwe-encryption):
+```java
+String payload = "{" +
+    "    \"path\": {" +
+    "        \"to\": {" +
+    "            \"foo\": {" +
+    "                \"sensitiveField1\": \"sensitiveValue1\"," +
+    "                \"sensitiveField2\": \"sensitiveValue2\"" +
+    "            }" +
+    "        }" +
+    "    }" +
+    "}";
+String encryptedPayload = JweEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+    "path": {
+        "to": {
+            "encryptedFoo": {
+                "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw=="
+            }
+        }
+    }
+}
+```
+
+#### Performing Decryption <a name="performing-jwe-decryption"></a>
+
+Call `JweEncryption.decryptPayload` with a JSON response payload and a `JweConfig` instance.
+
+Example using the configuration [above](#configuring-the-jwe-encryption):
+```java
+String encryptedPayload = "{" +
+    "    \"path\": {" +
+    "        \"to\": {" +
+    "            \"encryptedFoo\": {" +
+    "                \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw==\"" +
+    "            }" +
+    "        }" +
+    "    }" +
+    "}";
+String payload = JweEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+    "path": {
+        "to": {
+            "foo": {
+                "sensitiveField1": "sensitiveValue1",
+                "sensitiveField2": "sensitiveValue2"
+            }
+        }
+    }
+}
+```
+
+#### Encrypting Entire JWE Payloads <a name="encrypting-entire-jwe-payloads"></a>
+
+Entire payloads can be encrypted using the "$" operator as encryption path:
+
+```java
+JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withEncryptionCertificate(encryptionCertificate)
+    .withEncryptionPath("$", "$")
+    // ...
+    .build();
+```
+
+Example:
+```java
+String payload = "{" +
+    "    \"sensitiveField1\": \"sensitiveValue1\"," +
+    "    \"sensitiveField2\": \"sensitiveValue2\"" +
+    "}";
+String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+    "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw=="
+}
+```
+
+#### Decrypting Entire JWE Payloads <a name="decrypting-entire-jwe-payloads"></a>
+
+Entire payloads can be decrypted using the "$" operator as decryption path:
+
+```java
+JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withDecryptionKey(decryptionKey)
+    .withDecryptionPath("$", "$")
+    // ...
+    .build();
+```
+
+Example:
+```java
+String encryptedPayload = "{" +
+    "  \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw==\"" +
+    "}";
+String payload = JweEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+    "sensitiveField1": "sensitiveValue1",
+    "sensitiveField2": "sensitiveValue2"
+}
+```
+
+#### Performing Field Level Encryption <a name="field-level-encryption-and-decryption"></a>
 
 + [Introduction](#introduction)
 + [Configuring the Field Level Encryption](#configuring-the-field-level-encryption)
@@ -133,6 +306,7 @@ The core methods responsible for payload encryption and decryption are `encryptP
 * `encryptPayload` usage:
 ```java
 String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayload, config);
+
 ```
 
 * `decryptPayload` usage:
@@ -433,12 +607,12 @@ See also:
 </configuration>
 ```
 
-##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor` (OpenAPI Generator 3.3.x)
+##### Usage of the `OkHttp2EncryptionInterceptor` (OpenAPI Generator 3.3.x)
 ```java
 ApiClient client = new ApiClient();
 client.setBasePath("https://sandbox.api.mastercard.com");
 List<Interceptor> interceptors = client.getHttpClient().interceptors();
-interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
+interceptors.add(OkHttp2EncryptionInterceptor.from(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = new ServiceApi(client);
 // ...
@@ -451,7 +625,7 @@ client.setBasePath("https://sandbox.api.mastercard.com");
 client.setHttpClient(
     client.getHttpClient()
         .newBuilder()
-        .addInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config))
+        .addInterceptor(OkHttpFieldLevelEncryptionInterceptor.from(config))
         .addInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey))
         .build()
 );
@@ -470,7 +644,7 @@ ServiceApi serviceApi = new ServiceApi(client);
 </configuration>
 ```
 
-##### Usage of `OpenFeignFieldLevelEncryptionEncoder` and `OpenFeignFieldLevelEncryptionDecoder`
+##### Usage of `OpenFeignEncoderExecutor` and `OpenFeignDecoderExecutor`
 ```java
 ApiClient client = new ApiClient();
 ObjectMapper objectMapper = client.getObjectMapper();
@@ -479,8 +653,8 @@ Feign.Builder feignBuilder = client.getFeignBuilder();
 ArrayList<RequestInterceptor> interceptors = new ArrayList<>();
 interceptors.add(new OpenFeignOAuth1Interceptor(consumerKey, signingKey, client.getBasePath()));
 feignBuilder.requestInterceptors(interceptors);
-feignBuilder.encoder(new OpenFeignFieldLevelEncryptionEncoder(config, new FormEncoder(new JacksonEncoder(objectMapper))));
-feignBuilder.decoder(new OpenFeignFieldLevelEncryptionDecoder(config, new JacksonDecoder(objectMapper)));
+feignBuilder.encoder(OpenFeignEncoderExecutor.from(config, new FormEncoder(new JacksonEncoder(objectMapper))));
+feignBuilder.decoder(OpenFeignDecoderExecutor.from(config, new JacksonDecoder(objectMapper)));
 ServiceApi serviceApi = client.buildClient(ServiceApi.class);
 // ...
 ```
@@ -496,13 +670,13 @@ ServiceApi serviceApi = client.buildClient(ServiceApi.class);
 </configuration>
 ```
 
-##### Usage of the `OkHttp2FieldLevelEncryptionInterceptor`
+##### Usage of the `OkHttp2EncryptionInterceptor`
 ```java
 ApiClient client = new ApiClient();
 RestAdapter.Builder adapterBuilder = client.getAdapterBuilder();
 adapterBuilder.setEndpoint("https://sandbox.api.mastercard.com"); 
 List<Interceptor> interceptors = client.getOkClient().interceptors();
-interceptors.add(new OkHttp2FieldLevelEncryptionInterceptor(config));
+interceptors.add(OkHttp2EncryptionInterceptor.from(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = client.createService(ServiceApi.class);
 // ...
@@ -519,13 +693,13 @@ ServiceApi serviceApi = client.createService(ServiceApi.class);
 </configuration>
 ```
 
-##### Usage of the `OkHttpFieldLevelEncryptionInterceptor`
+##### Usage of the `OkHttpEncryptionInterceptor`
 ```java
 ApiClient client = new ApiClient();
 Retrofit.Builder adapterBuilder = client.getAdapterBuilder();
 adapterBuilder.baseUrl("https://sandbox.api.mastercard.com"); 
 OkHttpClient.Builder okBuilder = client.getOkBuilder();
-okBuilder.addInterceptor(new OkHttpFieldLevelEncryptionInterceptor(config));
+okBuilder.addInterceptor(OkHttpEncryptionInterceptor.from(config));
 okBuilder.addInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = client.createService(ServiceApi.class);
 // ...
@@ -542,13 +716,13 @@ ServiceApi serviceApi = client.createService(ServiceApi.class);
 </configuration>
 ```
 
-##### Usage of `HttpExecuteFieldLevelEncryptionInterceptor` and `HttpExecuteInterceptorChain`
+##### Usage of `HttpExecuteEncryptionInterceptor` and `HttpExecuteInterceptorChain`
 ```java
 HttpRequestInitializer initializer = new HttpRequestInitializer() {
     @Override
     public void initialize(HttpRequest request) {
         HttpExecuteOAuth1Interceptor authenticationInterceptor = new HttpExecuteOAuth1Interceptor(consumerKey, signingKey);
-        HttpExecuteFieldLevelEncryptionInterceptor encryptionInterceptor = new HttpExecuteFieldLevelEncryptionInterceptor(config);
+        HttpExecuteEncryptionInterceptor encryptionInterceptor = HttpExecuteEncryptionInterceptor.from(config);
         request.setInterceptor(new HttpExecuteInterceptorChain(Arrays.asList(encryptionInterceptor, authenticationInterceptor)));
         request.setResponseInterceptor(encryptionInterceptor);
     }
