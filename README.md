@@ -297,8 +297,8 @@ Output:
 + [Configuring the Field Level Encryption](#configuring-the-field-level-encryption)
 + [Performing Field Level Encryption](#performing-field-level-encryption)
 + [Performing Field Level Decryption](#performing-field-level-decryption)
-+ [Encrypting Entire Field Level Encryption Payloads](#encrypting-entire-fle-payloads)
-+ [Decrypting Entire Field Level Encryption Payloads](#decrypting-entire-fle-payloads)
++ [Encrypting Entire Payloads](#encrypting-entire-fle-payloads)
++ [Decrypting Entire Payloads](#decrypting-entire-fle-payloads)
 + [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
 #### Introduction <a name="fle-introduction"></a>
