@@ -18,7 +18,7 @@
   * [Selecting a JSON Engine](#selecting-a-json-engine)
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
-  * [Performing Encryption and Decryption](#performing-encryption-and-decryption)
+  * [Performing Payload Encryption and Decryption](#performing-payload-encryption-and-decryption)
   * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
 
 ## Overview <a name="overview"></a>
@@ -28,6 +28,7 @@ Library for Mastercard API compliant payload encryption/decryption.
 Java 8+
 
 ### References <a name="references"></a>
+* [JWE Specification](https://datatracker.ietf.org/doc/html/rfc7516)<br/>
 <img src="https://user-images.githubusercontent.com/3964455/55345820-c520a280-54a8-11e9-8235-407199fa1d97.png" alt="Encryption of sensitive data" width="75%" height="75%"/>
 
 ## Usage <a name="usage"></a>
@@ -116,7 +117,7 @@ Supported RSA key formats:
 * PKCS#8 PEM (starts with "-----BEGIN PRIVATE KEY-----")
 * Binary DER-encoded PKCS#8
 
-### Performing Encryption and Decryption <a name="performing-encryption-and-decryption"></a>
+### Performing Payload Encryption and Decryption <a name="performing-payload-encryption-and-decryption"></a>
 
 + [Introduction](#introduction)
 + [JWE Encryption and Decryption](#jwe-encryption-and-decryption)
@@ -124,7 +125,7 @@ Supported RSA key formats:
 
 #### Introduction <a name="introduction"></a>
 
-This library supports 2 different types of encryption/decryption. Field level encryption (deprecated) and JWE encryption.
+This library supports 2 different types of encryption/decryption. Field level encryption (scheme designed before JWE was introduced) and JWE encryption.
 
 #### JWE Encryption and Decryption <a name="jwe-encryption-and-decryption"></a>
 
@@ -132,11 +133,12 @@ This library supports 2 different types of encryption/decryption. Field level en
 + [Configuring the JWE Encryption](#configuring-the-jwe-encryption)
 + [Performing JWE Encryption](#performing-jwe-encryption)
 + [Performing JWE Decryption](#performing-jwe-decryption)
-+ [Encrypting Entire JWE Payloads](#encrypting-entire-jwe-payloads)
-+ [Decrypting Entire JWE Payloads](#decrypting-entire-jwe-payloads)
++ [Encrypting Entire Payloads](#encrypting-entire-payloads-jwe)
++ [Decrypting Entire Payloads](#decrypting-entire-payloads-jwe)
 
 #### Introduction <a name="jwe-introduction"></a>
 
+This library uses [JWE compact serialization](https://datatracker.ietf.org/doc/html/rfc7516#section-7.1) for the encryption of sensitive data.
 The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `JweEncryption` class.
 
 * `encryptPayload` usage:
@@ -231,7 +233,7 @@ Output:
 }
 ```
 
-#### Encrypting Entire JWE Payloads <a name="encrypting-entire-jwe-payloads"></a>
+#### Encrypting Entire Payloads <a name="encrypting-entire-payloads-jwe"></a>
 
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
@@ -260,7 +262,7 @@ Output:
 }
 ```
 
-#### Decrypting Entire JWE Payloads <a name="decrypting-entire-jwe-payloads"></a>
+#### Decrypting Entire Payloads <a name="decrypting-entire-payloads-jwe"></a>
 
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
