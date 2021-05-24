@@ -19,6 +19,8 @@
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
   * [Performing Payload Encryption and Decryption](#performing-payload-encryption-and-decryption)
+    * [JWE Encryption and Decryption](#jwe-encryption-and-decryption)
+    * [Mastercard Encryption and Decryption](#mastercard-encryption-and-decryption)
   * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
 
 ## Overview <a name="overview"></a>
@@ -121,11 +123,11 @@ Supported RSA key formats:
 
 + [Introduction](#introduction)
 + [JWE Encryption and Decryption](#jwe-encryption-and-decryption)
-+ [Field Level Encryption and Decryption](#field-level-encryption-and-decryption)
++ [Mastercard Encryption and Decryption](#mastercard-encryption-and-decryption)
 
 #### Introduction <a name="introduction"></a>
 
-This library supports 2 different types of encryption/decryption. Field level encryption (scheme designed before JWE was introduced) and JWE encryption.
+This library supports two types of encryption/decryption, both of which support field level and entire payload encryption: JWE encryption and what the library refers to as Field Level Encryption (Mastercard encryption), a scheme used by many services hosted on Mastercard Developers before the library added support for JWE.
 
 #### JWE Encryption and Decryption <a name="jwe-encryption-and-decryption"></a>
 
@@ -291,18 +293,18 @@ Output:
 }
 ```
 
-#### Field Level Encryption and Decryption <a name="field-level-encryption-and-decryption"></a>
+#### Mastercard Encryption and Decryption <a name="mastercard-encryption-and-decryption"></a>
 
-+ [Introduction](#fle-introduction)
-+ [Configuring the Field Level Encryption](#configuring-the-field-level-encryption)
-+ [Performing Field Level Encryption](#performing-field-level-encryption)
-+ [Performing Field Level Decryption](#performing-field-level-decryption)
-+ [Encrypting Entire Payloads](#encrypting-entire-fle-payloads)
-+ [Decrypting Entire Payloads](#decrypting-entire-fle-payloads)
++ [Introduction](#mastercard-introduction)
++ [Configuring the Mastercard Encryption](#configuring-the-mastercard-encryption)
++ [Performing Mastercard Encryption](#performing-mastercard-encryption)
++ [Performing Mastercard Decryption](#performing-mastercard-decryption)
++ [Encrypting Entire Payloads](#encrypting-entire-mastercard-payloads)
++ [Decrypting Entire Payloads](#decrypting-entire-mastercard-payloads)
 + [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
-#### Introduction <a name="fle-introduction"></a>
-
+#### Introduction <a name="mastercard-introduction"></a>
+ 
 The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
 * `encryptPayload` usage:
@@ -316,7 +318,7 @@ String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayl
 String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePayload, config);
 ```
 
-#### Configuring the Field Level Encryption <a name="configuring-the-field-level-encryption"></a>
+#### Configuring the Mastercard Encryption <a name="configuring-the-mastercard-encryption"></a>
 Use the `FieldLevelEncryptionConfigBuilder` to create `EncryptionConfig` instances. Example:
 ```java
 EncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
@@ -336,7 +338,7 @@ See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
 * [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
-#### Performing Field Level Encryption <a name="performing-field-level-encryption"></a>
+#### Performing Mastercard Encryption <a name="performing-mastercard-encryption"></a>
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and an `EncryptionConfig` instance.
 
@@ -371,7 +373,7 @@ Output:
 }
 ```
 
-#### Performing Field Level Decryption <a name="performing-field-level-decryption"></a>
+#### Performing Mastercard Decryption <a name="performing-mastercard-decryption"></a>
 
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and an `EncryptionConfig` instance.
 
@@ -406,7 +408,7 @@ Output:
 }
 ```
 
-#### Encrypting Entire Payloads <a name="encrypting-entire-fle-payloads"></a>
+#### Encrypting Entire Payloads <a name="encrypting-entire-mastercard-payloads"></a>
 
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
@@ -437,7 +439,7 @@ Output:
 }
 ```
 
-#### Decrypting Entire Payloads <a name="decrypting-entire-fle-payloads"></a>
+#### Decrypting Entire Payloads <a name="decrypting-entire-mastercard-payloads"></a>
 
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
