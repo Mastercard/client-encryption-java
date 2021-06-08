@@ -1,8 +1,8 @@
 package com.mastercard.developer.encryption.jwe;
 
+import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
-import com.mastercard.developer.encryption.JweConfig;
 import com.mastercard.developer.encryption.aes.AESCBC;
 import com.mastercard.developer.encryption.aes.AESEncryption;
 import com.mastercard.developer.encryption.aes.AESGCM;
@@ -39,7 +39,7 @@ public class JweObject {
         this.authTag = authTag;
     }
 
-    public String decrypt(JweConfig config) throws EncryptionException, GeneralSecurityException {
+    public String decrypt(EncryptionConfig config) throws EncryptionException, GeneralSecurityException {
         Key cek = RSA.unwrapSecretKey(config.getDecryptionKey(), Base64.getUrlDecoder().decode(this.getEncryptedKey()), "SHA-256");
         String encryptionMethod = this.header.getEnc();
 
@@ -56,7 +56,7 @@ public class JweObject {
         return new String(plainText);
     }
 
-    public static String encrypt(JweConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
+    public static String encrypt(EncryptionConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
         SecretKeySpec cek = AESEncryption.generateCek(256);
         byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionCertificate().getPublicKey(), cek, "SHA-256");
         String encryptedKey = base64Encode(encryptedSecretKeyBytes);

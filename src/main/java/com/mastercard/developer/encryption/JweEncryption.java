@@ -23,7 +23,7 @@ public class JweEncryption {
     private static final String ENCRYPTION = "A256GCM";
     private static final String CONTENT_TYPE = "application/json";
 
-    public static String encryptPayload(String payload, JweConfig config) throws EncryptionException {
+    public static String encryptPayload(String payload, EncryptionConfig config) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
@@ -42,7 +42,7 @@ public class JweEncryption {
         }
     }
 
-    public static String decryptPayload(String payload, JweConfig config) throws EncryptionException {
+    public static String decryptPayload(String payload, EncryptionConfig config) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
@@ -61,7 +61,7 @@ public class JweEncryption {
         }
     }
 
-    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
+    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, EncryptionConfig config) throws EncryptionException, GeneralSecurityException {
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
@@ -88,7 +88,7 @@ public class JweEncryption {
         payloadContext.put(jsonPathOut, config.encryptedValueFieldName, payload);
     }
 
-    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
+    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, EncryptionConfig config) throws EncryptionException, GeneralSecurityException {
 
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {

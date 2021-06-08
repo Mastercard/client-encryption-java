@@ -27,11 +27,11 @@ public class FieldLevelEncryption {
         // Nothing to do here
     }
 
-    public static String encryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+    public static String encryptPayload(String payload, EncryptionConfig config) throws EncryptionException {
         return encryptPayload(payload, config, null);
     }
 
-    public static String encryptPayload(String payload, FieldLevelEncryptionConfig config, Object params) throws EncryptionException {
+    public static String encryptPayload(String payload, EncryptionConfig config, Object params) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
@@ -40,7 +40,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
+                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, (FieldLevelEncryptionConfig) config, (FieldLevelEncryptionParams) params);
             }
 
             // Return the updated payload
@@ -50,11 +50,11 @@ public class FieldLevelEncryption {
         }
     }
 
-    public static String decryptPayload(String payload, FieldLevelEncryptionConfig config) throws EncryptionException {
+    public static String decryptPayload(String payload, EncryptionConfig config) throws EncryptionException {
         return decryptPayload(payload, config, null);
     }
 
-    public static String decryptPayload(String payload, FieldLevelEncryptionConfig config, Object params) throws EncryptionException {
+    public static String decryptPayload(String payload, EncryptionConfig config, Object params) throws EncryptionException {
         try {
             // Parse the given payload
             DocumentContext payloadContext = JsonPath.parse(payload, JsonParser.jsonPathConfig);
@@ -63,7 +63,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
+                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, (FieldLevelEncryptionConfig) config, (FieldLevelEncryptionParams) params);
             }
 
             // Return the updated payload
