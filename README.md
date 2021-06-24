@@ -30,8 +30,8 @@ Library for Mastercard API compliant payload encryption/decryption.
 Java 8+
 
 ### References <a name="references"></a>
-* [JWE Specification](https://datatracker.ietf.org/doc/html/rfc7516)<br/>
-<img src="https://user-images.githubusercontent.com/3964455/55345820-c520a280-54a8-11e9-8235-407199fa1d97.png" alt="Encryption of sensitive data" width="75%" height="75%"/>
+* [JSON Web Encryption (JWE)](https://datatracker.ietf.org/doc/html/rfc7516)
+* [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/)
 
 ## Usage <a name="usage"></a>
 ### Prerequisites <a name="prerequisites"></a>
