@@ -1,8 +1,8 @@
-on:
+'on':
   push:
-    branches: master
+    branches: main
   schedule:
-    - cron: "0 16 * * *"
+    - cron: 0 16 * * *
 name: broken links?
 jobs:
   linkChecker:
@@ -13,6 +13,6 @@ jobs:
         id: lc
         uses: peter-evans/link-checker@v1.2.2
         with:
-          args: -v -r *
+          args: '-v -r *'
       - name: Fail?
-        run: exit ${{ steps.lc.outputs.exit_code }}
+        run: 'exit ${{ steps.lc.outputs.exit_code }}'
