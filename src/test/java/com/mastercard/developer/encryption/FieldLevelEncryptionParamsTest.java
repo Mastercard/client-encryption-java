@@ -1,17 +1,10 @@
 package com.mastercard.developer.encryption;
 
 import com.mastercard.developer.test.TestUtils;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-
-import static com.mastercard.developer.encryption.FieldLevelEncryptionParams.SYMMETRIC_KEY_TYPE;
-import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

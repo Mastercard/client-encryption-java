@@ -45,7 +45,7 @@ final class JsonParser {
 
         // Object: merge
         int length = jsonProvider.length(decryptedValueJsonElement);
-        Collection<String> propertyKeys = (0 == length) ? Collections.<String>emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
+        Collection<String> propertyKeys = (0 == length) ? Collections.emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
         for (String key : propertyKeys) {
             payloadContext.delete(jsonPathOut + "." + key);
             payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));

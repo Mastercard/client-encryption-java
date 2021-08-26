@@ -9,8 +9,6 @@ import javax.crypto.Cipher;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map.Entry;
 
 import static com.mastercard.developer.utils.EncodingUtils.decodeValue;
@@ -40,7 +38,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.encryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
+                payloadContext = encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
             }
 
             // Return the updated payload
@@ -63,7 +61,7 @@ public class FieldLevelEncryption {
             for (Entry<String, String> entry : config.decryptionPaths.entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
+                payloadContext = decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config, (FieldLevelEncryptionParams) params);
             }
 
             // Return the updated payload
@@ -73,13 +71,13 @@ public class FieldLevelEncryption {
         }
     }
 
-    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
+    private static DocumentContext encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
                                            FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
         Object inJsonElement = JsonParser.readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
-            return;
+            return payloadContext;
         }
 
         if (params == null) {
@@ -102,11 +100,9 @@ public class FieldLevelEncryption {
         if (!"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         } else {
-            // Delete keys one by one
-            Collection<String> propertyKeys = new ArrayList<>(JsonParser.jsonEngine.getPropertyKeys(inJsonElement));
-            for (String key : propertyKeys) {
-                payloadContext.delete(jsonPathIn + "." + key);
-            }
+            // We can't reuse the same DocumentContext. We have to create a new DocumentContext
+            // with the appropriate internal representation (JSON object).
+            payloadContext = JsonPath.parse("{}", JsonParser.jsonPathConfig);
         }
 
         // Add encrypted data and encryption fields at the given JSON path
@@ -127,23 +123,24 @@ public class FieldLevelEncryption {
         if (!isNullOrEmpty(config.oaepPaddingDigestAlgorithmFieldName)) {
             payloadContext.put(jsonPathOut, config.oaepPaddingDigestAlgorithmFieldName, params.getOaepPaddingDigestAlgorithmValue());
         }
+        return payloadContext;
     }
 
-    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
+    private static DocumentContext decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut,
                                            FieldLevelEncryptionConfig config, FieldLevelEncryptionParams params) throws GeneralSecurityException, EncryptionException {
 
         JsonProvider jsonProvider = JsonParser.jsonPathConfig.jsonProvider();
         Object inJsonObject = JsonParser.readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {
             // Nothing to decrypt
-            return;
+            return payloadContext;
         }
 
         // Read and remove encrypted data and encryption fields at the given JSON path
         Object encryptedValueJsonElement = readAndDeleteJsonKey(payloadContext, jsonPathIn, inJsonObject, config.encryptedValueFieldName);
         if (JsonParser.jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
             // Nothing to decrypt
-            return;
+            return payloadContext;
         }
 
         if (!config.useHttpPayloads() && params == null) {
@@ -168,14 +165,21 @@ public class FieldLevelEncryption {
         // Add decrypted data at the given JSON path
         String decryptedValue = new String(decryptedValueBytes, StandardCharsets.UTF_8);
         decryptedValue = sanitizeJson(decryptedValue);
-        JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
-        JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+        if ("$".equals(jsonPathOut)) {
+            // We can't reuse the same DocumentContext. We have to create a new DocumentContext
+            // with the appropriate internal representation (JSON object or JSON array).
+            payloadContext = JsonPath.parse(decryptedValue, JsonParser.jsonPathConfig);
+        } else {
+            JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
+            JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+        }
 
         // Remove the input if now empty
         Object inJsonElement  = JsonParser.readJsonElement(payloadContext, jsonPathIn);
         if (0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         }
+        return payloadContext;
     }
 
     private static Object readAndDeleteJsonKey(DocumentContext context, String objectPath, Object object, String key) {

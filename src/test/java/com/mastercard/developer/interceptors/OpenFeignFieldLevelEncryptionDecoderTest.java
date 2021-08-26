@@ -198,7 +198,7 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
     private static Response.Body buildResponseBody(String payload) {
         Response response = Response.builder()
                 .status(200)
-                .headers(new HashMap<String, Collection<String>>())
+                .headers(new HashMap<>())
                 .body(payload, StandardCharsets.UTF_8)
                 .build();
         return response.body();

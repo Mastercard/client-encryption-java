@@ -65,6 +65,11 @@ public class TestUtils {
         assertPayloadEquals(expectedPayload, payloadString);
     }
 
+    public static void assertDecryptedJweEquals(String expectedPayload, String encryptedPayload, JweConfig config) throws Exception {
+        String payloadString = JweEncryption.decryptPayload(encryptedPayload, config);
+        assertPayloadEquals(expectedPayload, payloadString);
+    }
+
     public static void assertPayloadEquals(String expectedPayload, String payload) {
         JSONAssert.assertEquals(expectedPayload, payload, true);
     }
