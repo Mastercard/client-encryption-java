@@ -57,14 +57,14 @@ public class JweObject {
     public static String encrypt(JweConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
         SecretKeySpec cek = AESEncryption.generateCek(256);
         byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionCertificate().getPublicKey(), cek, "SHA-256");
-        String encryptedKey = base64Encode(encryptedSecretKeyBytes);
+        String encryptedKey = base64UrlEncode(encryptedSecretKeyBytes);
 
         byte[] iv = AESEncryption.generateIv().getIV();
         byte[] payloadBytes = payload.getBytes();
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
 
         String headerString = header.toJson();
-        String encodedHeader = base64Encode(headerString.getBytes());
+        String encodedHeader = base64UrlEncode(headerString.getBytes());
 
         byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
 
@@ -76,7 +76,7 @@ public class JweObject {
         byte[] cipherText = ByteUtils.subArray(cipherOutput, 0, tagPos);
         byte[] authTag = ByteUtils.subArray(cipherOutput, tagPos, ByteUtils.byteLength(128));
 
-        return serialize(encodedHeader, encryptedKey, base64Encode(iv), base64Encode(cipherText), base64Encode(authTag));
+        return serialize(encodedHeader, encryptedKey, base64UrlEncode(iv), base64UrlEncode(cipherText), base64UrlEncode(authTag));
     }
 
     private static String serialize(String header, String encryptedKey, String iv, String cipherText, String authTag) {
@@ -90,8 +90,12 @@ public class JweObject {
                 authTag;
     }
 
-    private static String base64Encode(byte[] bytes) {
-        return Base64.getUrlEncoder().encodeToString(bytes);
+    /**
+     * BASE64URL as per https://datatracker.ietf.org/doc/html/rfc7515#appendix-C
+     */
+    private static String base64UrlEncode(byte[] bytes) {
+        return Base64.getUrlEncoder().encodeToString(bytes)
+            .replaceAll("=", ""); // Remove any trailing '='s
     }
 
     public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {
