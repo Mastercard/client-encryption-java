@@ -6,8 +6,6 @@ import com.mastercard.developer.encryption.jwe.JweHeader;
 import com.mastercard.developer.encryption.jwe.JweObject;
 
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 
 import static com.mastercard.developer.encryption.JsonParser.*;
@@ -76,11 +74,7 @@ public class JweEncryption {
         if (!"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         } else {
-            // Delete keys one by one
-            Collection<String> propertyKeys = new ArrayList<>(jsonEngine.getPropertyKeys(inJsonElement));
-            for (String key : propertyKeys) {
-                payloadContext.delete(jsonPathIn + "." + key);
-            }
+            payloadContext.delete("$.*");
         }
 
         // Add encrypted data and encryption fields at the given JSON path
@@ -121,10 +115,6 @@ public class JweEncryption {
     }
 
     private static Object readJsonObject(DocumentContext context, String jsonPathString) {
-        Object jsonElement = readJsonElement(context, jsonPathString);
-        if (jsonElement == null) {
-            return null;
-        }
-        return jsonElement;
+        return readJsonElement(context, jsonPathString);
     }
 }

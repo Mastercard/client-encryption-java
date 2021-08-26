@@ -1,6 +1,5 @@
 package com.mastercard.developer.utils;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +13,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EncryptionUtilsTest {
 
@@ -30,8 +30,8 @@ public class EncryptionUtilsTest {
         Certificate certificate = EncryptionUtils.loadEncryptionCertificate(certificatePath);
 
         // THEN
-        Assert.assertNotNull(certificate);
-        Assert.assertEquals("X.509", certificate.getType());
+        assertNotNull(certificate);
+        assertEquals("X.509", certificate.getType());
     }
 
     @Test
@@ -44,8 +44,8 @@ public class EncryptionUtilsTest {
         Certificate certificate = EncryptionUtils.loadEncryptionCertificate(certificatePath);
 
         // THEN
-        Assert.assertNotNull(certificate);
-        Assert.assertEquals("X.509", certificate.getType());
+        assertNotNull(certificate);
+        assertEquals("X.509", certificate.getType());
     }
 
     @ParameterizedTest
@@ -63,9 +63,9 @@ public class EncryptionUtilsTest {
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
 
         // THEN
-        Assert.assertNotNull(privateKey);
-        Assert.assertEquals("RSA", privateKey.getAlgorithm());
-        Assert.assertArrayEquals(base64Decode(expectedEncoding), privateKey.getEncoded());
+        assertNotNull(privateKey);
+        assertEquals("RSA", privateKey.getAlgorithm());
+        assertArrayEquals(base64Decode(expectedEncoding), privateKey.getEncoded());
     }
 
     @ParameterizedTest
@@ -83,8 +83,8 @@ public class EncryptionUtilsTest {
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
 
         // THEN
-        Assert.assertNotNull(privateKey);
-        Assert.assertEquals("RSA", privateKey.getAlgorithm());
+        assertNotNull(privateKey);
+        assertEquals("RSA", privateKey.getAlgorithm());
     }
 
     @Test
@@ -99,10 +99,10 @@ public class EncryptionUtilsTest {
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyContainerPath, keyAlias, keyPassword);
 
         // THEN
-        Assert.assertNotNull(privateKey.getEncoded());
-        Assert.assertEquals("RSA", privateKey.getAlgorithm());
+        assertNotNull(privateKey.getEncoded());
+        assertEquals("RSA", privateKey.getAlgorithm());
         String expectedBase64Key = "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCYoc5Ue4MKxHIQeSESKQiIv341EFDtfAlAsXP74modJuwnSLOfSkFNgKH4y6vSKiUK7BxU2KFy7FkRJ9/vceJmP9MD6bWPgT2Wg4iSQxgPtAHEVps9MYvkhW0lt0hyhAcGLUR3kb4YjSkGfa8EzG/G2g+/VKdL0mnSgWhCnSBnR0xRwWccgdRTLm20/jzXkmHD92DBR7kDgiBUrPWTfLHDnsVoIUut6BAPI83TIjHjVG1Jn8K0prbGeQU9ALwaL36qvppYpmCqaAGHOM2fXsEPFNhEZxQpbyW2M4PtXHnjSqlNOKN2tmdF3jWwm9hKZ9xeaWJkBmBnLe3tNz0OdO0pAgMBAAECggEBAJHQGn5JFJJnw5SLM5XWz4lcb2SgNr/5/BjqriQXVEqPUZHh+X+Wf7ZbyeEWKgp4KrU5hYNlBS/2LMyf7GYixSfrl1qoncP/suektwcLw+PUks+P8XRPbhadhP1AEJ0eFlvHSR51hEaOLIA/98C80ZgF4H9njv93f5MT/5eL5lXipFX1dcxUB55q9QOtQ7uCg++NyG5F6u4FxbNtOtsjyNzWZSjYsjSyGHDip9ScDOPNsGQfznxo/oifdXvc25BgWvRflIIYEP08eeUSuGW2nUnx+Joc0oZTkC0wfU+aqKlaZp8zfOEIm0gUDgWtgnq5I5JHJMuW6BtA4K3E+nyP0lECgYEAzIbNx/lVxmFPbPp+AG9LD3JLycjdmTzwpHK44MsaUBOZ9PkLZs0NpR5z0/qcFb8YGGz3qN6E/TTydmfXCpZ3bxP3+x81gL9SVG/y2GP/ky/REA0jFycwVlONeVnd09xPNNLZLUgZhWyAQIA2pmVMh8W+pX6ojxGgOe+KIGutJCUCgYEAvwuNciTzkjBz9nFCjLONvP05WMdIAXo1uxd17iQ0lhRtmHbphojFAPcHYocm2oUXJo5nLvy+u8xnxbyXaZHmRqm98AzmBTtpphFtgfTtv/cSvOsBpdyyaJaN12IUs2XYACGBRa2DUkgxxvHtbmjFGFIU+5VgjOG8g0LfoPhLM7UCgYAmdRaOioihY7zOjg9RP5wKjIBJsfZREQ9irJus0SPieL0TPhzxuI7fRGmdK1tcD3GVbi/nVegFwIXy07WwrPhKL6QKWSTzT4ZIkEBGhg8RewVBkmbNvLWvFcjdT5ORebR/B0KE7DC4UN2Qw0sDYLrSMNGXRsilFjhdjHgZfoWw7QKBgAZrQvNk3nI5AoxzPcMwfUCuWXDsMTUrgAarQSEhQksQoKYQyMPmcIgZxLvAwsNw2VhITJs9jsMMmSgBsCyx5ETXizQ3mrruRhx4VW+aZSqgCJckZkfGZJAzDsz/1KY6c8l9VrSaoeDv4AxJMKsXBhhNGbtiR340T3sxkgX8kbpJAoGBAII2aFeQ4oE8DhSZZo2bpJxO072xy1P9PRlyasYBJ2sNiF0TTguXJB1Ncu0TM0+FLZXIFddalPgv1hY98vNX22dZWKvD3xJ7HRUx/Hyk+VEkH11lsLZ/8AhcwZAr76cE/HLz1XtkKKBCnnlOLPZN03j+WKU3p1fzeWqfW4nyCALQ";
-        Assert.assertArrayEquals(base64Decode(expectedBase64Key), privateKey.getEncoded());
+        assertArrayEquals(base64Decode(expectedBase64Key), privateKey.getEncoded());
     }
 
     @Test

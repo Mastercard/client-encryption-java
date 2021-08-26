@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mastercard.developer.encryption.aes.AESCBC;
 import com.mastercard.developer.test.TestUtils;
 import com.mastercard.developer.utils.EncryptionUtils;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +24,7 @@ import static com.mastercard.developer.test.TestUtils.*;
 import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
@@ -48,7 +47,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         byte[] expectedEncryptedBytes = base64Decode("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
-        Assert.assertArrayEquals(expectedEncryptedBytes, encryptedBytes);
+        assertArrayEquals(expectedEncryptedBytes, encryptedBytes);
     }
 
     @Test
@@ -67,7 +66,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         byte[] expectedBytes = "some data ù€@".getBytes();
-        Assert.assertArrayEquals(expectedBytes, decryptedBytes);
+        assertArrayEquals(expectedBytes, decryptedBytes);
     }
 
     @Test
@@ -90,7 +89,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
 
         // THEN
-        Assert.assertTrue(payload.contains("account"));
+        assertTrue(payload.contains("account"));
     }
 
     @Test
@@ -180,7 +179,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testEncryptPayload_ShouldEncryptArrays() throws Exception {
+    public void testEncryptPayload_ShouldEncryptArrayFields() throws Exception {
 
         // GIVEN
         String payload = "{" +
@@ -203,6 +202,29 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNull(encryptedPayloadObject.get("items"));
         assertNotNull(encryptedPayloadObject.get("encryptedItems"));
         assertDecryptedPayloadEquals("{\"items\":[{},{}]}", encryptedPayload, config);
+    }
+
+    @Test
+    public void testEncryptPayload_ShouldEncryptRootArrays() throws Exception {
+
+        // GIVEN
+        String payload = "[" +
+                "   {}," +
+                "   {}" +
+                "]";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("$", "$")
+                .withDecryptionPath("$", "$")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        JsonObject encryptedPayloadObject = new Gson().fromJson(encryptedPayload, JsonObject.class);
+        assertNotNull(encryptedPayloadObject);
+        assertDecryptedPayloadEquals("[{},{}]", encryptedPayload, config);
     }
 
     @Test
@@ -704,7 +726,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
-    public void testDecryptPayload_ShouldDecryptArrays() throws Exception {
+    public void testDecryptPayload_ShouldDecryptArrayFields() throws Exception {
 
         // GIVEN
         String encryptedPayload = "{" +
@@ -724,6 +746,27 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
         // THEN
         assertPayloadEquals("{\"items\":[{},{}]}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldDecryptRootArrays() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{\n" +
+                "  \"encryptedValue\": \"3496b0c505bcea6a849f8e30b553e6d4\"," +
+                "  \"iv\": \"ed82c0496e9d5ac769d77bdb2eb27958\"," +
+                "  \"encryptedKey\": \"29ea447b70bdf85dd509b5d4a23dc0ffb29fd1acf50ed0800ec189fbcf1fb813fa075952c3de2915d63ab42f16be2ed46dc27ba289d692778a1d585b589039ba0b25bad326d699c45f6d3cffd77b5ec37fe12e2c5456d49980b2ccf16402e83a8e9765b9b93ca37d4d5181ec3e5327fd58387bc539238f1c20a8bc9f4174f5d032982a59726b3e0b9cf6011d4d7bfc3afaf617e768dea6762750bce07339e3e55fdbd1a1cd12ee6bbfbc3c7a2d7f4e1313410eb0dad13e594a50a842ee1b2d0ff59d641987c417deaa151d679bc892e5c051b48781dbdefe74a12eb2b604b981e0be32ab81d01797117a24fbf6544850eed9b4aefad0eea7b3f5747b20f65d3f\"," +
+                "  \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("$", "$")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        assertPayloadEquals("[{},{}]", payload);
     }
 
     @Test
