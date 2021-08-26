@@ -1,7 +1,6 @@
 package com.mastercard.developer.encryption.jwe;
 
 import com.mastercard.developer.encryption.EncryptionException;
-import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.encryption.JweConfig;
 import com.mastercard.developer.encryption.aes.AESCBC;
 import com.mastercard.developer.encryption.aes.AESEncryption;
@@ -9,7 +8,6 @@ import com.mastercard.developer.encryption.aes.AESGCM;
 import com.mastercard.developer.encryption.rsa.RSA;
 import com.mastercard.developer.json.JsonEngine;
 import com.mastercard.developer.utils.ByteUtils;
-import com.mastercard.developer.utils.EncodingUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -93,7 +91,7 @@ public class JweObject {
     }
 
     private static String base64Encode(byte[] bytes) {
-        return EncodingUtils.encodeBytes(bytes, FieldLevelEncryptionConfig.FieldValueEncoding.BASE64);
+        return Base64.getUrlEncoder().encodeToString(bytes);
     }
 
     public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {

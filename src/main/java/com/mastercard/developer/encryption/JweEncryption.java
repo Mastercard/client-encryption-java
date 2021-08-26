@@ -30,7 +30,7 @@ public class JweEncryption {
             for (Map.Entry<String, String> entry : config.getEncryptionPaths().entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                payloadContext = encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
             }
 
             // Return the updated payload
@@ -49,7 +49,7 @@ public class JweEncryption {
             for (Map.Entry<String, String> entry : config.getDecryptionPaths().entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                payloadContext = decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
             }
 
             // Return the updated payload
@@ -59,11 +59,11 @@ public class JweEncryption {
         }
     }
 
-    private static void encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
+    private static DocumentContext encryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
         Object inJsonElement = readJsonElement(payloadContext, jsonPathIn);
         if (inJsonElement == null) {
             // Nothing to encrypt
-            return;
+            return payloadContext;
         }
 
         String inJsonString = sanitizeJson(jsonEngine.toJsonString(inJsonElement));
@@ -74,39 +74,49 @@ public class JweEncryption {
         if (!"$".equals(jsonPathIn)) {
             payloadContext.delete(jsonPathIn);
         } else {
-            payloadContext.delete("$.*");
+            // We can't reuse the same DocumentContext. We have to create a new DocumentContext
+            // with the appropriate internal representation (JSON object).
+            payloadContext = JsonPath.parse("{}", JsonParser.jsonPathConfig);
         }
 
         // Add encrypted data and encryption fields at the given JSON path
         checkOrCreateOutObject(payloadContext, jsonPathOut);
         payloadContext.put(jsonPathOut, config.encryptedValueFieldName, payload);
+        return payloadContext;
     }
 
-    private static void decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
+    private static DocumentContext decryptPayloadPath(DocumentContext payloadContext, String jsonPathIn, String jsonPathOut, JweConfig config) throws EncryptionException, GeneralSecurityException {
 
         Object inJsonObject = readJsonObject(payloadContext, jsonPathIn);
         if (inJsonObject == null) {
             // Nothing to decrypt
-            return;
+            return payloadContext;
         }
 
         // Read and remove encrypted data and encryption fields at the given JSON path
         Object encryptedValueJsonElement = readAndDeleteJsonKey(payloadContext, inJsonObject, config.encryptedValueFieldName);
         if (jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
             // Nothing to decrypt
-            return;
+            return payloadContext;
         }
 
         String encryptedValue = jsonEngine.toJsonString(encryptedValueJsonElement).replace("\"", "");
         JweObject jweObject = JweObject.parse(encryptedValue, jsonEngine);
-        String payload = jweObject.decrypt(config);
+        String decryptedValue = jweObject.decrypt(config);
 
         // Add decrypted data at the given JSON path
-        checkOrCreateOutObject(payloadContext, jsonPathOut);
-        JsonParser.addDecryptedDataToPayload(payloadContext, payload, jsonPathOut);
+        if ("$".equals(jsonPathOut)) {
+            // We can't reuse the same DocumentContext. We have to create a new DocumentContext
+            // with the appropriate internal representation (JSON object or JSON array).
+            payloadContext = JsonPath.parse(decryptedValue, JsonParser.jsonPathConfig);
+        } else {
+            checkOrCreateOutObject(payloadContext, jsonPathOut);
+            JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+        }
 
         // Remove the input
         payloadContext.delete(jsonPathIn);
+        return payloadContext;
     }
 
     private static Object readAndDeleteJsonKey(DocumentContext context, Object object, String key) {
