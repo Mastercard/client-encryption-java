@@ -95,7 +95,7 @@ public class JweObject {
      */
     private static String base64UrlEncode(byte[] bytes) {
         return Base64.getUrlEncoder().encodeToString(bytes)
-            .replaceAll("=", ""); // Remove any trailing '='s
+            .replace("=", ""); // Remove any trailing '='s
     }
 
     public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {
