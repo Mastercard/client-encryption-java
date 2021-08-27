@@ -752,7 +752,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
     public void testDecryptPayload_ShouldDecryptRootArrays() throws Exception {
 
         // GIVEN
-        String encryptedPayload = "{\n" +
+        String encryptedPayload = "{" +
                 "  \"encryptedValue\": \"3496b0c505bcea6a849f8e30b553e6d4\"," +
                 "  \"iv\": \"ed82c0496e9d5ac769d77bdb2eb27958\"," +
                 "  \"encryptedKey\": \"29ea447b70bdf85dd509b5d4a23dc0ffb29fd1acf50ed0800ec189fbcf1fb813fa075952c3de2915d63ab42f16be2ed46dc27ba289d692778a1d585b589039ba0b25bad326d699c45f6d3cffd77b5ec37fe12e2c5456d49980b2ccf16402e83a8e9765b9b93ca37d4d5181ec3e5327fd58387bc539238f1c20a8bc9f4174f5d032982a59726b3e0b9cf6011d4d7bfc3afaf617e768dea6762750bce07339e3e55fdbd1a1cd12ee6bbfbc3c7a2d7f4e1313410eb0dad13e594a50a842ee1b2d0ff59d641987c417deaa151d679bc892e5c051b48781dbdefe74a12eb2b604b981e0be32ab81d01797117a24fbf6544850eed9b4aefad0eea7b3f5747b20f65d3f\"," +
@@ -1141,6 +1141,31 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
                 "}";
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
                 .withDecryptionPath("$", "$")
+                .build();
+
+        // WHEN
+        String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        assertPayloadEquals("{\"field1\":\"value1\",\"field2\":\"value2\"}", payload);
+    }
+
+    @Test
+    public void testDecryptPayload_ShouldSupportRootAsOutputPath() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{" +
+                "    \"encryptedData\": {" +
+                "        \"iv\": \"6fef040c8fe8ad9ec56b74efa194b5f7\"," +
+                "        \"encryptedKey\": \"b04c69e1ca944fd7641ea79f03e5cd540144759212fa50d07c8a97ab30ca8bded324e2d4b8cd2613b25cd6bceac35b76c2fa1b521ff205b5f33eafaf4102efbefd35cae6707f985953d6dac366cca36295b29d8af3d94d5d5d1532158066b9fecfc2cc000f10e4757967e84c043d7db164d7488f5bef28f59c989c4cd316c870da7b7c1d10cfd73b6d285cd43447e9e96702e3e818011b45b0ecda21b02286db04b7c77ab193dcc4a9036beff065a404689b7cea40b6a348554900ae3eb819af9cb53ab800e158051aac8d8075045a06808e3730cd8cbc1b5334dcdc922d0227f6da1518442914ac5f3abf6751dfb5721074459d0626b62e934f6a6e6fd96020\"," +
+                "        \"encryptedValue\": \"386cdb354a33a5b5ae44fa73622297d0372857d1f7634b45010f691964958e2afca0f7391742dc1243768ccf0b4fce8b\"," +
+                "        \"encryptionCertificateFingerprint\": \"80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279\"," +
+                "        \"encryptionKeyFingerprint\": \"761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79\"," +
+                "        \"oaepHashingAlgorithm\": \"SHA256\"" +
+                "    }" +
+                "}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withDecryptionPath("$.encryptedData", "$")
                 .build();
 
         // WHEN

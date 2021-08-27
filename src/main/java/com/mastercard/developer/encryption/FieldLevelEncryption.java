@@ -172,13 +172,14 @@ public class FieldLevelEncryption {
         } else {
             JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
             JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
+
+            // Remove the input if now empty
+            Object inJsonElement  = JsonParser.readJsonElement(payloadContext, jsonPathIn);
+            if (0 == jsonProvider.length(inJsonElement)) {
+                payloadContext.delete(jsonPathIn);
+            }
         }
 
-        // Remove the input if now empty
-        Object inJsonElement  = JsonParser.readJsonElement(payloadContext, jsonPathIn);
-        if (0 == jsonProvider.length(inJsonElement) && !"$".equals(jsonPathIn)) {
-            payloadContext.delete(jsonPathIn);
-        }
         return payloadContext;
     }
 
