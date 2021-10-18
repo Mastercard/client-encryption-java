@@ -19,13 +19,12 @@ public class AESCBC {
 
     @java.lang.SuppressWarnings("squid:S3329")
     public static byte[] decrypt(Key secretKey, JweObject object) throws GeneralSecurityException {
+        // First 16 bytes are the MAC key, so we only use the second 16 bytes
         SecretKeySpec aesKey = new SecretKeySpec(secretKey.getEncoded(), 16, 16, "AES");
-
         byte[] cipherText = EncodingUtils.base64Decode(object.getCipherText());
         byte[] iv = EncodingUtils.base64Decode(object.getIv());
-        SecretKeySpec keyspec = new SecretKeySpec(aesKey.getEncoded(), "AES");
 
-        return cipher(keyspec, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
+        return cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
     }
 
     public static byte[] cipher(Key key, AlgorithmParameterSpec iv, byte[] bytes, int mode) throws GeneralSecurityException {
