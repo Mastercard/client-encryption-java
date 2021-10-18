@@ -5,9 +5,7 @@ import com.mastercard.developer.utils.ByteUtils;
 import com.mastercard.developer.utils.EncodingUtils;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
