@@ -13,6 +13,7 @@ import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
+import static com.mastercard.developer.utils.ByteUtils.concat;
 import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 
 /**
@@ -102,7 +103,7 @@ public final class EncryptionUtils {
                 0x30, 0xD, 0x6, 0x9, 0x2A, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xF7, 0xD, 0x1, 0x1, 0x1, 0x5, 0x0, // Sequence: 1.2.840.113549.1.1.1, NULL
                 0x4, (byte) 0x82, (byte) ((pkcs1Length >> 8) & 0xff), (byte) (pkcs1Length & 0xff) // Octet string + length
         };
-        byte[] pkcs8bytes = join(pkcs8Header, pkcs1Bytes);
+        byte[] pkcs8bytes = concat(pkcs8Header, pkcs1Bytes);
         return readPkcs8PrivateKey(pkcs8bytes);
     }
 
@@ -110,12 +111,5 @@ public final class EncryptionUtils {
         return json.replace("\n", "")
                 .replace("\r", "")
                 .replace("\t", "");
-    }
-
-    private static byte[] join(byte[] byteArray1, byte[] byteArray2){
-        byte[] bytes = new byte[byteArray1.length + byteArray2.length];
-        System.arraycopy(byteArray1, 0, bytes, 0, byteArray1.length);
-        System.arraycopy(byteArray2, 0, bytes, byteArray1.length, byteArray2.length);
-        return bytes;
     }
 }
