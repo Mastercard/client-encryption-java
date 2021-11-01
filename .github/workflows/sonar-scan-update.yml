@@ -15,7 +15,8 @@ name: Sonar Updated
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'tests can be run')
+    if: contains(github.event.pull_request.labels.*.name, 'tests can be run') || 
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v2
         with:
