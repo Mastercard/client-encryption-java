@@ -3,7 +3,7 @@ name: Sonar
   push:
     branches:
       - main
-  pull_request:
+  pull_request_target:
     branches:
       - main
   schedule:
@@ -11,6 +11,9 @@ name: Sonar
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'tests can be run') ||
+      github.event.pull_request.head.repo.full_name == github.repository ||
+      github.event_name != 'pull_request_target'
     steps:
       - uses: actions/checkout@v2
         with:
