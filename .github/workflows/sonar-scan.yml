@@ -11,13 +11,13 @@ name: Sonar
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'tests can be run') ||
-      github.event.pull_request.head.repo.full_name == github.repository ||
-      github.event_name != 'pull_request_target'
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Check for external PR
+        if: contains(github.event.pull_request.labels.*.name, 'tests can be run')
+        run: echo "Unsecure PR, must be labelled with the 'safe' label, then run the workflow again" && exit 1
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
