@@ -15,8 +15,8 @@ name: Sonar Updated
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'tests can be run') || 
-      github.event.pull_request.head.repo.full_name == github.repository
+#     if: contains(github.event.pull_request.labels.*.name, 'tests can be run') || 
+#       github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v2
         with:
@@ -27,6 +27,10 @@ jobs:
           java-version: 11
       - name: Build with Maven
         run: mvn clean install -Dgpg.signature.skip=true --file pom.xml
+      - name: Log some things
+        run: >-
+          echo 'Hello ${{ contains(github.event.pull_request.labels.*.name, 'tests can be run') }} ----- ${{ github.event.pull_request.head.repo.full_name }} ----- ${{ github.repository }}'
+        
       - name: Sonar Scan
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
