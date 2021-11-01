@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check for external PR
-        if: ${{ !(contains(github.event.pull_request.labels.*.name, 'safe') }}
+        if: ${{ !(contains(github.event.pull_request.labels.*.name, 'safe')) }}
         run: echo "Unsecure PR, must be labelled with the 'safe' label, then run the workflow again" && exit 1
       - name: Set up JDK
         uses: actions/setup-java@v1
