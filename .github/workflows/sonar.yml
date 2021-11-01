@@ -1,0 +1,39 @@
+name: Sonar Updated
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  pull_request_target:
+    types: [labeled]
+    branches:
+      - main
+  schedule:
+    - cron: 0 16 * * *
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'tests can be run')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build with Maven
+        run: mvn clean install -Dgpg.signature.skip=true --file pom.xml
+      - name: Sonar Scan
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          SONAR_TOKEN: '${{ secrets.SONAR_TOKEN }}'
+        run: >-
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.projectName=client-encryption-java
+          -Dsonar.projectKey=Mastercard_client-encryption-java
+          -Dsonar.organization=mastercard -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=$SONAR_TOKEN -Dsonar.cpd.exclusions=**/OkHttp*.java
+          -Dsonar.exclusions=**/*.xml -Dgpg.signature.skip=true
