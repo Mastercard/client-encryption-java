@@ -1,5 +1,5 @@
 # client-encryption-java
-<img src="https://developer.mastercard.com/img/logo_cogs.svg" />
+[![](https://developer.mastercard.com/_/_/src/global/assets/svg/mcdev-logo-dark.svg)](https://developer.mastercard.com/)
 
 [![](https://github.com/Mastercard/client-encryption-java/workflows/Build%20&%20Test/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3A%22Build+%26+Test%22)
 [![](https://sonarcloud.io/api/project_badges/measure?project=Mastercard_client-encryption-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mastercard_client-encryption-java)
