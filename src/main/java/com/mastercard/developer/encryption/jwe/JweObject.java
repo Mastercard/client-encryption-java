@@ -99,14 +99,17 @@ public class JweObject {
     }
 
     public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {
-        String t = encryptedPayload.trim();
-        int dot1 = t.indexOf('.');
-        int dot2 = t.indexOf('.', dot1 + 1);
-        int dot3 = t.indexOf('.', dot2 + 1);
-        int dot4 = t.indexOf('.', dot3 + 1);
-        JweHeader header = JweHeader.parseJweHeader(t.substring(0, dot1), jsonEngine);
+        String[] payloadParts = encryptedPayload.trim()
+                                    .split("\\.");
 
-        return new JweObject(header, t.substring(0, dot1), t.substring(dot1 + 1, dot2), t.substring(dot2 + 1, dot3), t.substring(dot3 + 1, dot4), t.substring(dot4 + 1));
+        String rawHeader = payloadParts[0];
+        String encryptedKey = payloadParts[1];
+        String iv = payloadParts[2];
+        String cipherText = payloadParts[3];
+        String authTag = payloadParts[4];
+        JweHeader header = JweHeader.parseJweHeader(rawHeader, jsonEngine);
+
+        return new JweObject(header, rawHeader, encryptedKey, iv, cipherText, authTag);
     }
 
     public JweHeader getHeader() {
