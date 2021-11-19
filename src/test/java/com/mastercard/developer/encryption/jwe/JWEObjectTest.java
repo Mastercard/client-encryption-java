@@ -12,7 +12,7 @@ public class JWEObjectTest {
         JweObject jweObject = TestUtils.getTestCbcJweObject();
         String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder().build());
 
-        assertEquals("{\"foo\":\"bar\"}", decryptedPayload);
+        assertEquals("bar", decryptedPayload);
     }
 
     @Test
@@ -20,6 +20,6 @@ public class JWEObjectTest {
         JweObject jweObject = TestUtils.getTestGcmJweObject();
         String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder().build());
 
-        assertEquals("bar", decryptedPayload);
+        assertEquals("{\"foo\":\"bar\"}", decryptedPayload);
     }
 }
