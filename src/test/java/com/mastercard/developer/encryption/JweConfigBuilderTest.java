@@ -8,7 +8,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 
-public class JweEncryptionConfigBuilderTest {
+public class JweConfigBuilderTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
