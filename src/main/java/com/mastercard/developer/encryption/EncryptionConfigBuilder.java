@@ -14,14 +14,12 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 
 abstract class EncryptionConfigBuilder {
 
-    Certificate encryptionCertificate;
-    String encryptionKeyFingerprint;
-    PrivateKey decryptionKey;
-    FieldLevelEncryptionConfig.FieldValueEncoding fieldValueEncoding;
-    Map<String, String> encryptionPaths = new HashMap<>();
-    Map<String, String> decryptionPaths = new HashMap<>();
-    String encryptedValueFieldName;
-
+    protected Certificate encryptionCertificate;
+    protected String encryptionKeyFingerprint;
+    protected PrivateKey decryptionKey;
+    protected Map<String, String> encryptionPaths = new HashMap<>();
+    protected Map<String, String> decryptionPaths = new HashMap<>();
+    protected String encryptedValueFieldName;
 
     void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
         try {

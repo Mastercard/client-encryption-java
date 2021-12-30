@@ -25,6 +25,7 @@ public class FieldLevelEncryptionConfigBuilder extends EncryptionConfigBuilder {
     private String encryptionCertificateFingerprintHeaderName;
     private String encryptionKeyFingerprintFieldName;
     private String encryptionKeyFingerprintHeaderName;
+    private FieldLevelEncryptionConfig.FieldValueEncoding fieldValueEncoding;
 
     /**
      * Get an instance of the builder.
