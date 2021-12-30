@@ -41,7 +41,7 @@ public class JweConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldComputeCertificateKeyFingerprints_WhenFingerprintsNotSet() throws Exception {
+    public void testBuild_ShouldComputeCertificateKeyFingerprint_WhenFingerprintNotSet() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
@@ -50,7 +50,7 @@ public class JweConfigBuilderTest {
     }
 
     @Test
-    public void testIntercept_ShouldThrowIOException_WhenEncryptionFails() throws Exception {
+    public void testIntercept_ShouldThrowEncryptionException_WhenInvalidEncryptionCertificate() throws Exception {
         expectedException.expect(EncryptionException.class);
         expectedException.expectMessage("Failed to compute encryption key fingerprint!");
         JweConfigBuilder.aJweEncryptionConfig()
@@ -60,13 +60,13 @@ public class JweConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldAutoPopulateEncryptionAndDecryptionPaths() throws Exception {
+    public void testBuild_ShouldFallbackToDefaults() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
-                .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .build();
         Assert.assertEquals(Collections.singletonMap("$.encryptedData", "$"), config.decryptionPaths);
         Assert.assertEquals(Collections.singletonMap("$", "$"), config.encryptionPaths);
+        Assert.assertEquals("encryptedData", config.encryptedValueFieldName);
     }
 
     @Test
