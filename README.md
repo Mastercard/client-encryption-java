@@ -19,6 +19,7 @@
   * [Loading the Encryption Certificate](#loading-the-encryption-certificate) 
   * [Loading the Decryption Key](#loading-the-decryption-key)
   * [Performing Payload Encryption and Decryption](#performing-payload-encryption-and-decryption)
+    * [Introduction](#introduction)
     * [JWE Encryption and Decryption](#jwe-encryption-and-decryption)
     * [Mastercard Encryption and Decryption](#mastercard-encryption-and-decryption)
   * [Integrating with OpenAPI Generator API Client Libraries](#integrating-with-openapi-generator-api-client-libraries)
@@ -138,7 +139,7 @@ This library supports two types of encryption/decryption, both of which support 
 + [Encrypting Entire Payloads](#encrypting-entire-payloads-jwe)
 + [Decrypting Entire Payloads](#decrypting-entire-payloads-jwe)
 
-#### Introduction <a name="jwe-introduction"></a>
+##### • Introduction <a name="jwe-introduction"></a>
 
 This library uses [JWE compact serialization](https://datatracker.ietf.org/doc/html/rfc7516#section-7.1) for the encryption of sensitive data.
 The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `JweEncryption` class.
@@ -154,7 +155,7 @@ String encryptedRequestPayload = JweEncryption.encryptPayload(requestPayload, co
 String responsePayload = JweEncryption.decryptPayload(encryptedResponsePayload, config);
 ```
 
-#### Configuring the JWE Encryption <a name="configuring-the-jwe-encryption"></a>
+##### • Configuring the JWE Encryption <a name="configuring-the-jwe-encryption"></a>
 Use the `JweConfigBuilder` to create `JweConfig` instances. Example:
 ```java
 JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
@@ -169,7 +170,7 @@ JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
 See also:
 * [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
-#### Performing JWE Encryption <a name="performing-jwe-encryption"></a>
+##### • Performing JWE Encryption <a name="performing-jwe-encryption"></a>
 
 Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.
 
@@ -202,7 +203,7 @@ Output:
 }
 ```
 
-#### Performing JWE Decryption <a name="performing-jwe-decryption"></a>
+##### • Performing JWE Decryption <a name="performing-jwe-decryption"></a>
 
 Call `JweEncryption.decryptPayload` with a JSON response payload and a `JweConfig` instance.
 
@@ -235,7 +236,7 @@ Output:
 }
 ```
 
-#### Encrypting Entire Payloads <a name="encrypting-entire-payloads-jwe"></a>
+##### • Encrypting Entire Payloads <a name="encrypting-entire-payloads-jwe"></a>
 
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
@@ -264,7 +265,7 @@ Output:
 }
 ```
 
-#### Decrypting Entire Payloads <a name="decrypting-entire-payloads-jwe"></a>
+##### • Decrypting Entire Payloads <a name="decrypting-entire-payloads-jwe"></a>
 
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
@@ -303,7 +304,7 @@ Output:
 + [Decrypting Entire Payloads](#decrypting-entire-mastercard-payloads)
 + [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
-#### Introduction <a name="mastercard-introduction"></a>
+##### • Introduction <a name="mastercard-introduction"></a>
  
 The core methods responsible for payload encryption and decryption are `encryptPayload` and `decryptPayload` in the `FieldLevelEncryption` class.
 
@@ -318,7 +319,7 @@ String encryptedRequestPayload = FieldLevelEncryption.encryptPayload(requestPayl
 String responsePayload = FieldLevelEncryption.decryptPayload(encryptedResponsePayload, config);
 ```
 
-#### Configuring the Mastercard Encryption <a name="configuring-the-mastercard-encryption"></a>
+##### • Configuring the Mastercard Encryption <a name="configuring-the-mastercard-encryption"></a>
 Use the `FieldLevelEncryptionConfigBuilder` to create `FieldLevelEncryptionConfig` instances. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
@@ -338,7 +339,7 @@ See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
 * [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
-#### Performing Mastercard Encryption <a name="performing-mastercard-encryption"></a>
+##### • Performing Mastercard Encryption <a name="performing-mastercard-encryption"></a>
 
 Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -373,7 +374,7 @@ Output:
 }
 ```
 
-#### Performing Mastercard Decryption <a name="performing-mastercard-decryption"></a>
+##### • Performing Mastercard Decryption <a name="performing-mastercard-decryption"></a>
 
 Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
@@ -408,7 +409,7 @@ Output:
 }
 ```
 
-#### Encrypting Entire Payloads <a name="encrypting-entire-mastercard-payloads"></a>
+##### • Encrypting Entire Payloads <a name="encrypting-entire-mastercard-payloads"></a>
 
 Entire payloads can be encrypted using the "$" operator as encryption path:
 
@@ -439,7 +440,7 @@ Output:
 }
 ```
 
-#### Decrypting Entire Payloads <a name="decrypting-entire-mastercard-payloads"></a>
+##### • Decrypting Entire Payloads <a name="decrypting-entire-mastercard-payloads"></a>
 
 Entire payloads can be decrypted using the "$" operator as decryption path:
 
@@ -470,13 +471,13 @@ Output:
 }
 ```
 
-#### Using HTTP Headers for Encryption Params <a name="using-http-headers-for-encryption-params"></a>
+##### • Using HTTP Headers for Encryption Params <a name="using-http-headers-for-encryption-params"></a>
 
 In the sections above, encryption parameters (initialization vector, encrypted symmetric key, etc.) are part of the HTTP payloads.
 
 Here is how to configure the library for using HTTP headers instead.
 
-##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
+###### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
 
 Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building a `FieldLevelEncryptionConfig` instance. Example:
 ```java
@@ -498,7 +499,7 @@ See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
 * [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
-##### Encrypting Using HTTP Headers
+###### Encrypting Using HTTP Headers
 
 Encryption can be performed using the following steps:
 
@@ -539,7 +540,7 @@ Output:
 }
 ```
 
-##### Decrypting Using HTTP Headers
+###### Decrypting Using HTTP Headers
 
 Decryption can be performed using the following steps:
 
