@@ -171,7 +171,7 @@ See also:
 
 #### Performing JWE Encryption <a name="performing-jwe-encryption"></a>
 
-Call `JweEncryption.encryptPayload` with a JSON request payload and an `JweConfig` instance.
+Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.
 
 Example using the configuration [above](#configuring-the-jwe-encryption):
 ```java
@@ -195,7 +195,7 @@ Output:
     "path": {
         "to": {
             "encryptedFoo": {
-                "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw=="
+                "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw"
             }
         }
     }
@@ -204,7 +204,7 @@ Output:
 
 #### Performing JWE Decryption <a name="performing-jwe-decryption"></a>
 
-Call `JweEncryption.decryptPayload` with a JSON response payload and an `JweConfig` instance.
+Call `JweEncryption.decryptPayload` with a JSON response payload and a `JweConfig` instance.
 
 Example using the configuration [above](#configuring-the-jwe-encryption):
 ```java
@@ -212,7 +212,7 @@ String encryptedPayload = "{" +
     "    \"path\": {" +
     "        \"to\": {" +
     "            \"encryptedFoo\": {" +
-    "                \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw==\"" +
+    "                \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw\"" +
     "            }" +
     "        }" +
     "    }" +
@@ -243,7 +243,7 @@ Entire payloads can be encrypted using the "$" operator as encryption path:
 JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withEncryptionPath("$", "$")
-    // ...
+    // …
     .build();
 ```
 
@@ -260,7 +260,7 @@ System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new Jso
 Output:
 ```json
 {
-    "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw=="
+    "encryptedValue": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw"
 }
 ```
 
@@ -272,14 +272,14 @@ Entire payloads can be decrypted using the "$" operator as decryption path:
 JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withDecryptionKey(decryptionKey)
     .withDecryptionPath("$", "$")
-    // ...
+    // …
     .build();
 ```
 
 Example:
 ```java
 String encryptedPayload = "{" +
-    "  \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM(...)==.Y+oPYKZEMTKyYcSIVEgtQw==\"" +
+    "  \"encryptedValue\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw\"" +
     "}";
 String payload = JweEncryption.decryptPayload(encryptedPayload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
@@ -340,7 +340,7 @@ See also:
 
 #### Performing Mastercard Encryption <a name="performing-mastercard-encryption"></a>
 
-Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and an `FieldLevelEncryptionConfig` instance.
+Call `FieldLevelEncryption.encryptPayload` with a JSON request payload and a `FieldLevelEncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
@@ -365,8 +365,8 @@ Output:
         "to": {
             "encryptedFoo": {
                 "iv": "7f1105fb0c684864a189fb3709ce3d28",
-                "encryptedKey": "67f467d1b653d98411a0c6d3c(...)ffd4c09dd42f713a51bff2b48f937c8",
-                "encryptedValue": "b73aabd267517fc09ed72455c2(...)dffb5fa04bf6e6ce9ade1ff514ed6141"
+                "encryptedKey": "67f467d1b653d98411a0c6d3c…ffd4c09dd42f713a51bff2b48f937c8",
+                "encryptedValue": "b73aabd267517fc09ed72455c2…dffb5fa04bf6e6ce9ade1ff514ed6141"
             }
         }
     }
@@ -375,7 +375,7 @@ Output:
 
 #### Performing Mastercard Decryption <a name="performing-mastercard-decryption"></a>
 
-Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and an `FieldLevelEncryptionConfig` instance.
+Call `FieldLevelEncryption.decryptPayload` with a JSON response payload and a `FieldLevelEncryptionConfig` instance.
 
 Example using the configuration [above](#configuring-the-field-level-encryption):
 ```java
@@ -384,8 +384,8 @@ String encryptedPayload = "{" +
     "        \"to\": {" +
     "            \"encryptedFoo\": {" +
     "                \"iv\": \"e5d313c056c411170bf07ac82ede78c9\"," +
-    "                \"encryptedKey\": \"e3a56746c0f9109d18b3a2652b76(...)f16d8afeff36b2479652f5c24ae7bd\"," +
-    "                \"encryptedValue\": \"809a09d78257af5379df0c454dcdf(...)353ed59fe72fd4a7735c69da4080e74f\"" +
+    "                \"encryptedKey\": \"e3a56746c0f9109d18b3a2652b76…f16d8afeff36b2479652f5c24ae7bd\"," +
+    "                \"encryptedValue\": \"809a09d78257af5379df0c454dcdf…353ed59fe72fd4a7735c69da4080e74f\"" +
     "            }" +
     "        }" +
     "    }" +
@@ -416,7 +416,7 @@ Entire payloads can be encrypted using the "$" operator as encryption path:
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withEncryptionPath("$", "$")
-    // ...
+    // …
     .build();
 ```
 
@@ -434,8 +434,8 @@ Output:
 ```json
 {
     "iv": "1b9396c98ab2bfd195de661d70905a45",
-    "encryptedKey": "7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13",
-    "encryptedValue": "e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515"
+    "encryptedKey": "7d5112fa08e554e3dbc455d0628…52e826dd10311cf0d63bbfb231a1a63ecc13",
+    "encryptedValue": "e5e9340f4d2618d27f8955828c86…379b13901a3b1e2efed616b6750a90fd379515"
 }
 ```
 
@@ -447,7 +447,7 @@ Entire payloads can be decrypted using the "$" operator as decryption path:
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withDecryptionKey(decryptionKey)
     .withDecryptionPath("$", "$")
-    // ...
+    // …
     .build();
 ```
 
@@ -455,8 +455,8 @@ Example:
 ```java
 String encryptedPayload = "{" +
     "  \"iv\": \"1b9396c98ab2bfd195de661d70905a45\"," +
-    "  \"encryptedKey\": \"7d5112fa08e554e3dbc455d0628(...)52e826dd10311cf0d63bbfb231a1a63ecc13\"," +
-    "  \"encryptedValue\": \"e5e9340f4d2618d27f8955828c86(...)379b13901a3b1e2efed616b6750a90fd379515\"" +
+    "  \"encryptedKey\": \"7d5112fa08e554e3dbc455d0628…52e826dd10311cf0d63bbfb231a1a63ecc13\"," +
+    "  \"encryptedValue\": \"e5e9340f4d2618d27f8955828c86…379b13901a3b1e2efed616b6750a90fd379515\"" +
     "}";
 String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
@@ -478,7 +478,7 @@ Here is how to configure the library for using HTTP headers instead.
 
 ##### Configuration for Using HTTP Headers <a name="configuration-for-using-http-headers"></a>
 
-Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building an `FieldLevelEncryptionConfig` instance. Example:
+Call `with{Param}HeaderName` instead of `with{Param}FieldName` when building a `FieldLevelEncryptionConfig` instance. Example:
 ```java
 FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
@@ -489,7 +489,7 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
     .withEncryptedValueFieldName("data")
     .withIvHeaderName("x-iv")
     .withEncryptedKeyHeaderName("x-encrypted-key")
-    // ...
+    // …
     .withFieldValueEncoding(FieldValueEncoding.HEX)
     .build();
 ```
@@ -513,7 +513,7 @@ FieldLevelEncryptionParams params = FieldLevelEncryptionParams.generate(config);
 ```java
 request.setHeader(config.getIvHeaderName(), params.getIvValue());
 request.setHeader(config.getEncryptedKeyHeaderName(), params.getEncryptedKeyValue());
-// ...
+// …
 ```
 
 3. Call `encryptPayload` with params:
@@ -535,7 +535,7 @@ System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new Jso
 Output:
 ```json
 {
-    "data": "53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5"
+    "data": "53b5f07ee46403af2e92abab900853…d560a0a08a1ed142099e3f4c84fe5e5"
 }
 ```
 
@@ -548,13 +548,13 @@ Decryption can be performed using the following steps:
 ```java
 String ivValue = response.getHeader(config.getIvHeaderName());
 String encryptedKeyValue = response.getHeader(config.getEncryptedKeyHeaderName());
-// ...
+// …
 ```
 
 2. Create a `FieldLevelEncryptionParams` instance:
 
 ```java
-FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, ..., config);
+FieldLevelEncryptionParams params = new FieldLevelEncryptionParams(ivValue, encryptedKeyValue, …, config);
 ```
 
 3. Call `decryptPayload` with params:
@@ -566,7 +566,7 @@ Example using the configuration [above](#configuration-for-using-http-headers):
 
 ```java
 String encryptedPayload = "{" +
-    "  \"data\": \"53b5f07ee46403af2e92abab900853(...)d560a0a08a1ed142099e3f4c84fe5e5\"" +
+    "  \"data\": \"53b5f07ee46403af2e92abab900853…d560a0a08a1ed142099e3f4c84fe5e5\"" +
     "}";
 String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config, params);
 System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
@@ -607,7 +607,7 @@ See also:
     <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
     <generatorName>java</generatorName>
     <library>okhttp-gson</library>
-    <!-- ... -->
+    <!-- … -->
 </configuration>
 ```
 
@@ -619,7 +619,7 @@ List<Interceptor> interceptors = client.getHttpClient().interceptors();
 interceptors.add(OkHttp2EncryptionInterceptor.from(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = new ServiceApi(client);
-// ...
+// …
 ```
 
 ##### Usage of the `OkHttpFieldLevelEncryptionInterceptor` (OpenAPI Generator 4.x.y)
@@ -634,7 +634,7 @@ client.setHttpClient(
         .build()
 );
 ServiceApi serviceApi = new ServiceApi(client);
-// ...
+// …
 ```
 
 #### feign <a name="feign"></a>
@@ -644,7 +644,7 @@ ServiceApi serviceApi = new ServiceApi(client);
     <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
     <generatorName>java</generatorName>
     <library>feign</library>
-    <!-- ... -->
+    <!-- … -->
 </configuration>
 ```
 
@@ -660,7 +660,7 @@ feignBuilder.requestInterceptors(interceptors);
 feignBuilder.encoder(OpenFeignEncoderExecutor.from(config, new FormEncoder(new JacksonEncoder(objectMapper))));
 feignBuilder.decoder(OpenFeignDecoderExecutor.from(config, new JacksonDecoder(objectMapper)));
 ServiceApi serviceApi = client.buildClient(ServiceApi.class);
-// ...
+// …
 ```
 
 #### retrofit <a name="retrofit"></a>
@@ -670,7 +670,7 @@ ServiceApi serviceApi = client.buildClient(ServiceApi.class);
     <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
     <generatorName>java</generatorName>
     <library>retrofit</library>
-    <!-- ... -->
+    <!-- … -->
 </configuration>
 ```
 
@@ -683,7 +683,7 @@ List<Interceptor> interceptors = client.getOkClient().interceptors();
 interceptors.add(OkHttp2EncryptionInterceptor.from(config));
 interceptors.add(new OkHttp2OAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = client.createService(ServiceApi.class);
-// ...
+// …
 ```
 
 #### retrofit2 <a name="retrofit2"></a>
@@ -693,7 +693,7 @@ ServiceApi serviceApi = client.createService(ServiceApi.class);
     <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
     <generatorName>java</generatorName>
     <library>retrofit2</library>
-    <!-- ... -->
+    <!-- … -->
 </configuration>
 ```
 
@@ -706,7 +706,7 @@ OkHttpClient.Builder okBuilder = client.getOkBuilder();
 okBuilder.addInterceptor(OkHttpEncryptionInterceptor.from(config));
 okBuilder.addInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey));
 ServiceApi serviceApi = client.createService(ServiceApi.class);
-// ...
+// …
 ```
 
 #### google-api-client <a name="google-api-client"></a>
@@ -716,7 +716,7 @@ ServiceApi serviceApi = client.createService(ServiceApi.class);
     <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
     <generatorName>java</generatorName>
     <library>google-api-client</library>
-    <!-- ... -->
+    <!-- … -->
 </configuration>
 ```
 
@@ -733,5 +733,5 @@ HttpRequestInitializer initializer = new HttpRequestInitializer() {
 };
 ApiClient client = new ApiClient("https://sandbox.api.mastercard.com", null, initializer, null);
 ServiceApi serviceApi = client.serviceApi();
-// ...
+// …
 ```
