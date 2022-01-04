@@ -1,8 +1,10 @@
 'on':
   push:
-    branches: main
+    branches:
+      - "**"
   schedule:
     - cron: 0 16 * * *
+  workflow_dispatch:
 name: broken links?
 jobs:
   linkChecker:
