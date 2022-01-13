@@ -623,14 +623,14 @@ ServiceApi serviceApi = new ServiceApi(client);
 // …
 ```
 
-##### Usage of the `OkHttpFieldLevelEncryptionInterceptor` (OpenAPI Generator 4.x.y)
+##### Usage of the `OkHttpEncryptionInterceptor` (OpenAPI Generator 4.x.y)
 ```java
 ApiClient client = new ApiClient();
 client.setBasePath("https://sandbox.api.mastercard.com");
 client.setHttpClient(
     client.getHttpClient()
         .newBuilder()
-        .addInterceptor(OkHttpFieldLevelEncryptionInterceptor.from(config))
+        .addInterceptor(OkHttpEncryptionInterceptor.from(config))
         .addInterceptor(new OkHttpOAuth1Interceptor(consumerKey, signingKey))
         .build()
 );
