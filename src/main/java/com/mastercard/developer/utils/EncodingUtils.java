@@ -63,4 +63,11 @@ public class EncodingUtils {
         }
         return Base64.getEncoder().encodeToString(bytes);
     }
+
+    /**
+     * BASE64URL as per https://datatracker.ietf.org/doc/html/rfc7515#appendix-C
+     */
+    public static String base64UrlEncode(byte[] bytes) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
 }

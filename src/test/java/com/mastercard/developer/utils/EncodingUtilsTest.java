@@ -67,4 +67,11 @@ public class EncodingUtilsTest {
     public void testBase64Decode_ShouldThrowIllegalArgumentException_WhenNullValue() {
         EncodingUtils.base64Decode(null);
     }
+
+    @Test
+    public void testBase64UrlEncode() {
+        Assert.assertEquals("AA", EncodingUtils.base64UrlEncode(new byte[1]));
+        Assert.assertEquals("eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ", EncodingUtils.base64UrlEncode("{\"alg\":\"RSA-OAEP\",\"enc\":\"A256GCM\"}".getBytes()));
+        Assert.assertEquals("bGlnaHQgd29yaw", EncodingUtils.base64UrlEncode("light work".getBytes()));
+    }
 }
