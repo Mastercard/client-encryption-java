@@ -94,7 +94,7 @@ public class JweEncryption {
         }
 
         // Read and remove encrypted data and encryption fields at the given JSON path
-        Object encryptedValueJsonElement = readAndDeleteJsonKey(payloadContext, inJsonObject, config.encryptedValueFieldName);
+        Object encryptedValueJsonElement = JsonPath.parse(inJsonObject).read(config.encryptedValueFieldName);
         if (jsonEngine.isNullOrEmptyJson(encryptedValueJsonElement)) {
             // Nothing to decrypt
             return payloadContext;
@@ -117,11 +117,6 @@ public class JweEncryption {
         // Remove the input
         payloadContext.delete(jsonPathIn);
         return payloadContext;
-    }
-
-    private static Object readAndDeleteJsonKey(DocumentContext context, Object object, String key) {
-        context.delete(key);
-        return object;
     }
 
     private static Object readJsonObject(DocumentContext context, String jsonPathString) {
