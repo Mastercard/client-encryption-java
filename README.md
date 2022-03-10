@@ -162,7 +162,7 @@ JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withEncryptionCertificate(encryptionCertificate)
     .withDecryptionKey(decryptionKey)
     .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
-    .withDecryptionPath("$.path.to.encryptedFoo", "$.path.to.foo")
+    .withDecryptionPath("$.path.to.encryptedFoo.encryptedValue", "$.path.to.foo")
     .withEncryptedValueFieldName("encryptedValue")
     .build();
 ```
@@ -272,7 +272,7 @@ Entire payloads can be decrypted using the "$" operator as decryption path:
 ```java
 JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withDecryptionKey(decryptionKey)
-    .withDecryptionPath("$", "$")
+    .withDecryptionPath("$.encryptedValue", "$")
     // …
     .build();
 ```
