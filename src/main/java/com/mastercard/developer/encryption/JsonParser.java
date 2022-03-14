@@ -10,7 +10,7 @@ import com.mastercard.developer.json.JsonEngine;
 import java.util.Collection;
 import java.util.Collections;
 
-final class JsonParser {
+public final class JsonParser {
 
     private JsonParser() {
         // Nothing to do here
@@ -24,7 +24,7 @@ final class JsonParser {
      *
      * @param jsonEngine A {@link com.mastercard.developer.json.JsonEngine} instance
      */
-    static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
+   public static synchronized Configuration withJsonEngine(JsonEngine jsonEngine) {
         JsonParser.jsonEngine = jsonEngine;
         JsonParser.jsonPathConfig = new Configuration.ConfigurationBuilder()
                 .jsonProvider(jsonEngine.getJsonProvider())
