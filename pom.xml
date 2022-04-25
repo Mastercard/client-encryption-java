@@ -6,7 +6,7 @@
 
     <groupId>com.mastercard.developer</groupId>
     <artifactId>client-encryption</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3</version>
     <packaging>jar</packaging>
     <description>Library for Mastercard API compliant payload encryption/decryption</description>
     <url>https://github.com/Mastercard/client-encryption-java</url>
