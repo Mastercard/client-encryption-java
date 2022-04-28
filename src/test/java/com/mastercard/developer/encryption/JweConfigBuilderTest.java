@@ -96,4 +96,14 @@ public class JweConfigBuilderTest {
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .build();
     }
+    
+    @Test
+    public void testBuild_ShouldNotComputeCertificateKeyFingerprint_WhenFingerprintSet() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEncryptionKeyFingerprint("2f4lvi26vJWzkzAIaiR2G0YsJAQ=")
+                .build();
+        Assert.assertEquals("2f4lvi26vJWzkzAIaiR2G0YsJAQ=", config.getEncryptionKeyFingerprint());
+    }
 }
