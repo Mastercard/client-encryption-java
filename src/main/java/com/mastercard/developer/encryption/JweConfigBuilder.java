@@ -74,6 +74,11 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         return this;
     }
 
+    public JweConfigBuilder withEncryptionKeyFingerprint(String encryptionKeyFingerprint) {
+        this.encryptionKeyFingerprint = encryptionKeyFingerprint;
+        return this;
+    }
+    
     private void checkParameterValues() {
         if (decryptionKey == null && encryptionCertificate == null) {
             throw new IllegalArgumentException("You must include at least an encryption certificate or a decryption key");
