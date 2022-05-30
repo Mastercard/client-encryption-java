@@ -15,6 +15,6 @@ jobs:
         id: lc
         uses: peter-evans/link-checker@v1.2.2
         with:
-          args: '-v -r *'
+          args: -v -r * -x (mvnrepository)
       - name: Fail?
         run: 'exit ${{ steps.lc.outputs.exit_code }}'
