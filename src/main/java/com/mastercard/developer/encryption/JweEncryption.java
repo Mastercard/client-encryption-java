@@ -30,7 +30,17 @@ public class JweEncryption {
             for (Map.Entry<String, String> entry : config.getEncryptionPaths().entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                payloadContext = encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                if(!jsonPathIn.contains("[*]")){
+                    payloadContext = encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                }else {
+                    String getFieldLength = jsonPathIn.split("\\[.*?\\]")[0].concat(".length()");
+                    Integer length = JsonPath.read(payload, getFieldLength);
+                    for (Integer i = 0; i < length; i++) {
+                        String newJsonPathIn = jsonPathIn.replace("*", i.toString());
+                        String newJsonPathOut = jsonPathOut.replace("*", i.toString());
+                        payloadContext = encryptPayloadPath(payloadContext, newJsonPathIn, newJsonPathOut, config);
+                    }
+                }
             }
 
             // Return the updated payload
@@ -49,7 +59,17 @@ public class JweEncryption {
             for (Map.Entry<String, String> entry : config.getDecryptionPaths().entrySet()) {
                 String jsonPathIn = entry.getKey();
                 String jsonPathOut = entry.getValue();
-                payloadContext = decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                if(!jsonPathIn.contains("[*]")){
+                    payloadContext = decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
+                }else {
+                    String getFieldLength = jsonPathIn.split("\\[.*?\\]")[0].concat(".length()");
+                    Integer length = JsonPath.read(payload, getFieldLength);
+                    for (Integer i = 0; i < length; i++) {
+                        String newJsonPathIn = jsonPathIn.replace("*", i.toString());
+                        String newJsonPathOut = jsonPathOut.replace("*", i.toString());
+                        payloadContext = decryptPayloadPath(payloadContext, newJsonPathIn, newJsonPathOut, config);
+                    }
+                }
             }
 
             // Return the updated payload

@@ -138,6 +138,8 @@ This library supports two types of encryption/decryption, both of which support 
 + [Performing JWE Decryption](#performing-jwe-decryption)
 + [Encrypting Entire Payloads](#encrypting-entire-payloads-jwe)
 + [Decrypting Entire Payloads](#decrypting-entire-payloads-jwe)
++ [Encrypting Payloads with Wildcards](#encrypting-wildcard-payloads-jwe)
++ [Decrypting Payloads with Wildcards](#decrypting-wildcard-payloads-jwe)
 
 ##### • Introduction <a name="jwe-introduction"></a>
 
@@ -294,6 +296,70 @@ Output:
 }
 ```
 
+##### • Encrypting Payloads with Wildcards <a name="encrypting-wildcard-payloads-jwe"></a>
+
+Wildcards can be encrypted using the "[*]" operator as part of encryption path:
+
+```java
+JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withEncryptionCertificate(encryptionCertificate)
+    .withEncryptionPath("$.list[*]sensitiveField1", "$.list[*]encryptedField")
+    // …
+    .build();
+```
+
+Example:
+```java
+String payload = "{ \"list\": [ " +
+    "   { \"sensitiveField1\" : \"sensitiveValue1\"}, "+
+    "   { \"sensitiveField1\" : \"sensitiveValue2\"} " +
+    "]}";
+String encryptedPayload = JweEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+  "list": [
+    {"encryptedField": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw"},
+    {"encryptedField": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+asdvarvasdvfdvakmkmm"}
+  ]
+}
+```
+
+##### • Decrypting Payloads with Wildcards <a name="decrypting-wildcard-payloads-jwe"></a>
+
+Wildcards can be decrypted using the "[*]" operator as part of decryption path:
+
+```java
+JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withDecryptionKey(decryptionKey)
+    .withDecryptionPath("$.list[*]encryptedField", "$.list[*]sensitiveField1")
+    // …
+    .build();
+```
+
+Example:
+```java
+String encryptedPayload = "{ \"list\": [ " +
+        " { \"encryptedField\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw\"}, " +
+        " { \"encryptedField\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+asdvarvasdvfdvakmkmm\"} " +
+        " ]}";
+String payload = JweEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+  "list": [
+    {"sensitiveField1": "sensitiveValue1"},
+    {"sensitiveField2": "sensitiveValue2"}
+  ]
+}
+```
+
 #### Mastercard Encryption and Decryption <a name="mastercard-encryption-and-decryption"></a>
 
 + [Introduction](#mastercard-introduction)
@@ -302,6 +368,8 @@ Output:
 + [Performing Mastercard Decryption](#performing-mastercard-decryption)
 + [Encrypting Entire Payloads](#encrypting-entire-mastercard-payloads)
 + [Decrypting Entire Payloads](#decrypting-entire-mastercard-payloads)
++ [Encrypting Payloads with Wildcards](#encrypting-wildcard-mastercard-payloads)
++ [Decrypting Payloads with Wildcards](#decrypting-wildcard-mastercard-payloads)
 + [Using HTTP Headers for Encryption Params](#using-http-headers-for-encryption-params)
 
 ##### • Introduction <a name="mastercard-introduction"></a>
@@ -468,6 +536,70 @@ Output:
 {
     "sensitiveField1": "sensitiveValue1",
     "sensitiveField2": "sensitiveValue2"
+}
+
+```
+##### • Encrypting Payloads with Wildcards <a name="encrypting-wildcard-mastercard-payloads"></a>
+
+Wildcards can be encrypted using the "[*]" operator as part of encryption path:
+
+```java
+FLEConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+    .withEncryptionCertificate(encryptionCertificate)
+    .withEncryptionPath("$.list[*]sensitiveField1", "$.list[*]encryptedField")
+    // …
+    .build();
+```
+
+Example:
+```java
+String payload = "{ \"list\": [ " +
+    "   { \"sensitiveField1\" : \"sensitiveValue1\"}, "+
+    "   { \"sensitiveField1\" : \"sensitiveValue2\"} " +
+    "]}";
+String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(encryptedPayload)));
+```
+
+Output:
+```json
+{
+  "list": [
+    {"encryptedField": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw"},
+    {"encryptedField": "eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+asdvarvasdvfdvakmkmm"}
+  ]
+}
+```
+
+##### • Decrypting Payloads with Wildcards <a name="decrypting-wildcard-mastercard-payloads"></a>
+
+Wildcards can be decrypted using the "[*]" operator as part of decryption path:
+
+```java
+FLEConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+    .withDecryptionKey(decryptionKey)
+    .withDecryptionPath("$.list[*]encryptedField", "$.list[*]sensitiveField1")
+    // …
+    .build();
+```
+
+Example:
+```java
+String encryptedPayload = "{ \"list\": [ " +
+        " { \"encryptedField\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+oPYKZEMTKyYcSIVEgtQw\"}, " +
+        " { \"encryptedField\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM….Y+asdvarvasdvfdvakmkmm\"} " +
+        " ]}";
+String payload = FieldLevelEncryption.decryptPayload(encryptedPayload, config);
+System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(new JsonParser().parse(payload)));
+```
+
+Output:
+```json
+{
+  "list": [
+    {"sensitiveField1": "sensitiveValue1"},
+    {"sensitiveField2": "sensitiveValue2"}
+  ]
 }
 ```
 

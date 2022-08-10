@@ -24,6 +24,7 @@ import static com.mastercard.developer.test.TestUtils.*;
 import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static com.mastercard.developer.utils.EncryptionUtils.loadDecryptionKey;
 import static org.hamcrest.core.Is.isA;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldLevelEncryptionWithDefaultJsonEngineTest {
@@ -126,6 +127,34 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         assertNotNull(encryptedData.get("iv").getAsString());
         assertDecryptedPayloadEquals("{\"data\":{\"field1\":\"value1\",\"field2\":\"value2\"}}", encryptedPayload, config);
     }
+
+    @Test
+    public void testEncryptPayload_ShouldEncryptWithWildcard() throws Exception {
+
+        // GIVEN
+        String payload = "{ \"fields\": [" +
+                "   {" +
+                "      \"field1\": \"1234\"," +
+                "      \"field2\": \"asdf\"" +
+                "   }," +
+                "   {" +
+                "      \"field1\": \"5678\"," +
+                "      \"field2\": \"zxcv\"" +
+                "   }" +
+                "]}";
+        FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder()
+                .withEncryptionPath("$.fields[*]field1", "$.fields[*]encryptedData")
+                .withDecryptionPath("$.fields[*]encryptedData", "$.fields[*]field1")
+                .withOaepPaddingDigestAlgorithm("SHA-256")
+                .build();
+
+        // WHEN
+        String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
+
+        // THEN
+        assertDecryptedPayloadEquals("{\"fields\":[{\"field2\":\"asdf\",\"field1\":1234},{\"field2\":\"zxcv\",\"field1\":5678}]}", encryptedPayload, config);
+    }
+
 
     @Test
     public void testEncryptPayload_ShouldSupportBase64FieldValueEncoding() throws Exception {

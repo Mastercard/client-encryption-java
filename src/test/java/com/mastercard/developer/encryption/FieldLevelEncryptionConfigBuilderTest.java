@@ -97,11 +97,47 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteDecryptionPath() throws Exception {
+    public void testBuild_ShouldBuild_WhenHavingWildcardPaths() throws Exception {
+        FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.encryptedPayloads[*]", "$.payload[*]")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withEncryptionCertificateFingerprint("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B")
+                .withEncryptionKeyFingerprint("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810")
+                .withEncryptionCertificateFingerprintFieldName("publicCertificateFingerprint")
+                .withEncryptionCertificateFingerprintHeaderName("x-public-certificate-fingerprint")
+                .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
+                .withEncryptionKeyFingerprintHeaderName("x-public-key-fingerprint")
+                .withDecryptionPath("$.encryptedPayloads[*]", "$.payload[*]")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withOaepPaddingDigestAlgorithmFieldName("oaepPaddingDigestAlgorithm")
+                .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvFieldName("iv")
+                .withIvHeaderName("x-iv")
+                .withFieldValueEncoding(HEX)
+                .build();
+        Assert.assertNotNull(config);
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotHavingWildcardOnBothDecryptionPaths() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for decryption must point to a single item!");
+        expectedException.expectMessage("JSON paths for decryption with wildcard must both contain a wildcard!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withDecryptionPath("$.encryptedPayloads[*]", "$.payload")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMultipleWildcardsOnDecryptionPaths() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for decryption with can only contain one wildcard!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withDecryptionPath("$.encryptedPayloads[*]field1[*]subField", "$.payload[*]field1[*]encryptedSubField")
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .build();
     }
@@ -121,11 +157,21 @@ public class FieldLevelEncryptionConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteEncryptionPath() throws Exception {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotHavingWildcardOnBothEncryptionPaths() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for encryption must point to a single item!");
+        expectedException.expectMessage("JSON paths for encryption with wildcard must both contain a wildcard!");
         FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
-                .withEncryptionPath("$.payloads[*]", "$.encryptedPayload")
+                .withEncryptionPath("$.encryptedPayloads[*]", "$.payload")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMultipleWildcardsOnEncryptionPaths() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for encryption with can only contain one wildcard!");
+        FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.encryptedPayloads[*]field1[*]subField", "$.payload[*]field1[*]encryptedSubField")
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .build();
     }
