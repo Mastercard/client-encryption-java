@@ -42,14 +42,32 @@ abstract class EncryptionConfigBuilder {
 
     void checkJsonPathParameterValues() {
         for (Map.Entry<String, String> entry : decryptionPaths.entrySet()) {
-            if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                throw new IllegalArgumentException("JSON paths for decryption must point to a single item!");
+            if(entry.getKey().contains("[*]") || entry.getValue().contains("[*]")){
+                if(!(entry.getKey().contains("[*]") && entry.getValue().contains("[*]"))){
+                    throw new IllegalArgumentException("JSON paths for decryption with wildcard must both contain a wildcard!");
+                }
+                if((entry.getKey().split("[*]", -1).length-1 > 1 || entry.getValue().split("[*]", -1).length-1 > 1)){
+                    throw new IllegalArgumentException("JSON paths for decryption with can only contain one wildcard!");
+                }
+            } else {
+                if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
+                    throw new IllegalArgumentException("JSON paths for decryption must point to a single item!");
+                }
             }
         }
 
         for (Map.Entry<String, String> entry : encryptionPaths.entrySet()) {
-            if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                throw new IllegalArgumentException("JSON paths for encryption must point to a single item!");
+            if(entry.getKey().contains("[*]") || entry.getValue().contains("[*]")){
+                if(!(entry.getKey().contains("[*]") && entry.getValue().contains("[*]"))){
+                    throw new IllegalArgumentException("JSON paths for encryption with wildcard must both contain a wildcard!");
+                }
+                if((entry.getKey().split("[*]", -1).length-1 > 1 || entry.getValue().split("[*]", -1).length-1 > 1)){
+                    throw new IllegalArgumentException("JSON paths for encryption with can only contain one wildcard!");
+                }
+            } else {
+                if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
+                    throw new IllegalArgumentException("JSON paths for encryption must point to a single item!");
+                }
             }
         }
     }

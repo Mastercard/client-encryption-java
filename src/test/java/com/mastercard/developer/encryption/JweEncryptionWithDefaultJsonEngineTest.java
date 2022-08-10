@@ -34,6 +34,32 @@ public class JweEncryptionWithDefaultJsonEngineTest {
     }
 
     @Test
+    public void testEncryptPayload_ShouldEncryptWithWildcard() throws Exception {
+
+        // GIVEN
+        String payload = "{ \"fields\": [" +
+                "   {" +
+                "      \"field1\": \"AAAA\"," +
+                "      \"field2\": \"asdf\"" +
+                "   }," +
+                "   {" +
+                "      \"field1\": \"BBBB\"," +
+                "      \"field2\": \"zxcv\"" +
+                "   }" +
+                "]}";
+        JweConfig config = getTestJweConfigBuilder()
+                .withEncryptionPath("$.fields[*]field1", "$.fields[*]")
+                .withDecryptionPath("$.fields[*]encryptedData", "$.fields[*]field1")
+                .build();
+
+        // WHEN
+        String encryptedPayload = JweEncryption.encryptPayload(payload, config);
+
+        // THEN
+        assertDecryptedJweEquals("{\"fields\":[{\"field2\":\"asdf\",\"field1\":\"AAAA\"},{\"field2\":\"zxcv\",\"field1\":\"BBBB\"}]}", encryptedPayload, config);
+    }
+
+    @Test
     public void testEncryptPayload_ShouldCreateEncryptedValue_WhenOutPathParentDoesNotExistInPayload() throws Exception {
 
         // GIVEN

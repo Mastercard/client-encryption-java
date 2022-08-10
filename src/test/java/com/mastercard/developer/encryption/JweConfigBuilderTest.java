@@ -41,6 +41,18 @@ public class JweConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_ShouldBuild_WhenHavingWildcardPaths() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEncryptionPath("$.encryptedPayloads[*]", "$.payload[*]")
+                .withDecryptionPath("$.encryptedPayloads[*]", "$.payload[*]")
+                .withEncryptedValueFieldName("encryptedPayload")
+                .build();
+        Assert.assertNotNull(config);
+    }
+
+    @Test
     public void testBuild_ShouldComputeCertificateKeyFingerprint_WhenFingerprintNotSet() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
@@ -78,9 +90,9 @@ public class JweConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteDecryptionPath() throws Exception {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotHavingWildcardOnBothDecryptionPaths() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for decryption must point to a single item!");
+        expectedException.expectMessage("JSON paths for decryption with wildcard must both contain a wildcard!");
         JweConfigBuilder.aJweEncryptionConfig()
                 .withDecryptionPath("$.encryptedPayloads[*]", "$.payload")
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
@@ -88,15 +100,35 @@ public class JweConfigBuilderTest {
     }
 
     @Test
-    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotDefiniteEncryptionPath() throws Exception {
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMultipleWildcardsOnDecryptionPaths() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("JSON paths for encryption must point to a single item!");
+        expectedException.expectMessage("JSON paths for decryption with can only contain one wildcard!");
         JweConfigBuilder.aJweEncryptionConfig()
-                .withEncryptionPath("$.payloads[*]", "$.encryptedPayload")
+                .withDecryptionPath("$.encryptedPayloads[*]field1[*]subField", "$.payload[*]field1[*]encryptedSubField")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+    }
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenNotHavingWildcardOnBothEncryptionPaths() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for encryption with wildcard must both contain a wildcard!");
+        JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionPath("$.encryptedPayloads[*]", "$.payload")
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .build();
     }
-    
+
+    @Test
+    public void testBuild_ShouldThrowIllegalArgumentException_WhenMultipleWildcardsOnEncryptionPaths() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("JSON paths for encryption with can only contain one wildcard!");
+        JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionPath("$.encryptedPayloads[*]field1[*]subField", "$.payload[*]field1[*]encryptedSubField")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .build();
+    }
+
     @Test
     public void testBuild_ShouldNotComputeCertificateKeyFingerprint_WhenFingerprintSet() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
