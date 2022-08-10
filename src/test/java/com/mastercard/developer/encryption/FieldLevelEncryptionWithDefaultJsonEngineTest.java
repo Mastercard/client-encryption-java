@@ -134,11 +134,11 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         // GIVEN
         String payload = "{ \"fields\": [" +
                 "   {" +
-                "      \"field1\": \"1234\"," +
+                "      \"field1\": \"AAAA\"," +
                 "      \"field2\": \"asdf\"" +
                 "   }," +
                 "   {" +
-                "      \"field1\": \"5678\"," +
+                "      \"field1\": \"BBBB\"," +
                 "      \"field2\": \"zxcv\"" +
                 "   }" +
                 "]}";
@@ -152,7 +152,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         String encryptedPayload = FieldLevelEncryption.encryptPayload(payload, config);
 
         // THEN
-        assertDecryptedPayloadEquals("{\"fields\":[{\"field2\":\"asdf\",\"field1\":1234},{\"field2\":\"zxcv\",\"field1\":5678}]}", encryptedPayload, config);
+        assertDecryptedPayloadEquals("{\"fields\":[{\"field2\":\"asdf\",\"field1\":\"AAAA\"},{\"field2\":\"zxcv\",\"field1\":\"BBBB\"}]}", encryptedPayload, config);
     }
 
 
