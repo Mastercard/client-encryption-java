@@ -1,6 +1,7 @@
 package com.mastercard.developer.encryption;
 
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.Collections;
 
@@ -25,6 +26,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
 
         JweConfig config = new JweConfig();
         config.encryptionCertificate = this.encryptionCertificate;
+        config.encryptionKey = this.encryptionKey;
         config.encryptionKeyFingerprint = this.encryptionKeyFingerprint;
         config.decryptionKey = this.decryptionKey;
         config.encryptionPaths = this.encryptionPaths.isEmpty() ? Collections.singletonMap("$", "$") : this.encryptionPaths;
@@ -38,7 +40,21 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
      * See: {@link EncryptionConfig#encryptionCertificate}.
      */
     public JweConfigBuilder withEncryptionCertificate(Certificate encryptionCertificate) {
+        if (this.encryptionKey != null) {
+            throw new IllegalArgumentException("You have already supplied an encryption key");
+        }
         this.encryptionCertificate = encryptionCertificate;
+        return this;
+    }
+
+    /**
+     * See: {@link EncryptionConfig#encryptionKey}.
+     */
+    public JweConfigBuilder withEncryptionKey(PublicKey encryptionKey) {
+        if (this.encryptionCertificate != null) {
+            throw new IllegalArgumentException("You have already supplied an encryption certificate");
+        }
+        this.encryptionKey = encryptionKey;
         return this;
     }
 

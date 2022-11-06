@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 abstract class EncryptionConfigBuilder {
 
     protected Certificate encryptionCertificate;
+    protected PublicKey encryptionKey;
     protected String encryptionKeyFingerprint;
     protected PrivateKey decryptionKey;
     protected Map<String, String> encryptionPaths = new HashMap<>();

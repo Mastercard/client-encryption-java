@@ -1,6 +1,7 @@
 package com.mastercard.developer.encryption;
 
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +35,11 @@ public abstract class EncryptionConfig {
      * A certificate object whose public key will be used for encryption.
      */
     Certificate encryptionCertificate;
+
+    /**
+     * A public key will be used for request encryption.
+     */
+    PublicKey encryptionKey;
 
     /**
      * A private key object to be used for decryption.
@@ -75,6 +81,13 @@ public abstract class EncryptionConfig {
 
     public Certificate getEncryptionCertificate() {
         return encryptionCertificate;
+    }
+
+    public PublicKey getEncryptionKey() {
+        if (encryptionKey != null) {
+            return encryptionKey;
+        }
+        return encryptionCertificate.getPublicKey();
     }
 
     public PrivateKey getDecryptionKey() {

@@ -32,6 +32,24 @@ public class JweConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_EncryptionKeyFromCertificate() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertEquals(TestUtils.getTestEncryptionCertificate().getPublicKey(), config.getEncryptionKey());
+    }
+
+    @Test
+    public void testBuild_EncryptionKeyFromEncryptionKey() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionKey(TestUtils.getTestEncryptionCertificate().getPublicKey())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertEquals(TestUtils.getTestEncryptionCertificate().getPublicKey(), config.getEncryptionKey());
+    }
+
+    @Test
     public void testBuild_ResultShouldBeAssignableToGenericEncryptionConfig() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
