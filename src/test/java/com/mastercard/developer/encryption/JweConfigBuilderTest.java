@@ -148,9 +148,37 @@ public class JweConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_ShouldComputeCertificateKeyFingerprin() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", config.getEncryptionKeyFingerprint());
+    }
+
+    @Test
+    public void testBuild_ShouldComputeEncryptionKeyFingerprin() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionKey(TestUtils.getTestEncryptionCertificate().getPublicKey())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertEquals("761b003c1eade3a5490e5000d37887baa5e6ec0e226c07706e599451fc032a79", config.getEncryptionKeyFingerprint());
+    }
+
+    @Test
     public void testBuild_ShouldNotComputeCertificateKeyFingerprint_WhenFingerprintSet() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEncryptionKeyFingerprint("2f4lvi26vJWzkzAIaiR2G0YsJAQ=")
+                .build();
+        Assert.assertEquals("2f4lvi26vJWzkzAIaiR2G0YsJAQ=", config.getEncryptionKeyFingerprint());
+    }
+
+    @Test
+    public void testBuild_ShouldNotComputeEncryptionKeyFingerprint_WhenFingerprintSet() throws Exception {
+        EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionKey(TestUtils.getTestEncryptionCertificate().getPublicKey())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .withEncryptionKeyFingerprint("2f4lvi26vJWzkzAIaiR2G0YsJAQ=")
                 .build();
