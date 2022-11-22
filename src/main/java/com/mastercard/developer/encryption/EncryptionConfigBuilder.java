@@ -29,16 +29,14 @@ abstract class EncryptionConfigBuilder {
                 // No encryption certificate / encryption key set or key fingerprint already provided
                 return;
             }
-            final PublicKey publicKey;
             if (encryptionKey != null && encryptionCertificate != null) {
                 throw new IllegalArgumentException("You can only supply either an encryption key or an encryption certificate");
             }
+            final PublicKey publicKey;
             if (encryptionKey != null) {
                 publicKey = encryptionKey;
-            } else if (encryptionCertificate != null) {
-                publicKey = encryptionCertificate.getPublicKey();
             } else {
-                throw new IllegalArgumentException("You need to supply either one of the encryption key or the encryption certificate");
+                publicKey = encryptionCertificate.getPublicKey();
             }
             byte[] keyFingerprintBytes = sha256digestBytes(publicKey.getEncoded());
             encryptionKeyFingerprint = encodeBytes(keyFingerprintBytes, FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
