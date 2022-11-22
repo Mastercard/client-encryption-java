@@ -18,7 +18,7 @@
         <google-api-client-version>1.23.0</google-api-client-version>
         <feign-version>9.7.0</feign-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gpg.signature.skip>true</gpg.signature.skip>
+        <gpg.signature.skip>false</gpg.signature.skip>
     </properties>
 
     <scm>
