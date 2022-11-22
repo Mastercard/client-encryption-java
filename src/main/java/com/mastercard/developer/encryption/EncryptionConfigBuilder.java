@@ -38,7 +38,7 @@ abstract class EncryptionConfigBuilder {
             } else {
                 publicKey = encryptionCertificate.getPublicKey();
             }
-            byte[] keyFingerprintBytes = sha256digestBytes(publicKey.getEncoded());
+            final byte[] keyFingerprintBytes = sha256digestBytes(publicKey.getEncoded());
             encryptionKeyFingerprint = encodeBytes(keyFingerprintBytes, FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
         } catch (Exception e) {
             throw new EncryptionException("Failed to compute encryption key fingerprint!", e);
