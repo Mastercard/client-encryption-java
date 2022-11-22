@@ -25,11 +25,22 @@ abstract class EncryptionConfigBuilder {
 
     void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
         try {
-            if (encryptionCertificate == null || !isNullOrEmpty(encryptionKeyFingerprint)) {
-                // No encryption certificate set or key fingerprint already provided
+            if ((encryptionCertificate == null && encryptionKey == null) || !isNullOrEmpty(encryptionKeyFingerprint)) {
+                // No encryption certificate / encryption key set or key fingerprint already provided
                 return;
             }
-            byte[] keyFingerprintBytes = sha256digestBytes(encryptionCertificate.getPublicKey().getEncoded());
+            final PublicKey publicKey;
+            if (encryptionKey != null && encryptionCertificate != null) {
+                throw new IllegalArgumentException("You can only supply either an encryption key or an encryption certificate");
+            }
+            if (encryptionKey != null) {
+                publicKey = encryptionKey;
+            } else if (encryptionCertificate != null) {
+                publicKey = encryptionCertificate.getPublicKey();
+            } else {
+                throw new IllegalArgumentException("You need to supply either one of the encryption key or the encryption certificate");
+            }
+            byte[] keyFingerprintBytes = sha256digestBytes(publicKey.getEncoded());
             encryptionKeyFingerprint = encodeBytes(keyFingerprintBytes, FieldLevelEncryptionConfig.FieldValueEncoding.HEX);
         } catch (Exception e) {
             throw new EncryptionException("Failed to compute encryption key fingerprint!", e);
