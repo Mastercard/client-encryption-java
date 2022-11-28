@@ -24,7 +24,7 @@ public class RSATest {
         SecretKey originalKey = new SecretKeySpec(originalKeyBytes, 0, originalKeyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
-        byte[] wrappedKeyBytes = RSA.wrapSecretKey(config.getEncryptionCertificate().getPublicKey(), originalKey, "SHA-256");
+        byte[] wrappedKeyBytes = RSA.wrapSecretKey(config.getEncryptionKey(), originalKey, "SHA-256");
         Key unwrappedKey = RSA.unwrapSecretKey(config.getDecryptionKey(), wrappedKeyBytes, "SHA-256");
 
         // THEN
