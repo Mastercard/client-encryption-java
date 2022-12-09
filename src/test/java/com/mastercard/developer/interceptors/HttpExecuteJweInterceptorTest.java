@@ -154,7 +154,7 @@ public class HttpExecuteJweInterceptorTest {
 
         // GIVEN
         String encryptedPayload = "{" +
-                "\"encryptedPayload\":\"eyJraWQiOiI3NjFiMDAzYzFlYWRlM2E1NDkwZTUwMDBkMzc4ODdiYWE1ZTZlYzBlMjI2YzA3NzA2ZTU5OTQ1MWZjMDMyYTc5IiwiY3R5IjoiYXBwbGljYXRpb25cL2pzb24iLCJlbmMiOiJBMTkyR0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.peSgTt_lPbcNStWh-gI3yMzhOGtFCwExFwLxKeHwjzsXvHB0Fml5XnG0jRbJSfOHzKx02d0NVBzoDDRSAnafuabbbMKcoaUK-jZNHSg4BHdyBZpCO82kzvWeEm3TTNHIMBTfM00EmdFB03z_a0PaWsT-FIOzu4Sd5Z_nsNLhP9941CtVS-YtZ9WkgDezGipxA7ejQ3X5gFVy2RH1gL8OTbzIYCwBcrfSjAiCQgunNbLxPPlfZHB_6prPK7_50NS6FvuMnAhiqUiiAka8DHMdeGBWOie2Q0FV_bsRDHx_6CY8kQA3F_NXz1dELIclJhdZFfRt1y-TEfwOIj4nDi2JnA.8BYMB5MkH2ZNyFGS._xb3uDsUQcPT5fQyZw.O0MzJ5OvNyj_QMuqaloTWA\"}";
+                "\"encryptedPayload\":\"eyJlbmMiOiJYQzIwUCIsImFsZyI6IlJTQS1PQUVQLTI1NiJ9.7CF3JQoFw9BBsbDVX4TFcDBsrfSp1cUl1V6VsKqoXwappcidYKUlgaSfqnRi3u1MAQimqQ8DpoImXICmZtGwhA4TeUzR16HJvW2W-0OQ9MC9oWW7b00U8Whds1jomOGaI4Hbs3gqvLieXEbl05UtpLbK8vqSbiN1kxyftKIGZvNQS0PvHoZMdVAROiMbG0-T8GY1NfOgAumZvATNBZHL-FaV25_pZhIIkhMBfDDBlRL5abn1Zc_IM1WzaZbLXVpggfTSFbKQEKMnGdDc9LXP_MCUcfvdjdD3NApuq_7tbUvEpEyNzGCnL9KD_1iyz2RFQZUfx1aHXJ3tpO4Gvk7rXg.haTi4wWtgKvvEi8yXToc0UUuBBhMLING.wP9pmYHOZxkmKD_H9A.6Ir2s-8s9vF75BxuLl26hw\"}";
 
         JweConfig config = getTestJweConfigBuilder()
                 .withDecryptionPath("$.encryptedPayload", "$.foo")

@@ -1,5 +1,6 @@
 package com.mastercard.developer.encryption.jwe;
 
+import com.google.common.collect.ImmutableSet;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.JweConfig;
 import com.mastercard.developer.encryption.aes.AESCBC;
@@ -27,7 +28,7 @@ public class JweObject {
     private final String authTag;
 
     private static final String A128CBC_HS256 = "A128CBC-HS256";
-    private static final String A256GCM = "A256GCM";
+    private static final ImmutableSet<String> AES_GCM_ENCRYPTION_METHODS = ImmutableSet.of("A128GCM", "A192GCM", "A256GCM");
 
     private JweObject(JweHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
         this.header = header;
@@ -44,9 +45,9 @@ public class JweObject {
 
         byte[] plainText;
 
-        if(encryptionMethod.equals(A256GCM)) {
+        if (AES_GCM_ENCRYPTION_METHODS.contains(encryptionMethod)) {
             plainText = AESGCM.decrypt(cek, this);
-        } else if(encryptionMethod.equals(A128CBC_HS256)) {
+        } else if (encryptionMethod.equals(A128CBC_HS256)) {
             plainText = AESCBC.decrypt(cek, this);
         } else {
             throw new EncryptionException(String.format("Encryption method %s not supported", encryptionMethod));
@@ -93,7 +94,7 @@ public class JweObject {
 
     public static JweObject parse(String encryptedPayload, JsonEngine jsonEngine) {
         String[] payloadParts = encryptedPayload.trim()
-                                    .split("\\.");
+                .split("\\.");
 
         String rawHeader = payloadParts[0];
         String encryptedKey = payloadParts[1];
@@ -109,7 +110,9 @@ public class JweObject {
         return header;
     }
 
-    public String getRawHeader() { return rawHeader; }
+    public String getRawHeader() {
+        return rawHeader;
+    }
 
     private String getEncryptedKey() {
         return encryptedKey;
