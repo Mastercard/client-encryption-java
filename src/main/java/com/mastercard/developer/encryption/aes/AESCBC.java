@@ -23,6 +23,9 @@ public class AESCBC {
         SecretKeySpec aesKey = new SecretKeySpec(secretKey.getEncoded(), 16, 16, "AES");
         byte[] cipherText = EncodingUtils.base64Decode(object.getCipherText());
         byte[] iv = EncodingUtils.base64Decode(object.getIv());
+        if(iv.length !=16){
+            throw new IllegalArgumentException("Incorrect IV length,must be 16 bytes for AES-CBC")
+        }
 
         return cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
     }
