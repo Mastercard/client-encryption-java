@@ -1,6 +1,5 @@
 package com.mastercard.developer.encryption.jwe;
 
-import com.google.common.collect.ImmutableSet;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.JweConfig;
 import com.mastercard.developer.encryption.aes.AESCBC;
@@ -17,7 +16,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 public class JweObject {
     private final JweHeader header;
@@ -28,7 +29,7 @@ public class JweObject {
     private final String authTag;
 
     private static final String A128CBC_HS256 = "A128CBC-HS256";
-    private static final ImmutableSet<String> AES_GCM_ENCRYPTION_METHODS = ImmutableSet.of("A128GCM", "A192GCM", "A256GCM");
+    private static final List<String> AES_GCM_ENCRYPTION_METHODS = Arrays.asList("A128GCM", "A192GCM", "A256GCM");
 
     private JweObject(JweHeader header, String rawHeader, String encryptedKey, String iv, String cipherText, String authTag) {
         this.header = header;
