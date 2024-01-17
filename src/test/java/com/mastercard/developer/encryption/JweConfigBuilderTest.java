@@ -116,7 +116,7 @@ public class JweConfigBuilderTest {
     @Test
     public void testBuild_ShouldThrowIllegalArgumentException_WhenMissingDecryptionKey() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("You must include at least an encryption certificate or a decryption key");
+        expectedException.expectMessage("You must include at least an encryption key/certificate or a decryption key");
         JweConfigBuilder.aJweEncryptionConfig()
                 .build();
     }
