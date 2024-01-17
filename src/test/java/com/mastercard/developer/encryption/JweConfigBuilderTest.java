@@ -32,6 +32,20 @@ public class JweConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_EncryptionKeyNoDecryptionKey() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionKey(TestUtils.getTestEncryptionCertificate().getPublicKey())
+                .withEncryptionPath("$", "$")
+                .withEncryptedValueFieldName("encryptedPayload")
+                .build();
+        Assert.assertNotNull(config);
+        Assert.assertEquals(EncryptionConfig.Scheme.JWE, config.getScheme());
+        Assert.assertEquals(TestUtils.getTestEncryptionCertificate().getPublicKey(), config.getEncryptionKey());
+        Assert.assertEquals("encryptedPayload", config.getEncryptedValueFieldName());
+        Assert.assertEquals(Collections.singletonMap("$", "$"), config.getEncryptionPaths());
+    }
+
+    @Test
     public void testBuild_EncryptionKeyFromCertificate() throws Exception {
         EncryptionConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
