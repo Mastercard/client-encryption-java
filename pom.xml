@@ -173,7 +173,7 @@
                      https://docs.oracle.com/javase/7/docs/api/ are in the unnamed module."
                      See: https://bugs.openjdk.java.net/browse/JDK-8212233
                 -->
-                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
         </profile>
     </profiles>
