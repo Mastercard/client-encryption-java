@@ -94,10 +94,10 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         return this;
     }
-    
+
     private void checkParameterValues() {
-        if (decryptionKey == null && encryptionCertificate == null) {
-            throw new IllegalArgumentException("You must include at least an encryption certificate or a decryption key");
+        if (decryptionKey == null && encryptionCertificate == null && encryptionKey == null) {
+            throw new IllegalArgumentException("You must include at least an encryption key/certificate or a decryption key");
         }
     }
 }
