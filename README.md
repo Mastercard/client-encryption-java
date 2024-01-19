@@ -12,6 +12,7 @@
 - [Overview](#overview)
   * [Compatibility](#compatibility)
   * [References](#references)
+  * [Versioning and Deprecation Policy](#versioning)
 - [Usage](#usage)
   * [Prerequisites](#prerequisites)
   * [Adding the Library to Your Project](#adding-the-library-to-your-project)
@@ -33,6 +34,9 @@ Java 8+
 ### References <a name="references"></a>
 * [JSON Web Encryption (JWE)](https://datatracker.ietf.org/doc/html/rfc7516)
 * [Securing Sensitive Data Using Payload Encryption](https://developer.mastercard.com/platform/documentation/security-and-authentication/securing-sensitive-data-using-payload-encryption/)
+
+### Versioning and Deprecation Policy <a name="versioning"></a>
+* [Mastercard Versioning and Deprecation Policy](https://github.com/Mastercard/.github/blob/main/CLIENT_LIBRARY_DEPRECATION_POLICY.md)
 
 ## Usage <a name="usage"></a>
 ### Prerequisites <a name="prerequisites"></a>
