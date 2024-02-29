@@ -27,7 +27,7 @@ import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FieldLevelEncryptionWithDefaultJsonEngineTest {
+class FieldLevelEncryptionWithDefaultJsonEngineTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

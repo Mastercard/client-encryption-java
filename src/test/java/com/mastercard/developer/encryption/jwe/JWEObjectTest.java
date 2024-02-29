@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
-public class JWEObjectTest {
+class JWEObjectTest {
 
     @Test
     public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsCbcEncrypted() throws Exception {
@@ -32,7 +32,7 @@ public class JWEObjectTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("aesGcmJweObjects")
-    public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsGcmEncrypted(String name, JweObject jweObject) throws Exception {
+    void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsGcmEncrypted(String name, JweObject jweObject) throws Exception {
         String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder().build());
 
         assertEquals("{\"foo\":\"bar\"}", decryptedPayload);

@@ -15,7 +15,7 @@ import static com.mastercard.developer.utils.EncodingUtils.base64Decode;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EncryptionUtilsTest {
+class EncryptionUtilsTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
