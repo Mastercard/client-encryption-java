@@ -14,8 +14,8 @@
 
     <properties>
         <okhttp2-version>2.7.5</okhttp2-version>
-        <okhttp3-version>4.8.1</okhttp3-version>
-        <google-api-client-version>1.23.0</google-api-client-version>
+        <okhttp3-version>4.12.0</okhttp3-version>
+        <google-api-client-version>2.3.0</google-api-client-version>
         <feign-version>9.7.0</feign-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gpg.signature.skip>false</gpg.signature.skip>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.5.5</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -135,7 +135,7 @@
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>2.4.9</version>
+            <version>2.5.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -163,9 +163,23 @@
 
     <profiles>
         <profile>
-            <id>java11+</id>
+            <id>java11</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <!-- The Javadoc generation started to fail with OpenJDK 11.0.2 (11.0.1 was OK) and OpenJDK 12-ea:
+                     "The code being documented uses modules but the packages defined in
+                     https://docs.oracle.com/javase/7/docs/api/ are in the unnamed module."
+                     See: https://bugs.openjdk.java.net/browse/JDK-8212233
+                -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>java17</id>
+            <activation>
+                <jdk>17</jdk>
             </activation>
             <properties>
                 <!-- The Javadoc generation started to fail with OpenJDK 11.0.2 (11.0.1 was OK) and OpenJDK 12-ea:
@@ -184,7 +198,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.12.1</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -196,7 +210,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -216,7 +230,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -233,7 +247,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -246,7 +260,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>generate-javadoc</id>
