@@ -33,7 +33,7 @@ public class JweEncryption {
                 if(!jsonPathIn.contains("[*]")){
                     payloadContext = encryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
                 }else {
-                    String getFieldLength = jsonPathIn.split("\\[.*?\\]")[0].concat(".length()");
+                    String getFieldLength = jsonPathIn.split("\\[^\\]")[0].concat(".length()");
                     Integer length = JsonPath.read(payload, getFieldLength);
                     for (Integer i = 0; i < length; i++) {
                         String newJsonPathIn = jsonPathIn.replace("*", i.toString());
@@ -62,7 +62,7 @@ public class JweEncryption {
                 if(!jsonPathIn.contains("[*]")){
                     payloadContext = decryptPayloadPath(payloadContext, jsonPathIn, jsonPathOut, config);
                 }else {
-                    String getFieldLength = jsonPathIn.split("\\[.*?\\]")[0].concat(".length()");
+                    String getFieldLength = jsonPathIn.split("\\[^\\]")[0].concat(".length()");
                     Integer length = JsonPath.read(payload, getFieldLength);
                     for (Integer i = 0; i < length; i++) {
                         String newJsonPathIn = jsonPathIn.replace("*", i.toString());
