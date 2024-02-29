@@ -15,7 +15,7 @@ public class AESCBC {
     private AESCBC() {
     }
 
-    private static final String CYPHER = "AES/CBC/PKCS5Padding";
+    private static final String CYPHER = "AES/GCM/NoPadding";
 
     @java.lang.SuppressWarnings("squid:S3329")
     public static byte[] decrypt(Key secretKey, JweObject object) throws GeneralSecurityException {
