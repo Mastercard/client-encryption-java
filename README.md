@@ -29,7 +29,7 @@
 Library for Mastercard API compliant payload encryption/decryption.
 
 ### Compatibility <a name="compatibility"></a>
-Java 8+
+Java 11+
 
 ### References <a name="references"></a>
 * [JSON Web Encryption (JWE)](https://datatracker.ietf.org/doc/html/rfc7516)
