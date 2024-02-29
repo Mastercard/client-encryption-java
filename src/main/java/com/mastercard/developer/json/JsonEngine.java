@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
 
 public abstract class JsonEngine {
-
-    private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(".*(\\['.*'\\])"); // Returns "['obj2']" for "$['obj1']['obj2']"
+    private static String pattern = ".*(\\\\['.*'\\\\])";
+    private static final Pattern LAST_ELEMENT_IN_PATH_PATTERN = Pattern.compile(pattern); // Returns "['obj2']" for "$['obj1']['obj2']"
 
     public abstract JsonProvider getJsonProvider();
     public abstract Object parse(String string);
