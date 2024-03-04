@@ -7,6 +7,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding.HEX;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
 
 public class FieldLevelEncryptionConfigBuilderTest {
 
@@ -14,7 +17,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testBuild_Nominal() throws Exception {
+    public void testBuild_Nominal_iv12() throws Exception {
         FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
                 .withEncryptionPath("$.payload", "$.encryptedPayload")
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
@@ -35,6 +38,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
                 .withIvFieldName("iv")
                 .withIvHeaderName("x-iv")
                 .withFieldValueEncoding(HEX)
+                .withEncryptionIVSize(12)
                 .build();
         Assert.assertNotNull(config);
         Assert.assertEquals(1, config.encryptionPaths.size());
@@ -56,6 +60,85 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
         Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
         Assert.assertEquals(HEX, config.fieldValueEncoding);
+        assertThat(config.getIVSize().intValue(),equalTo(12));
+    }
+
+    @Test
+    public void testBuild_Nominal_iv16() throws Exception {
+        FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                .withEncryptionPath("$.payload", "$.encryptedPayload")
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withEncryptionCertificateFingerprint("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B")
+                .withEncryptionKeyFingerprint("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810")
+                .withEncryptionCertificateFingerprintFieldName("publicCertificateFingerprint")
+                .withEncryptionCertificateFingerprintHeaderName("x-public-certificate-fingerprint")
+                .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
+                .withEncryptionKeyFingerprintHeaderName("x-public-key-fingerprint")
+                .withDecryptionPath("$.encryptedPayload", "$.payload")
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withOaepPaddingDigestAlgorithm("SHA-512")
+                .withOaepPaddingDigestAlgorithmFieldName("oaepPaddingDigestAlgorithm")
+                .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
+                .withEncryptedValueFieldName("encryptedValue")
+                .withEncryptedKeyFieldName("encryptedKey")
+                .withEncryptedKeyHeaderName("x-encrypted-key")
+                .withIvFieldName("iv")
+                .withIvHeaderName("x-iv")
+                .withFieldValueEncoding(HEX)
+                .withEncryptionIVSize(16)
+                .build();
+        Assert.assertNotNull(config);
+        Assert.assertEquals(1, config.encryptionPaths.size());
+        Assert.assertNotNull(config.encryptionCertificate);
+        Assert.assertEquals("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B", config.encryptionCertificateFingerprint);
+        Assert.assertEquals("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810", config.encryptionKeyFingerprint);
+        Assert.assertEquals("publicCertificateFingerprint", config.encryptionCertificateFingerprintFieldName);
+        Assert.assertEquals("x-public-certificate-fingerprint", config.encryptionCertificateFingerprintHeaderName);
+        Assert.assertEquals("publicKeyFingerprint", config.encryptionKeyFingerprintFieldName);
+        Assert.assertEquals("x-public-key-fingerprint", config.encryptionKeyFingerprintHeaderName);
+        Assert.assertEquals(1, config.decryptionPaths.size());
+        Assert.assertNotNull(config.decryptionKey);
+        Assert.assertEquals("SHA-512", config.oaepPaddingDigestAlgorithm);
+        Assert.assertEquals("encryptedValue", config.encryptedValueFieldName);
+        Assert.assertEquals("encryptedKey", config.encryptedKeyFieldName);
+        Assert.assertEquals("x-encrypted-key", config.encryptedKeyHeaderName);
+        Assert.assertEquals("iv", config.ivFieldName);
+        Assert.assertEquals("x-iv", config.ivHeaderName);
+        Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
+        Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
+        Assert.assertEquals(HEX, config.fieldValueEncoding);
+        assertThat(config.getIVSize().intValue(),equalTo(16));
+    }
+
+    @Test
+    public void testBuild_FailedIV() throws Exception {
+        try {
+            FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLevelEncryptionConfig()
+                    .withEncryptionPath("$.payload", "$.encryptedPayload")
+                    .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                    .withEncryptionCertificateFingerprint("97A2FFE9F0D48960EF31E87FCD7A55BF7843FB4A9EEEF01BDB6032AD6FEF146B")
+                    .withEncryptionKeyFingerprint("F806B26BC4870E26986C70B6590AF87BAF4C2B56BB50622C51B12212DAFF2810")
+                    .withEncryptionCertificateFingerprintFieldName("publicCertificateFingerprint")
+                    .withEncryptionCertificateFingerprintHeaderName("x-public-certificate-fingerprint")
+                    .withEncryptionKeyFingerprintFieldName("publicKeyFingerprint")
+                    .withEncryptionKeyFingerprintHeaderName("x-public-key-fingerprint")
+                    .withDecryptionPath("$.encryptedPayload", "$.payload")
+                    .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                    .withOaepPaddingDigestAlgorithm("SHA-512")
+                    .withOaepPaddingDigestAlgorithmFieldName("oaepPaddingDigestAlgorithm")
+                    .withOaepPaddingDigestAlgorithmHeaderName("x-oaep-padding-digest-algorithm")
+                    .withEncryptedValueFieldName("encryptedValue")
+                    .withEncryptedKeyFieldName("encryptedKey")
+                    .withEncryptedKeyHeaderName("x-encrypted-key")
+                    .withIvFieldName("iv")
+                    .withIvHeaderName("x-iv")
+                    .withFieldValueEncoding(HEX)
+                    .withEncryptionIVSize(23)
+                    .build();
+            assertFalse("It should raise an exception, but it didn't", true);
+        } catch ( IllegalArgumentException e) {
+            assertThat(e.getMessage(), equalTo("Supported IV Sizes are either 12 or 16!"));
+        }
     }
 
     @Test
