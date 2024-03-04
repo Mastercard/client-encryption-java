@@ -187,6 +187,16 @@ public class FieldLevelEncryptionConfigBuilder extends EncryptionConfigBuilder {
     }
 
     /**
+     * See: {@link EncryptionConfig#ivSize}.
+     */
+    public FieldLevelEncryptionConfigBuilder withEncryptionIVSize(Integer ivSize) {
+        if (ivSize == 12 || ivSize == 16) {
+            this.ivSize = ivSize;
+            return this;
+        }
+        throw new IllegalArgumentException("Supported IV Sizes are either 12 or 16!");
+    }
+    /**
      * Build a {@link com.mastercard.developer.encryption.FieldLevelEncryptionConfig}.
      * @throws EncryptionException
      */
@@ -209,6 +219,7 @@ public class FieldLevelEncryptionConfigBuilder extends EncryptionConfigBuilder {
         config.encryptionCertificate = this.encryptionCertificate;
         config.oaepPaddingDigestAlgorithm = this.oaepPaddingDigestAlgorithm;
         config.ivFieldName = this.ivFieldName;
+        config.ivSize = this.ivSize;
         config.oaepPaddingDigestAlgorithmFieldName = this.oaepPaddingDigestAlgorithmFieldName;
         config.decryptionPaths = this.decryptionPaths;
         config.encryptedKeyFieldName = this.encryptedKeyFieldName;

@@ -43,7 +43,7 @@ public final class FieldLevelEncryptionParams {
     public static FieldLevelEncryptionParams generate(FieldLevelEncryptionConfig config) throws EncryptionException {
 
         // Generate a random IV
-        IvParameterSpec ivParameterSpec = AESEncryption.generateIv();
+        IvParameterSpec ivParameterSpec = AESEncryption.generateIv(config.getIVSize());
         String ivSpecValue = encodeBytes(ivParameterSpec.getIV(), config.fieldValueEncoding);
 
         // Generate an AES secret key

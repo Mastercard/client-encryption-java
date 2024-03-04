@@ -14,10 +14,10 @@ public class AESEncryption {
         // Nothing to do here
     }
 
-    public static IvParameterSpec generateIv() throws EncryptionException {
+    public static IvParameterSpec generateIv(Integer ivSize) throws EncryptionException {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            byte[] ivBytes = new byte[16];
+            byte[] ivBytes = new byte[ivSize];
             secureRandom.nextBytes(ivBytes);
             return new IvParameterSpec(ivBytes);
         } catch (GeneralSecurityException e) {
