@@ -71,7 +71,7 @@ See: https://search.maven.org/artifact/com.mastercard.developer/client-encryptio
 
 This library requires one of the following dependencies to be added to your classpath:
 
-* [Jackson](https://search.maven.org/artifact/com.fasterxml.jackson.core/jackson-databind) 2.4.5+
+* [Jackson](https://search.maven.org/artifact/com.fasterxml.jackson.core/jackson-databind) 2.5.0+
 * [Google Gson](https://search.maven.org/artifact/com.google.code.gson/gson) 2.3.1+
 * [Json-smart](https://search.maven.org/artifact/net.minidev/json-smart) 2.1.1+
 * [Jettison](https://search.maven.org/artifact/org.codehaus.jettison/jettison) 1.0+
