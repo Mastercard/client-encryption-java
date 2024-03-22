@@ -46,6 +46,13 @@ public abstract class EncryptionConfig {
      */
     PrivateKey decryptionKey;
 
+
+    /**
+     * IV size in bytes
+     */
+
+    Integer ivSize = 16;
+
     /**
      * A list of JSON paths to encrypt in request payloads.
      * Example:
@@ -107,4 +114,6 @@ public abstract class EncryptionConfig {
     String getEncryptedValueFieldName() {
         return encryptedValueFieldName;
     }
+
+    public Integer getIVSize() { return ivSize; }
 }

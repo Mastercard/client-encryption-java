@@ -6,7 +6,7 @@
 
     <groupId>com.mastercard.developer</groupId>
     <artifactId>client-encryption</artifactId>
-    <version>1.7.11</version>
+    <version>1.10.0</version>
     <packaging>jar</packaging>
     <description>Library for Mastercard API compliant payload encryption/decryption</description>
     <url>https://github.com/Mastercard/client-encryption-java</url>
@@ -95,6 +95,11 @@
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>2.2</version>
         </dependency>
 
         <dependency>

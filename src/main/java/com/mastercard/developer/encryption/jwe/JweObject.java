@@ -62,7 +62,7 @@ public class JweObject {
         byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionKey(), cek, "SHA-256");
         String encryptedKey = EncodingUtils.base64UrlEncode(encryptedSecretKeyBytes);
 
-        byte[] iv = AESEncryption.generateIv().getIV();
+        byte[] iv = AESEncryption.generateIv(config.getIVSize()).getIV();
         byte[] payloadBytes = payload.getBytes();
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
 
