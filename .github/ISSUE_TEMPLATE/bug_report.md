@@ -38,4 +38,4 @@ Add any other context about the problem here (OS, language version, etc..).
 Has a similar issue/PR been reported/opened before?
 
 **Suggest a fix/enhancement**
-If you can't fix the bug yourself, perhaps you can point to what might be causing the problem (line of code or commit), or simply make a suggestion.
+If you're unable to fix the bug yourself, perhaps you can indicate what might be causing the problem (line of code or commit), or simply make a suggestion.
