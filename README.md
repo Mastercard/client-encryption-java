@@ -170,6 +170,7 @@ JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .withEncryptionPath("$.path.to.foo", "$.path.to.encryptedFoo")
     .withDecryptionPath("$.path.to.encryptedFoo.encryptedValue", "$.path.to.foo")
     .withEncryptedValueFieldName("encryptedValue")
+    .withIVSize(16) // available values are 12 or 16. If not specified, default value is 16.
     .build();
 ```
 

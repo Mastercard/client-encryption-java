@@ -8,19 +8,24 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
+
 public class JweConfigBuilderTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testBuild_Nominal() throws Exception {
+    public void testBuild_Nominal_iv12() throws Exception {
         JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
                 .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
                 .withDecryptionKey(TestUtils.getTestDecryptionKey())
                 .withEncryptionPath("$", "$")
                 .withDecryptionPath("$.encryptedPayload", "$")
                 .withEncryptedValueFieldName("encryptedPayload")
+                .withEncryptionIVSize(12)
                 .build();
         Assert.assertNotNull(config);
         Assert.assertEquals(EncryptionConfig.Scheme.JWE, config.getScheme());
@@ -29,8 +34,45 @@ public class JweConfigBuilderTest {
         Assert.assertEquals("encryptedPayload", config.getEncryptedValueFieldName());
         Assert.assertEquals(Collections.singletonMap("$.encryptedPayload", "$"), config.getDecryptionPaths());
         Assert.assertEquals(Collections.singletonMap("$", "$"), config.getEncryptionPaths());
+        assertThat(config.getIVSize().intValue(),equalTo(12));
     }
 
+    @Test
+    public void testBuild_Nominal_iv16() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEncryptionPath("$", "$")
+                .withDecryptionPath("$.encryptedPayload", "$")
+                .withEncryptedValueFieldName("encryptedPayload")
+                .withEncryptionIVSize(16)
+                .build();
+        Assert.assertNotNull(config);
+        Assert.assertEquals(EncryptionConfig.Scheme.JWE, config.getScheme());
+        Assert.assertEquals(TestUtils.getTestDecryptionKey(), config.getDecryptionKey());
+        Assert.assertEquals(TestUtils.getTestEncryptionCertificate(), config.getEncryptionCertificate());
+        Assert.assertEquals("encryptedPayload", config.getEncryptedValueFieldName());
+        Assert.assertEquals(Collections.singletonMap("$.encryptedPayload", "$"), config.getDecryptionPaths());
+        Assert.assertEquals(Collections.singletonMap("$", "$"), config.getEncryptionPaths());
+        assertThat(config.getIVSize().intValue(),equalTo(16));
+    }
+
+    @Test
+    public void testBuild_FailedIV() throws Exception {
+        try {
+            JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                    .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                    .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                    .withEncryptionPath("$", "$")
+                    .withDecryptionPath("$.encryptedPayload", "$")
+                    .withEncryptedValueFieldName("encryptedPayload")
+                    .withEncryptionIVSize(24)
+                    .build();
+            assertFalse("It should raise an exception, but it didn't", true);
+        } catch ( IllegalArgumentException e) {
+            assertThat(e.getMessage(), equalTo("Supported IV Sizes are either 12 or 16!"));
+        }
+    }
     @Test
     public void testBuild_EncryptionKeyNoDecryptionKey() throws Exception {
         JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
