@@ -92,7 +92,7 @@ public class JweEncryption {
 
         // Delete data in clear
         if (!"$".equals(jsonPathIn)) {
-            payloadContext.delete(jsonPathIn);
+            JsonParser.deleteIfExists(payloadContext, jsonPathIn);
         } else {
             // We can't reuse the same DocumentContext. We have to create a new DocumentContext
             // with the appropriate internal representation (JSON object).
@@ -135,12 +135,12 @@ public class JweEncryption {
         }
 
         // Remove the input
-        payloadContext.delete(jsonPathIn);
+        JsonParser.deleteIfExists(payloadContext, jsonPathIn);
         return payloadContext;
     }
 
     private static Object readAndDeleteJsonKey(DocumentContext context, Object object, String key) {
-        context.delete(key);
+        JsonParser.deleteIfExists(context, key);
         return object;
     }
 
