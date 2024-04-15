@@ -87,11 +87,6 @@ public final class JsonParser {
         return jsonElement;
     }
 
-    // Upgrading the json-path lib from 2.6.0 to 2.9.0 introduced a bug where when you
-    // try to delete a non-existent key in a DocumentContext with the SUPPRESS_EXCEPTIONS flag,
-    // it would throw a ClassCastException. This method is a workaround for the issue.
-    // Once this issue is fixed this method's usages can be replaced with a simple DocumentContext.delete(path).
-    // Track the issue here https://github.com/json-path/JsonPath/issues/870
     static void deleteIfExists(DocumentContext context, String jsonPathString){
        Object value = context.read(jsonPathString);
        if(value != null){
