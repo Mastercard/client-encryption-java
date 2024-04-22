@@ -13,10 +13,9 @@
     <name>client-encryption</name>
 
     <properties>
-        <okhttp2-version>2.7.5</okhttp2-version>
         <okhttp3-version>4.12.0</okhttp3-version>
-        <google-api-client-version>2.3.0</google-api-client-version>
-        <feign-version>9.7.0</feign-version>
+        <google-api-client-version>2.4.0</google-api-client-version>
+        <feign-version>13.2.1</feign-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gpg.signature.skip>false</gpg.signature.skip>
     </properties>
@@ -66,13 +65,6 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp3-version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp2-version}</version>
             <scope>provided</scope>
         </dependency>
 

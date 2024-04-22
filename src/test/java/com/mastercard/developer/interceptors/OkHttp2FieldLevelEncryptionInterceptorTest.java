@@ -4,7 +4,12 @@ import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.FieldLevelEncryptionConfig;
 import com.mastercard.developer.test.TestUtils;
-import com.squareup.okhttp.*;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okio.Buffer;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,10 +20,11 @@ import java.io.IOException;
 
 import static com.mastercard.developer.test.TestUtils.assertPayloadEquals;
 import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
-import static com.squareup.okhttp.Interceptor.Chain;
+import static okhttp3.Interceptor.Chain;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+
 
 public class OkHttp2FieldLevelEncryptionInterceptorTest {
 
@@ -143,6 +149,7 @@ public class OkHttp2FieldLevelEncryptionInterceptorTest {
                 .request(request)
                 .code(200)
                 .protocol(Protocol.HTTP_1_1)
+                .message("")
                 .build();
         Chain chain = mock(Chain.class);
         when(request.body()).thenReturn(null);

@@ -12,7 +12,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,10 +19,16 @@ import java.util.HashMap;
 import static com.mastercard.developer.test.TestUtils.assertPayloadEquals;
 import static com.mastercard.developer.test.TestUtils.getTestFieldLevelEncryptionConfigBuilder;
 import static com.mastercard.developer.utils.FeignUtils.readHeader;
+import static com.mastercard.developer.utils.HttpHelpers.buildDummyRequest;
+import static com.mastercard.developer.utils.HttpHelpers.buildResponse;
 import static org.hamcrest.core.Is.isA;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class OpenFeignFieldLevelEncryptionDecoderTest {
 
@@ -52,11 +57,7 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
                 put("content-length", Collections.singleton("100"));
             }
         };
-        Response response = Response.builder()
-                .status(200)
-                .headers(headers)
-                .body(encryptedPayload, StandardCharsets.UTF_8)
-                .build();
+        Response response = buildResponse(encryptedPayload);
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
@@ -99,7 +100,7 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
         FieldLevelEncryptionConfig config = getTestFieldLevelEncryptionConfigBuilder().build();
         Type type = mock(Type.class);
         Response response = mock(Response.class);
-        when(response.body()).thenReturn(buildResponseBody(""));
+        when(response.body()).thenReturn(buildResponse("").body());
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
@@ -128,7 +129,8 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
                 .build();
         Type type = mock(Type.class);
         Response response = mock(Response.class);
-        when(response.body()).thenReturn(buildResponseBody(encryptedPayload));
+        when(response.body()).thenReturn(buildResponse(encryptedPayload).body());
+        when(response.request()).thenReturn(buildDummyRequest(encryptedPayload));
         Decoder delegate = mock(Decoder.class);
 
         // THEN
@@ -170,11 +172,7 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
                 put("x-encryption-certificate-fingerprint", Collections.singleton("80810fc13a8319fcf0e2ec322c82a4c304b782cc3ce671176343cfe8160c2279"));
             }
         };
-        Response response = Response.builder()
-                .status(200)
-                .headers(headers)
-                .body(encryptedPayload, StandardCharsets.UTF_8)
-                .build();
+        Response response = buildResponse(encryptedPayload, headers);
         Decoder delegate = mock(Decoder.class);
 
         // WHEN
@@ -195,12 +193,4 @@ public class OpenFeignFieldLevelEncryptionDecoderTest {
         assertNull(readHeader(responseValue, "x-encryption-certificate-fingerprint"));
     }
 
-    private static Response.Body buildResponseBody(String payload) {
-        Response response = Response.builder()
-                .status(200)
-                .headers(new HashMap<>())
-                .body(payload, StandardCharsets.UTF_8)
-                .build();
-        return response.body();
-    }
 }
