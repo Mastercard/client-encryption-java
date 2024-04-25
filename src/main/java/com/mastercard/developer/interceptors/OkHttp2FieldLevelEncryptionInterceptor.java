@@ -1,7 +1,9 @@
 package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.*;
-import com.squareup.okhttp.*;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 /**
  * An OkHttp2 interceptor for encrypting/decrypting parts of HTTP payloads.

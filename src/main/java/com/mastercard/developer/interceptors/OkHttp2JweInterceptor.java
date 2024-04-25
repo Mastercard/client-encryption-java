@@ -4,8 +4,9 @@ import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
 import com.mastercard.developer.encryption.JweConfig;
 import com.mastercard.developer.encryption.JweEncryption;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 /**
  * An OkHttp2 JWE interceptor for encrypting/decrypting parts of HTTP payloads.
