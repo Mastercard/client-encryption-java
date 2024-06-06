@@ -15,7 +15,7 @@ public class AESCBC {
     private AESCBC() {
     }
 
-    private static final String CYPHER = "AES/CBC/PKCS5Padding";
+    private static final String CYPHER = "AES/CBC/NoPadding";
 
     @java.lang.SuppressWarnings("squid:S3329")
     public static byte[] decrypt(Key secretKey, JweObject object) throws GeneralSecurityException {
@@ -24,7 +24,12 @@ public class AESCBC {
         byte[] cipherText = EncodingUtils.base64Decode(object.getCipherText());
         byte[] iv = EncodingUtils.base64Decode(object.getIv());
 
-        return cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
+        byte[] decrypted = cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
+
+        int padCount = decrypted[decrypted.length - 1];
+        byte[] unpadded = new byte[decrypted.length - padCount];
+        System.arraycopy(decrypted, 0, unpadded, 0, unpadded.length);
+        return unpadded;
     }
 
     public static byte[] cipher(Key key, AlgorithmParameterSpec iv, byte[] bytes, int mode) throws GeneralSecurityException {
