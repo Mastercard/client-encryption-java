@@ -15,24 +15,22 @@ public class AESCBC {
     private AESCBC() {
     }
 
+    private static final String CYPHER = "AES/GCM/NoPadding";
+
     @java.lang.SuppressWarnings("squid:S3329")
     public static byte[] decrypt(Key secretKey, JweObject object) throws GeneralSecurityException {
         // First 16 bytes are the MAC key, so we only use the second 16 bytes
         SecretKeySpec aesKey = new SecretKeySpec(secretKey.getEncoded(), 16, 16, "AES");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, EncodingUtils.base64Decode(object.getIv()));
         byte[] cipherText = EncodingUtils.base64Decode(object.getCipherText());
         byte[] iv = EncodingUtils.base64Decode(object.getIv());
 
-        byte[] decrypted = cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
-
-        int padCount = decrypted[decrypted.length - 1];
-        byte[] unpadded = new byte[decrypted.length - padCount];
-        System.arraycopy(decrypted, 0, unpadded, 0, unpadded.length);
-        return unpadded;
+        return cipher(aesKey, gcmSpec, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
     }
 
-    public static byte[] cipher(Key key, AlgorithmParameterSpec iv, byte[] bytes, int mode) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        cipher.init(mode, key, iv);
+    public static byte[] cipher(Key key,GCMParameterSpec gcpSpec, AlgorithmParameterSpec iv, byte[] bytes, int mode) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance(CYPHER);
+        cipher.init(mode, key, gcpSpec, iv);
         return cipher.doFinal(bytes);
     }
 }
