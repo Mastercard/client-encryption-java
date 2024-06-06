@@ -23,10 +23,10 @@ public class AESCBC {
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, EncodingUtils.base64Decode(object.getIv()));
         byte[] bytes = ByteUtils.concat(EncodingUtils.base64Decode(object.getCipherText()), EncodingUtils.base64Decode(object.getAuthTag()));
 
-        return cipher(cek, gcmSpec, bytes, aad, Cipher.DECRYPT_MODE);
+        return cipher(secretKey, gcmSpec, bytes, aad, Cipher.DECRYPT_MODE);
     }
 
-    public static byte[] cipher(Key key, GCMParameterSpec gcpSpec, byte[] bytes, aad, int mode) throws GeneralSecurityException {
+    public static byte[] cipher(Key key, GCMParameterSpec gcmSpec, byte[] bytes, aad, int mode) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance(CYPHER);
         cipher.init(mode, key, gcpSpec);
         cipher.updateAAD(aad);
