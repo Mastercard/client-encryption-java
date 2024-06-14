@@ -58,7 +58,7 @@ public class JweObject {
     }
 
     public static String encrypt(JweConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
-        SecretKeySpec cek = AESEncryption.generateCek(256);
+        SecretKeySpec cek = config.getSymmetricKeySpec();
         byte[] encryptedSecretKeyBytes = RSA.wrapSecretKey(config.getEncryptionKey(), cek, "SHA-256");
         String encryptedKey = EncodingUtils.base64UrlEncode(encryptedSecretKeyBytes);
 
