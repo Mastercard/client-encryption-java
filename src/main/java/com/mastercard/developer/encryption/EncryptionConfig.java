@@ -1,5 +1,8 @@
 package com.mastercard.developer.encryption;
 
+import com.mastercard.developer.encryption.aes.AESEncryption;
+
+import javax.crypto.spec.SecretKeySpec;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -84,6 +87,8 @@ public abstract class EncryptionConfig {
      */
     String encryptedValueFieldName = null;
 
+    SecretKeySpec symmetricKeySpec;
+
     public String getEncryptionKeyFingerprint() { return encryptionKeyFingerprint; }
 
     public Certificate getEncryptionCertificate() {
@@ -116,4 +121,12 @@ public abstract class EncryptionConfig {
     }
 
     public Integer getIVSize() { return ivSize; }
+
+    public SecretKeySpec getSymmetricKeySpec() {
+        if (symmetricKeySpec != null) {
+            return symmetricKeySpec;
+        } else {
+            return AESEncryption.generateCek(256);
+        }
+    }    
 }
