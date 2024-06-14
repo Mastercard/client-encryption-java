@@ -1,5 +1,6 @@
 package com.mastercard.developer.encryption;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -34,6 +35,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         config.encryptedValueFieldName = this.encryptedValueFieldName == null ? "encryptedData" : this.encryptedValueFieldName;
         config.scheme = EncryptionConfig.Scheme.JWE;
         config.ivSize = ivSize;
+        config.symmetricKeySpec = this.symmetricKeySpec;
         return config;
     }
 
@@ -111,5 +113,10 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
             throw new IllegalArgumentException("You must include at least an encryption key/certificate or a decryption key");
         }
     }
-
+ 
+    public JweConfigBuilder withSymmetricKeySpec(SecretKeySpec secretKeySpec) {
+        this.symmetricKeySpec = secretKeySpec;
+        return this;
+    }
+    
 }
