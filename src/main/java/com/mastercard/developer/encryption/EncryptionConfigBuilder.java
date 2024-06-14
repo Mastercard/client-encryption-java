@@ -2,6 +2,7 @@ package com.mastercard.developer.encryption;
 
 import com.jayway.jsonpath.JsonPath;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -24,6 +25,7 @@ abstract class EncryptionConfigBuilder {
     protected String encryptedValueFieldName;
 
     protected Integer ivSize = 16;
+    protected SecretKeySpec symmetricKeySpec;
 
     void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
         try {
