@@ -1,11 +1,13 @@
 package com.mastercard.developer.encryption;
 
+import com.mastercard.developer.encryption.aes.AESEncryption;
 import com.mastercard.developer.test.TestUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
