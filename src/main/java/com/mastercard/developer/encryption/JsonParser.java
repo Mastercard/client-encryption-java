@@ -47,7 +47,7 @@ public final class JsonParser {
         int length = jsonProvider.length(decryptedValueJsonElement);
         Collection<String> propertyKeys = (0 == length) ? Collections.emptyList() : jsonProvider.getPropertyKeys(decryptedValueJsonElement);
         for (String key : propertyKeys) {
-            payloadContext.delete(jsonPathOut + "." + key);
+            deleteIfExists( payloadContext, jsonPathOut + "." + key);
             payloadContext.put(jsonPathOut, key, jsonProvider.getMapValue(decryptedValueJsonElement, key));
         }
     }
@@ -85,5 +85,12 @@ public final class JsonParser {
             throw new IllegalArgumentException(String.format("JSON object expected at path: '%s'!", jsonPathString));
         }
         return jsonElement;
+    }
+
+    static void deleteIfExists(DocumentContext context, String jsonPathString){
+       Object value = context.read(jsonPathString);
+       if(value != null){
+           context.delete(jsonPathString);
+       }
     }
 }

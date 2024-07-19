@@ -33,6 +33,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         config.decryptionPaths = this.decryptionPaths.isEmpty() ? Collections.singletonMap("$.encryptedData", "$") : this.decryptionPaths;
         config.encryptedValueFieldName = this.encryptedValueFieldName == null ? "encryptedData" : this.encryptedValueFieldName;
         config.scheme = EncryptionConfig.Scheme.JWE;
+        config.ivSize = ivSize;
         return config;
     }
 
@@ -82,9 +83,8 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         return this;
     }
 
-    /**
-     * See: {@link EncryptionConfig#encryptedValueFieldName}.
-     */
+
+
     public JweConfigBuilder withEncryptedValueFieldName(String encryptedValueFieldName) {
         this.encryptedValueFieldName = encryptedValueFieldName;
         return this;
@@ -94,10 +94,22 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         this.encryptionKeyFingerprint = encryptionKeyFingerprint;
         return this;
     }
-    
+
+    /**
+     * See: {@link EncryptionConfig#ivSize}.
+     */
+    public JweConfigBuilder withEncryptionIVSize(Integer ivSize) {
+        if (ivSize == 12 || ivSize == 16) {
+            this.ivSize = ivSize;
+            return this;
+        }
+        throw new IllegalArgumentException("Supported IV Sizes are either 12 or 16!");
+    }
+
     private void checkParameterValues() {
-        if (decryptionKey == null && encryptionCertificate == null) {
-            throw new IllegalArgumentException("You must include at least an encryption certificate or a decryption key");
+        if (decryptionKey == null && encryptionCertificate == null && encryptionKey == null) {
+            throw new IllegalArgumentException("You must include at least an encryption key/certificate or a decryption key");
         }
     }
+
 }

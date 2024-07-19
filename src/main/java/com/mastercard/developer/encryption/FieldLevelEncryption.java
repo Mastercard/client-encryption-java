@@ -210,7 +210,7 @@ public class FieldLevelEncryption {
         }
         JsonProvider jsonProvider = JsonParser.jsonPathConfig.jsonProvider();
         Object value = jsonProvider.getMapValue(object, key);
-        context.delete(objectPath + "." + key);
+        JsonParser.deleteIfExists(context, objectPath + "." + key);
         return value;
     }
 }

@@ -1,7 +1,14 @@
 package com.mastercard.developer.interceptors;
 
-import com.mastercard.developer.encryption.*;
-import com.squareup.okhttp.*;
+import com.mastercard.developer.encryption.EncryptionConfig;
+import com.mastercard.developer.encryption.EncryptionException;
+import com.mastercard.developer.encryption.JweConfig;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.MediaType;
 import okio.Buffer;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,10 +19,16 @@ import java.io.IOException;
 
 import static com.mastercard.developer.test.TestUtils.assertPayloadEquals;
 import static com.mastercard.developer.test.TestUtils.getTestJweConfigBuilder;
-import static com.squareup.okhttp.Interceptor.Chain;
+import static okhttp3.Interceptor.Chain;
 import static org.hamcrest.core.Is.isA;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class OkHttp2JweInterceptorTest {
 
@@ -106,6 +119,7 @@ public class OkHttp2JweInterceptorTest {
                 .request(request)
                 .code(200)
                 .protocol(Protocol.HTTP_1_1)
+                .message("")
                 .build();
         Chain chain = mock(Chain.class);
         when(request.body()).thenReturn(null);
@@ -136,6 +150,7 @@ public class OkHttp2JweInterceptorTest {
                 .body(ResponseBody.create(JSON_MEDIA_TYPE, encryptedPayload))
                 .request(request)
                 .code(200)
+                .message("")
                 .protocol(Protocol.HTTP_1_1)
                 .build();
         Chain chain = mock(Chain.class);

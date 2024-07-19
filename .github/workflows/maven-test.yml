@@ -15,14 +15,10 @@ jobs:
     strategy:
       matrix:
         java:
-          - 8
-          - 9
           - 11
-          - 12
-          - 13
-          - 14
+          - 17
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
         with:
           fetch-depth: 0
       - name: 'Set up JDK ${{ matrix.java }}'

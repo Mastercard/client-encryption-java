@@ -42,7 +42,7 @@ public abstract class OpenFeignDecoderExecutor implements Decoder {
             }
 
             // Read response payload
-            String responsePayload = Util.toString(body.asReader());
+            String responsePayload = Util.toString(body.asReader(StandardCharsets.UTF_8));
 
             // Decrypt fields & update headers
             String decryptedPayload = decryptPayload(response, responsePayload);
@@ -53,7 +53,7 @@ public abstract class OpenFeignDecoderExecutor implements Decoder {
                     .body(decryptedPayload, StandardCharsets.UTF_8)
                     .build();
         } catch (EncryptionException e) {
-            throw new DecodeException("Failed to intercept and decrypt response!", e);
+            throw new DecodeException(response.status(), "Failed to intercept and decrypt response!", response.request(), e);
         }
 
         // Call the regular decoder

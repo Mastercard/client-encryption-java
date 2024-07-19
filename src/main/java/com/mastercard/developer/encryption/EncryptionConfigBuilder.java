@@ -23,6 +23,8 @@ abstract class EncryptionConfigBuilder {
     protected Map<String, String> decryptionPaths = new HashMap<>();
     protected String encryptedValueFieldName;
 
+    protected Integer ivSize = 16;
+
     void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
         try {
             if ((encryptionCertificate == null && encryptionKey == null) || !isNullOrEmpty(encryptionKeyFingerprint)) {

@@ -2,11 +2,11 @@ package com.mastercard.developer.interceptors;
 
 import com.mastercard.developer.encryption.EncryptionConfig;
 import com.mastercard.developer.encryption.EncryptionException;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
-import com.squareup.okhttp.Interceptor;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.Interceptor;
 import okio.Buffer;
 import java.io.IOException;
 import static com.mastercard.developer.utils.StringUtils.isNullOrEmpty;
@@ -15,7 +15,7 @@ public abstract class OkHttp2EncryptionInterceptor implements Interceptor {
 
     protected abstract String encryptPayload(Request request, Request.Builder newBuilder, String requestPayload) throws EncryptionException;
 
-    protected abstract String decryptPayload(com.squareup.okhttp.Response response, com.squareup.okhttp.Response.Builder newBuilder, String responsePayload) throws EncryptionException;
+    protected abstract String decryptPayload(Response response, Response.Builder newBuilder, String responsePayload) throws EncryptionException;
 
     public static OkHttp2EncryptionInterceptor from(EncryptionConfig config) {
         return config.getScheme().equals(EncryptionConfig.Scheme.JWE) ? new OkHttp2JweInterceptor(config) : new OkHttp2FieldLevelEncryptionInterceptor(config);
@@ -48,7 +48,7 @@ public abstract class OkHttp2EncryptionInterceptor implements Interceptor {
             Request.Builder requestBuilder = request.newBuilder();
             String encryptedPayload = encryptPayload(request, requestBuilder, requestPayload);
 
-            RequestBody encryptedBody = RequestBody.create(requestBody.contentType(), encryptedPayload);
+            RequestBody encryptedBody = RequestBody.create(encryptedPayload.getBytes(), requestBody.contentType());
             return requestBuilder
                     .method(request.method(), encryptedBody)
                     .header("Content-Length", String.valueOf(encryptedBody.contentLength()))
@@ -79,7 +79,7 @@ public abstract class OkHttp2EncryptionInterceptor implements Interceptor {
             Response.Builder responseBuilder = response.newBuilder();
             String decryptedPayload = decryptPayload(response, responseBuilder, responsePayload);
 
-            try (ResponseBody decryptedBody = ResponseBody.create(responseBody.contentType(), decryptedPayload)) {
+            try (ResponseBody decryptedBody = ResponseBody.create(decryptedPayload.getBytes(), responseBody.contentType())) {
                 return responseBuilder
                         .body(decryptedBody)
                         .header("Content-Length", String.valueOf(decryptedBody.contentLength()))
@@ -89,4 +89,5 @@ public abstract class OkHttp2EncryptionInterceptor implements Interceptor {
             throw new IOException("Failed to intercept and decrypt response!", e);
         }
     }
+
 }
