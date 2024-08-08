@@ -174,9 +174,6 @@ JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .build();
 ```
 
-See also:
-* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
-
 ##### • Performing JWE Encryption <a name="performing-jwe-encryption"></a>
 
 Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.
@@ -410,7 +407,6 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
 
 See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
-* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
 ##### • Performing Mastercard Encryption <a name="performing-mastercard-encryption"></a>
 
@@ -634,7 +630,6 @@ FieldLevelEncryptionConfig config = FieldLevelEncryptionConfigBuilder.aFieldLeve
 
 See also:
 * [FieldLevelEncryptionConfig.java](https://www.javadoc.io/page/com.mastercard.developer/client-encryption/latest/com/mastercard/developer/encryption/FieldLevelEncryptionConfig.html) for all config options
-* [Service Configurations for Client Encryption Java](https://github.com/Mastercard/client-encryption-java/wiki/Service-Configurations-for-Client-Encryption-Java)
 
 ###### Encrypting Using HTTP Headers
 
