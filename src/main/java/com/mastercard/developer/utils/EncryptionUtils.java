@@ -35,6 +35,9 @@ public final class EncryptionUtils {
         return loadEncryptionCertificate(Files.readAllBytes(Paths.get(certificatePath)));
     }
 
+    /**
+     * Populate a X509 encryption certificate object with the certificate data at the given certificate data in bytes.
+     */
     public static Certificate loadEncryptionCertificate(byte[] certificateBytes) throws CertificateException {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         return factory.generateCertificate(new ByteArrayInputStream(certificateBytes));
