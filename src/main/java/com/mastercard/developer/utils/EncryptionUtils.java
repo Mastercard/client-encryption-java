@@ -1,7 +1,6 @@
 package com.mastercard.developer.utils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,16 +31,26 @@ public final class EncryptionUtils {
     /**
      * Populate a X509 encryption certificate object with the certificate data at the given file path.
      */
-    public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, FileNotFoundException {
+    public static Certificate loadEncryptionCertificate(String certificatePath) throws CertificateException, IOException {
+        return loadEncryptionCertificate(Files.readAllBytes(Paths.get(certificatePath)));
+    }
+
+    public static Certificate loadEncryptionCertificate(byte[] certificateBytes) throws CertificateException {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        return factory.generateCertificate(new FileInputStream(certificatePath));
+        return factory.generateCertificate(new ByteArrayInputStream(certificateBytes));
     }
 
     /**
      * Load a RSA decryption key from a file (PEM or DER).
      */
     public static PrivateKey loadDecryptionKey(String keyFilePath) throws GeneralSecurityException, IOException {
-        byte[] keyDataBytes = Files.readAllBytes(Paths.get(keyFilePath));
+        return loadDecryptionKey(Files.readAllBytes(Paths.get(keyFilePath)));
+    }
+
+    /**
+     * Load a RSA decryption key from key data in bytes.
+     */
+    public static PrivateKey loadDecryptionKey(byte[] keyDataBytes) throws GeneralSecurityException {
         String keyDataString = new String(keyDataBytes, StandardCharsets.UTF_8);
 
         if (keyDataString.contains(PKCS_1_PEM_HEADER)) {
@@ -63,17 +72,17 @@ public final class EncryptionUtils {
         }
 
         // We assume it's a PKCS#8 DER encoded binary file
-        return readPkcs8PrivateKey(Files.readAllBytes(Paths.get(keyFilePath)));
+        return readPkcs8PrivateKey(keyDataBytes);
     }
 
     /**
      * Load a RSA decryption key out of a PKCS#12 container.
      */
     public static PrivateKey loadDecryptionKey(String pkcs12KeyFilePath,
-                                            String decryptionKeyAlias,
-                                            String decryptionKeyPassword) throws GeneralSecurityException, IOException {
+                                               String decryptionKeyAlias,
+                                               String decryptionKeyPassword) throws GeneralSecurityException, IOException {
         KeyStore pkcs12KeyStore = KeyStore.getInstance("PKCS12");
-        pkcs12KeyStore.load(new FileInputStream(pkcs12KeyFilePath), decryptionKeyPassword.toCharArray());
+        pkcs12KeyStore.load(Files.newInputStream(Paths.get(pkcs12KeyFilePath)), decryptionKeyPassword.toCharArray());
         return (PrivateKey) pkcs12KeyStore.getKey(decryptionKeyAlias, decryptionKeyPassword.toCharArray());
     }
 
