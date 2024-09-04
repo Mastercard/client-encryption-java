@@ -6,7 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.rules.ExpectedException;
 
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -70,6 +72,26 @@ public class EncryptionUtilsTest {
 
     @ParameterizedTest
     @CsvSource({
+            "pkcs8/test_key_pkcs8-2048.der, MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD0ynqAQWn0T7/VJLletTJgoxsTt5TR3IkJ+Yk/Pxg6Q5hXuiGrBdC+OVo/9hrNnptuZh9rZYKto6lbSjYFiKMeBDvPZrYDPzusp0C0KllIoVbzYiOezD76XHsQAEje0UXbzZlXstPXef2bi2HkqV26ST167L5O4moK8+7jHMT80T6XgsUyvyt8PjsQ9CSu6fnD9NfCSYmt2cb16OXcEtA7To2zoGznXqB6JhntFjG0jxee7RkLR+moOqMI9kFM5GSIV4uhwQ9FtOCjUf7TFAU12wwfX/QXUEj6G93GVtzf6QdkVkWh4EyRHeMLyMNc5c0Iw1ZvXdOKfoeo9F47QpbzAgMBAAECggEAK3dMmzuCSdxjTsCPnc6E3H35z914Mm97ceb6RN26OpZIFcO6OLj2oOBkMxlLFxnDta2yhIpo0tZNuyUJRKBHfov35tLxHNB8kyK7rYIbincDjoHtm0PfJuuG+odiaRY11lrCkLzzOr6xlo4AWu7r8qkQnqQtAqrXc4xu7artG4rfMIunGnjjWQGzovtey1JgZctO97MU4Wvw18vgYBI6JM4eHJkZxgEhVQblBTKZs4OfiWk6MRHchgvqnWugwl213FgCzwy9cnyxTP13i9QKaFzL29TYmmN6bRWBH95z41M8IAa0CGahrSJjudZCFwsFh413YWv/pdqdkKHg1sqseQKBgQD641RYQkMn4G9vOiwB/is5M0OAhhUdWH1QtB8vvhY5ISTjFMqgIIVQvGmqDDk8QqFMOfFFqLtnArGn8HrKmBXMpRigS4ae/QgHEz34/RFjNDQ9zxIf/yoCRH5PmnPPU6x8j3bj/vJMRQA6/yngoca+9qvi3R32AtC5DUELnwyzNwKBgQD5x1iEV+albyCNNyLoT/f6LSH1NVcO+0IOvIaAVMtfy+hEEXz7izv3/AgcogVZzRARSK0qsQ+4WQN6Q2WG5cQYSyB92PR+VgwhnagVvA+QHNDL988xoMhB5r2D2IVSRuTB2EOg7LiWHUHIExaxVkbADODDj7YV2aQCJVv0gbDQJQKBgQCaABix5Fqci6NbPvXsczvM7K6uoZ8sWDjz5NyPzbqObs3ZpdWK3Ot4V270tnQbjTq9M4PqIlyGKp0qXO7ClQAskdq/6hxEU0UuMp2DzLNzlYPLvON/SH1czvZJnqEfzli+TMHJyaCpOGGf1Si7fhIk/f0cUGYnsCq2rHAU1hhRmQKBgE/BJTRs1MqyJxSwLEc9cZLCYntnYrr342nNLK1BZgbalvlVFDFFjgpqwTRTT54S6jR6nkBpdPmKAqBBcOOX7ftL0b4dTkQguZLqQkdeWyHK8aiPIetYyVixkoXM1xUkadqzcTSrIW1dPiniXnaVc9XSxtnqw1tKuSGuSCRUXN65AoGBAN/AmT1S4PAQpSWufC8NUJey8S0bURUNNjd52MQ7pWzGq2QC00+dBLkTPj3KOGYpXw9ScZPbxOthBFzHOxERWo16AFw3OeRtn4VB1QJ9XvoA/oz4lEhJKbwUfuFGGvSpYvg3vZcOHF2zlvcUu7C0ub/WhOjV9jZvU5B2Ev8x1neb",
+            "pkcs8/test_key_pkcs8-2048.pem, MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD0ynqAQWn0T7/VJLletTJgoxsTt5TR3IkJ+Yk/Pxg6Q5hXuiGrBdC+OVo/9hrNnptuZh9rZYKto6lbSjYFiKMeBDvPZrYDPzusp0C0KllIoVbzYiOezD76XHsQAEje0UXbzZlXstPXef2bi2HkqV26ST167L5O4moK8+7jHMT80T6XgsUyvyt8PjsQ9CSu6fnD9NfCSYmt2cb16OXcEtA7To2zoGznXqB6JhntFjG0jxee7RkLR+moOqMI9kFM5GSIV4uhwQ9FtOCjUf7TFAU12wwfX/QXUEj6G93GVtzf6QdkVkWh4EyRHeMLyMNc5c0Iw1ZvXdOKfoeo9F47QpbzAgMBAAECggEAK3dMmzuCSdxjTsCPnc6E3H35z914Mm97ceb6RN26OpZIFcO6OLj2oOBkMxlLFxnDta2yhIpo0tZNuyUJRKBHfov35tLxHNB8kyK7rYIbincDjoHtm0PfJuuG+odiaRY11lrCkLzzOr6xlo4AWu7r8qkQnqQtAqrXc4xu7artG4rfMIunGnjjWQGzovtey1JgZctO97MU4Wvw18vgYBI6JM4eHJkZxgEhVQblBTKZs4OfiWk6MRHchgvqnWugwl213FgCzwy9cnyxTP13i9QKaFzL29TYmmN6bRWBH95z41M8IAa0CGahrSJjudZCFwsFh413YWv/pdqdkKHg1sqseQKBgQD641RYQkMn4G9vOiwB/is5M0OAhhUdWH1QtB8vvhY5ISTjFMqgIIVQvGmqDDk8QqFMOfFFqLtnArGn8HrKmBXMpRigS4ae/QgHEz34/RFjNDQ9zxIf/yoCRH5PmnPPU6x8j3bj/vJMRQA6/yngoca+9qvi3R32AtC5DUELnwyzNwKBgQD5x1iEV+albyCNNyLoT/f6LSH1NVcO+0IOvIaAVMtfy+hEEXz7izv3/AgcogVZzRARSK0qsQ+4WQN6Q2WG5cQYSyB92PR+VgwhnagVvA+QHNDL988xoMhB5r2D2IVSRuTB2EOg7LiWHUHIExaxVkbADODDj7YV2aQCJVv0gbDQJQKBgQCaABix5Fqci6NbPvXsczvM7K6uoZ8sWDjz5NyPzbqObs3ZpdWK3Ot4V270tnQbjTq9M4PqIlyGKp0qXO7ClQAskdq/6hxEU0UuMp2DzLNzlYPLvON/SH1czvZJnqEfzli+TMHJyaCpOGGf1Si7fhIk/f0cUGYnsCq2rHAU1hhRmQKBgE/BJTRs1MqyJxSwLEc9cZLCYntnYrr342nNLK1BZgbalvlVFDFFjgpqwTRTT54S6jR6nkBpdPmKAqBBcOOX7ftL0b4dTkQguZLqQkdeWyHK8aiPIetYyVixkoXM1xUkadqzcTSrIW1dPiniXnaVc9XSxtnqw1tKuSGuSCRUXN65AoGBAN/AmT1S4PAQpSWufC8NUJey8S0bURUNNjd52MQ7pWzGq2QC00+dBLkTPj3KOGYpXw9ScZPbxOthBFzHOxERWo16AFw3OeRtn4VB1QJ9XvoA/oz4lEhJKbwUfuFGGvSpYvg3vZcOHF2zlvcUu7C0ub/WhOjV9jZvU5B2Ev8x1neb",
+            "pkcs1/test_key_pkcs1-2048.pem, MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDMJPwAG210B9bznVVU0xKSmBxZnXIVODE275yg+kvxSDU5mBFg6CD59yP8DwxNiz/JeAgmEjWChdUX/01k9+vKsE/F4Ug4l74IZ48YyBe/cXuj25XTXTNzIiaAqe2/c2ssJXD22vMghoo2C/CCY8OF6AexalUyvsuTYMvlCY8Tbwnx6Qmdh8cnMZRKUlgmkKgJW07ts88MJxaCuU7OhqBO6O2nIFFYA9EmgDUnZvu6/Ouqa5QZ/xiqDwwh43tS7GziNKTeuwNcwITlwJUpr5t+hNXVdFAnY8AF026/Af/CqixGDdhOAV1YzjoBjgOAjPOpj/FJ4uJt3UfODbAdBMzrAgMBAAECggEBAMuaO2eT81cdFopEKb3/AfAJG4VZXVXChHspAYsf96v+e28ktnhzK6iCj3YuP/P65LR4LZBi6tFxzzUu4K7KAXZW4EkYReKDnPle574smlrKwSiMseJrewviTIpYcJFYeNQ/x2m8t22CIciDoe05uOENqNaOmciRuBIWIWUeYn9aoDsiMQ56EaKpOOt/Jekvyttwa35yElvbPSxF2UAGOXUxPaz1wIdkvDPrHV4NAMNjLDalFGYR10xnlVa0B3fsjxFaXY0esyyCBxonMgDkud12xGqYxXDv7WoUggrRkc5OSe++BDz5Ts/6vy/v7ea5+9fglqQ+KeCPnjeyVs4ZqkECgYEA7UXhER4p8KkYyjuRZmwABICQRv7kVy7iOsTNmR/aOTlYLjORaWZICprLVYsgQY/bksKjSjy9MR/HS0426QkyYQl7BWLnnU3HP5yVytuIlFxfo/xFMJ5wm1CNQ6rAcO8o02lwATzPPRg4ui0nGEIflJPdoTTuxzXn0r0QYzN52uECgYEA3EG9uCEzE3uVO5K/Ew7A1A5aAp9bNX59NctDtKAWEgKoRXrudgebSv+P2U3ZW3G6HouGpnavWSHMQ6HIfPtgEg0BhSqOOgUBVR+wdntq4zux1AFnHVXBLZdE+CWCmyj3ASFMTPvkLssfj/ae7UEhUB24TZxz3nAo8RR7Gmz8TUsCgYEAimnEVK8K+kg6nObI+D2yeO3ivHe/DpjcAjqCUXxCWjV4mmMcxaaUChOo4Dsr0vMvvNpsVUc/eqO2J9j1sVXbHL5iFI9Q2/Pect5Oh6svbpTAejIUzrrup7wC3GGEp5zsbP/KBf7KSjKSDRGAB+ey8oKbvInbbTymAsql/6iswiECgYEAuukzFZFe5banMpHaglKvwoSXT8hpv2Ci4samox6C/C+zGpsyx4i2+RMcwHy26kn9drRSxOrM7OeojvA40g8EPO06kAZIAeaDdfhZaIJdd44N32p9VcCTGZxYE/jI9+Dwk83tERtlTWxkUWgpAA+YNIO0BnCxR1+I7uTBfvBjvzcCgYBDrjptyo8peY0Jzaijg7hWBwLZp/M27GhR8uAV6FVESP+1uG06k3g3CECxCE3Pi6HVSaW6UpNMZnrtVaKQCJDyKnkdIExFVP8DhkJSHmid1TXJXEfpDT57JD4UX6NOCcB0ynSyYvDvJ6bodx6SSyB03CEMqJ8VMjXeYpZSHyAF7A=="
+    })
+    void testLoadDecryptionKey_ShouldSupportPkcs8DerBytes(String keyLocation, String expectedEncoding) throws Exception {
+
+        // GIVEN
+        byte[] keyBytes = Files.readAllBytes(Paths.get(String.format("./src/test/resources/keys/%s", keyLocation)));
+
+        // WHEN
+        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyBytes);
+
+        // THEN
+        assertNotNull(privateKey);
+        assertEquals("RSA", privateKey.getAlgorithm());
+        assertArrayEquals(base64Decode(expectedEncoding), privateKey.getEncoded());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
             "test_key_pkcs1-512.pem",
             "test_key_pkcs1-1024.pem",
             "test_key_pkcs1-4096.pem"
@@ -81,6 +103,25 @@ public class EncryptionUtilsTest {
 
         // WHEN
         PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyPath);
+
+        // THEN
+        assertNotNull(privateKey);
+        assertEquals("RSA", privateKey.getAlgorithm());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "test_key_pkcs1-512.pem",
+            "test_key_pkcs1-1024.pem",
+            "test_key_pkcs1-4096.pem"
+    })
+    void testLoadDecryptionKey_ShouldSupportPkcs1Base64PemBytes_512bits(String fileName) throws Exception {
+
+        // GIVEN
+        byte[] keyBytes = Files.readAllBytes(Paths.get(String.format("./src/test/resources/keys/pkcs1/%s", fileName)));
+
+        // WHEN
+        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyBytes);
 
         // THEN
         assertNotNull(privateKey);
