@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.rules.ExpectedException;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
@@ -79,10 +80,10 @@ public class EncryptionUtilsTest {
     void testLoadDecryptionKey_ShouldSupportPkcs8DerBytes(String keyLocation, String expectedEncoding) throws Exception {
 
         // GIVEN
-        byte[] keyBytes = Files.readAllBytes(Paths.get(String.format("./src/test/resources/keys/%s", keyLocation)));
+        InputStream keyStream = Files.newInputStream(Paths.get(String.format("./src/test/resources/keys/%s", keyLocation)));
 
         // WHEN
-        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyBytes);
+        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyStream);
 
         // THEN
         assertNotNull(privateKey);
@@ -118,10 +119,10 @@ public class EncryptionUtilsTest {
     void testLoadDecryptionKey_ShouldSupportPkcs1Base64PemBytes_512bits(String fileName) throws Exception {
 
         // GIVEN
-        byte[] keyBytes = Files.readAllBytes(Paths.get(String.format("./src/test/resources/keys/pkcs1/%s", fileName)));
+        InputStream keyStream = Files.newInputStream(Paths.get(String.format("./src/test/resources/keys/pkcs1/%s", fileName)));
 
         // WHEN
-        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyBytes);
+        PrivateKey privateKey = EncryptionUtils.loadDecryptionKey(keyStream);
 
         // THEN
         assertNotNull(privateKey);
