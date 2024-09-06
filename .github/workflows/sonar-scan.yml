@@ -45,5 +45,4 @@ jobs:
           -Dsonar.projectKey=Mastercard_client-encryption-java
           -Dsonar.organization=mastercard -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.login=$SONAR_TOKEN -Dsonar.cpd.exclusions=**/OkHttp*.java
-          -Dsonar.exclusions=**/*.xml -Dgpg.signature.skip=true
-https://api.paypal.com/v3/vault/payment-tokens
+          
