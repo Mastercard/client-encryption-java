@@ -140,7 +140,7 @@ public class JweEncryption {
         //Strip the parent node if empty
         String jsonPathInStripped = jsonPathIn.replaceAll("." + config.getEncryptedValueFieldName() + "$", "");
         Object inJsonObjectStripped = readJsonObject(payloadContext, jsonPathIn);
-        if (inJsonObjectStripped == null) {
+        if (!jsonPathInStripped.equals("$") && !jsonPathInStripped.contains("[") && inJsonObjectStripped == null) {
             JsonParser.deleteIfExists(payloadContext, jsonPathInStripped);
         }
 
