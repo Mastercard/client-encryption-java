@@ -136,6 +136,14 @@ public class JweEncryption {
 
         // Remove the input
         JsonParser.deleteIfExists(payloadContext, jsonPathIn);
+
+        //Strip the parent node if empty
+        String jsonPathInStripped = jsonPathIn.replaceAll("." + config.getEncryptedValueFieldName() + "$", "");
+        Object inJsonObjectStripped = readJsonObject(payloadContext, jsonPathIn);
+        if (!jsonPathInStripped.equals("$") && !jsonPathInStripped.contains("[") && inJsonObjectStripped == null) {
+            JsonParser.deleteIfExists(payloadContext, jsonPathInStripped);
+        }
+
         return payloadContext;
     }
 

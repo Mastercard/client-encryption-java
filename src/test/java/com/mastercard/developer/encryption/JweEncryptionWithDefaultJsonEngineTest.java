@@ -115,4 +115,25 @@ public class JweEncryptionWithDefaultJsonEngineTest {
         // THEN
         assertPayloadEquals("{\"data\": {}}", payload);
     }
+
+    @Test
+    public void testDecryptPayload_ShouldRemoveParentEncryptedFieldIfEmpty() throws Exception {
+
+        // GIVEN
+        String encryptedPayload = "{\n" +
+                "    \"encryptedDataParent\": {\n" +
+                "        \"encryptedData\": \"eyJraWQiOiI3NjFiMDAzYzFlYWRlM2E1NDkwZTUwMDBkMzc4ODdiYWE1ZTZlYzBlMjI2YzA3NzA2ZTU5OTQ1MWZjMDMyYTc5IiwiY3R5IjoiYXBwbGljYXRpb24vanNvbiIsImVuYyI6IkEyNTZHQ00iLCJhbGciOiJSU0EtT0FFUC0yNTYifQ.XVy1AR51sUvwT-AtcsogQDo_klFi1EMYW8Wz7qM0e1dA3jNX5nTa38JhRcVuyVK15OenTYfg7aaH_fLjPZI1Mukd0BBnTuonh8T9CX5tbAAYx_KGPxc7a7ekBO-xXEA762eRvIIQJDZgQ_C3U39kc-XoaxC-ZYx8Va_aPBsXI1uozAfj3j5XVDnSmGAVWc2N4STTlCKbL4EO6YXASl_PrAOIVVSUrhpYvNS7GnjrP9x49tlRmTS0Dx-_MhkIAJM6H25YAuUmO-LW3gikReOUgGeY9_JtOioDs2J4ncKqugPFKr8kYF1cKnMwFv0TS9p5qR0kiF20bxRMvhbazf_Q5Q.V2Uz5-YRNq9ZIJjhRsKYIw.jB1s8rczGEj2OjU.qs4zVUf2tHML02Rglq5ncw\"\n" +
+                "    }\n" +
+                "}";
+        JweConfig config = getTestJweConfigBuilder()
+                .withEncryptedValueFieldName("encryptedData")
+                .withDecryptionPath("$.encryptedDataParent.encryptedData", "$.unencrypted")
+                .build();
+
+        // WHEN
+        String payload = JweEncryption.decryptPayload(encryptedPayload, config);
+
+        // THEN
+        assertPayloadEquals("{\"unencrypted\":{\"data\": {}}}", payload);
+    }
 }
