@@ -56,7 +56,7 @@ public class OkHttp2JweInterceptorTest {
                 .build();
         Request request = new Request.Builder()
                 .url("https://sandbox.api.mastercard.com/service")
-                .post(RequestBody.create(JSON_MEDIA_TYPE, "{\"foo\":\"bar\"}"))
+                .post(RequestBody.create("{\"foo\":\"bar\"}", JSON_MEDIA_TYPE))
                 .build();
         Chain chain = mock(Chain.class);
         Response response = mock(Response.class);
@@ -115,7 +115,7 @@ public class OkHttp2JweInterceptorTest {
                 .build();
         Request request = mock(Request.class);
         Response encryptedResponse = new Response.Builder()
-                .body(ResponseBody.create(JSON_MEDIA_TYPE, encryptedPayload))
+                .body(ResponseBody.create(encryptedPayload, JSON_MEDIA_TYPE))
                 .request(request)
                 .code(200)
                 .protocol(Protocol.HTTP_1_1)
@@ -147,7 +147,7 @@ public class OkHttp2JweInterceptorTest {
                 .build();
         Request request = mock(Request.class);
         Response encryptedResponse = new Response.Builder()
-                .body(ResponseBody.create(JSON_MEDIA_TYPE, encryptedPayload))
+                .body(ResponseBody.create(encryptedPayload, JSON_MEDIA_TYPE))
                 .request(request)
                 .code(200)
                 .message("")
@@ -199,7 +199,7 @@ public class OkHttp2JweInterceptorTest {
         Response response = mock(Response.class);
         when(chain.request()).thenReturn(request);
         when(chain.proceed(any(Request.class))).thenReturn(response);
-        when(response.body()).thenReturn(ResponseBody.create(JSON_MEDIA_TYPE, ""));
+        when(response.body()).thenReturn(ResponseBody.create("", JSON_MEDIA_TYPE));
 
         // WHEN
         OkHttp2JweInterceptor instanceUnderTest = new OkHttp2JweInterceptor(config);
@@ -227,7 +227,7 @@ public class OkHttp2JweInterceptorTest {
         when(request.body()).thenReturn(null);
         when(chain.request()).thenReturn(request);
         when(chain.proceed(any(Request.class))).thenReturn(response);
-        when(response.body()).thenReturn(ResponseBody.create(JSON_MEDIA_TYPE, encryptedPayload));
+        when(response.body()).thenReturn(ResponseBody.create(encryptedPayload, JSON_MEDIA_TYPE));
 
         // THEN
         expectedException.expect(IOException.class);
