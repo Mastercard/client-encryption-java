@@ -6,6 +6,6 @@ public class StringUtils {
     }
 
     public static boolean isNullOrEmpty(String str) {
-        return null == str || str.length() == 0;
+        return null == str || str.isEmpty();
     }
 }
