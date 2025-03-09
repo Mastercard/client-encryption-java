@@ -60,7 +60,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
         Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
         Assert.assertEquals(HEX, config.fieldValueEncoding);
-        assertThat(config.getIVSize().intValue(),equalTo(12));
+        assertThat(config.getIVSize(),equalTo(12));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class FieldLevelEncryptionConfigBuilderTest {
         Assert.assertEquals("oaepPaddingDigestAlgorithm", config.oaepPaddingDigestAlgorithmFieldName);
         Assert.assertEquals("x-oaep-padding-digest-algorithm", config.oaepPaddingDigestAlgorithmHeaderName);
         Assert.assertEquals(HEX, config.fieldValueEncoding);
-        assertThat(config.getIVSize().intValue(),equalTo(16));
+        assertThat(config.getIVSize(),equalTo(16));
     }
 
     @Test
