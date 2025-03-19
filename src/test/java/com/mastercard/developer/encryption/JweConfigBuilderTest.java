@@ -34,7 +34,7 @@ public class JweConfigBuilderTest {
         Assert.assertEquals("encryptedPayload", config.getEncryptedValueFieldName());
         Assert.assertEquals(Collections.singletonMap("$.encryptedPayload", "$"), config.getDecryptionPaths());
         Assert.assertEquals(Collections.singletonMap("$", "$"), config.getEncryptionPaths());
-        assertThat(config.getIVSize().intValue(),equalTo(12));
+        assertThat(config.getIVSize(),equalTo(12));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class JweConfigBuilderTest {
         Assert.assertEquals("encryptedPayload", config.getEncryptedValueFieldName());
         Assert.assertEquals(Collections.singletonMap("$.encryptedPayload", "$"), config.getDecryptionPaths());
         Assert.assertEquals(Collections.singletonMap("$", "$"), config.getEncryptionPaths());
-        assertThat(config.getIVSize().intValue(),equalTo(16));
+        assertThat(config.getIVSize(),equalTo(16));
     }
 
     @Test
