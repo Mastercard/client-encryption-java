@@ -1,25 +1,23 @@
 package com.mastercard.developer.encryption;
-
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-import static org.hamcrest.core.Is.isA;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncryptionExceptionTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() {
+        try {
+            throw new EncryptionException("Something happened!", new IOException());
+        } catch (EncryptionException e) {
+            // Assert that the exception message is correct
+            assertEquals("Something happened!", e.getMessage());
 
-        expectedException.expect(EncryptionException.class);
-        expectedException.expectMessage("Something happened!");
-        expectedException.expectCause(isA(IOException.class));
-
-        throw new EncryptionException("Something happened!", new IOException());
+            // Assert that the cause of the exception is of type IOException
+            assertTrue(e.getCause() instanceof IOException);
+        }
     }
 }
