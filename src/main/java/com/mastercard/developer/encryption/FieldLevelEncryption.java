@@ -193,7 +193,7 @@ public class FieldLevelEncryption {
             JsonParser.checkOrCreateOutObject(payloadContext, jsonPathOut);
             JsonParser.addDecryptedDataToPayload(payloadContext, decryptedValue, jsonPathOut);
 
-            if(jsonPathIn != jsonPathOut) {
+            if(!jsonPathIn.equals(jsonPathOut)) {
                 // Remove the input if now empty
                 Object inJsonElement  = JsonParser.readJsonElement(payloadContext, jsonPathIn);
                 if (0 == jsonProvider.length(inJsonElement)) {
