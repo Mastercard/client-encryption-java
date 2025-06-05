@@ -1,8 +1,7 @@
 name: Maven Publish
 
 on:
-  release:
-    types: [created]
+  pull_request:
 
 jobs:
   build:
@@ -25,11 +24,8 @@ jobs:
         gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
         gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
-    - name: Build with Maven
+    - name: Build and Test
       run: mvn clean package -Dmaven.javadoc.skip=false
-
-    - name: Import signing key
-      run: gpg --batch --import ${{ secrets.GPG_SECRET_KEY }}
         
     - name: Publish to Maven Central
-      run: mvn -X -Dgpg.passphrase=${{ secrets.PGP_PASSPHRASE }} deploy -DskipTests -Dmaven.javadoc.skip=false
+      run: mvn -X deploy -DskipTests -Dmaven.javadoc.skip=false
