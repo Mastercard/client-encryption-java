@@ -19,8 +19,8 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         server-id: central
-        server-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-        server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+        server-username: MAVEN_CENTRAL_USERNAME
+        server-password: MAVEN_CENTRAL_TOKEN
         gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
         gpg-passphrase: GPG_PASSPHRASE
 
@@ -30,6 +30,6 @@ jobs:
     - name: Publish to Maven Central
       env:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: |
-        gpg --list-keys
-        mvn -X deploy -DskipTests -Dmaven.javadoc.skip=false
+        MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+      run: mvn -X deploy -DskipTests -Dmaven.javadoc.skip=false
