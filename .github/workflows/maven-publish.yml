@@ -24,6 +24,7 @@ jobs:
         server-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
         server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
         gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+        gpg-passphrase: GPG_PASSPHRASE
 
     - name: Build and Test
       run: mvn clean package -Dmaven.javadoc.skip=false
