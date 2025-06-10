@@ -25,11 +25,7 @@ jobs:
         gpg-passphrase: GPG_PASSPHRASE
 
     - name: Build and Test
-      env:
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: |
-        gpg --list-keys
-        mvn clean package -Dmaven.javadoc.skip=false
+      run: mvn clean package -Dmaven.javadoc.skip=false
         
     - name: Publish to Maven Central
       env:
