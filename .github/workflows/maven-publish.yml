@@ -28,7 +28,7 @@ jobs:
       env:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: |
-        gpg- --list-keys
+        gpg --list-keys
         mvn clean package -Dmaven.javadoc.skip=false
         
     - name: Publish to Maven Central
