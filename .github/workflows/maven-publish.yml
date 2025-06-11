@@ -1,8 +1,7 @@
 name: Maven Publish
 
 on:
-  release:
-    types: [published]
+  pull_request:
 
 jobs:
   build:
@@ -33,4 +32,4 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
         MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-      run: mvn -X deploy -DskipTests -Dmaven.javadoc.skip=false
+      run: mvn -X deploy -Dmaven.javadoc.skip=false
