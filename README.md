@@ -73,7 +73,7 @@ This library requires one of the following dependencies to be added to your clas
 
 * [Jackson](https://search.maven.org/artifact/com.fasterxml.jackson.core/jackson-databind) 2.5.0+
 * [Google Gson](https://search.maven.org/artifact/com.google.code.gson/gson) 2.3.1+
-* [Json-smart](https://search.maven.org/artifact/net.minidev/json-smart) 2.1.1+
+* [Json-smart](https://search.maven.org/artifact/net.minidev/json-smart) 2.5.2+
 * [Jettison](https://search.maven.org/artifact/org.codehaus.jettison/jettison) 1.0+
 * [Org JSON](https://search.maven.org/artifact/org.json/json) 20070829+
 
