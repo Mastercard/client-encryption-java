@@ -77,7 +77,7 @@ abstract class EncryptionConfigBuilder {
 
     private void validateSingleWildcardOnly(String key, String value, String action) {
         if (countWildcards(key) > 1 || countWildcards(value) > 1) {
-            throw new IllegalArgumentException("JSON paths for " + action + " can only contain one wildcard!");
+            throw new IllegalArgumentException("JSON paths for " + action + " with can only contain one wildcard!");
         }
     }
 
