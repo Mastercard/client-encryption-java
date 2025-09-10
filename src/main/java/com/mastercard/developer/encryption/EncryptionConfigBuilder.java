@@ -54,34 +54,40 @@ abstract class EncryptionConfigBuilder {
     }
 
     void checkJsonPathParameterValues() {
-        for (Map.Entry<String, String> entry : decryptionPaths.entrySet()) {
-            if(entry.getKey().contains("[*]") || entry.getValue().contains("[*]")){
-                if(!(entry.getKey().contains("[*]") && entry.getValue().contains("[*]"))){
-                    throw new IllegalArgumentException("JSON paths for decryption with wildcard must both contain a wildcard!");
-                }
-                if((entry.getKey().split("[*]", -1).length-1 > 1 || entry.getValue().split("[*]", -1).length-1 > 1)){
-                    throw new IllegalArgumentException("JSON paths for decryption with can only contain one wildcard!");
-                }
-            } else {
-                if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                    throw new IllegalArgumentException("JSON paths for decryption must point to a single item!");
-                }
-            }
-        }
+        decryptionPaths.forEach((key, value) -> validatePaths(key, value, "decryption"));
+        encryptionPaths.forEach((key, value) -> validatePaths(key, value, "encryption"));
+    }
 
-        for (Map.Entry<String, String> entry : encryptionPaths.entrySet()) {
-            if(entry.getKey().contains("[*]") || entry.getValue().contains("[*]")){
-                if(!(entry.getKey().contains("[*]") && entry.getValue().contains("[*]"))){
-                    throw new IllegalArgumentException("JSON paths for encryption with wildcard must both contain a wildcard!");
-                }
-                if((entry.getKey().split("[*]", -1).length-1 > 1 || entry.getValue().split("[*]", -1).length-1 > 1)){
-                    throw new IllegalArgumentException("JSON paths for encryption with can only contain one wildcard!");
-                }
-            } else {
-                if (!JsonPath.isPathDefinite(entry.getKey()) || !JsonPath.isPathDefinite(entry.getValue())) {
-                    throw new IllegalArgumentException("JSON paths for encryption must point to a single item!");
-                }
-            }
+    private void validatePaths(String key, String value, String action) {
+        boolean keyHasWildcard = key.contains("[*]");
+        boolean valueHasWildcard = value.contains("[*]");
+        if (keyHasWildcard || valueHasWildcard) {
+            validateBothOrNoneHasWildcard(keyHasWildcard, valueHasWildcard, action);
+            validateSingleWildcardOnly(key, value, action);
+        } else {
+            validateDefinitePaths(key, value, action);
         }
+    }
+
+    private void validateBothOrNoneHasWildcard(boolean keyHasWildcard, boolean valueHasWildcard, String action) {
+        if (!(keyHasWildcard && valueHasWildcard)) {
+            throw new IllegalArgumentException("JSON paths for " + action + " with wildcard must both contain a wildcard!");
+        }
+    }
+
+    private void validateSingleWildcardOnly(String key, String value, String action) {
+        if (countWildcards(key) > 1 || countWildcards(value) > 1) {
+            throw new IllegalArgumentException("JSON paths for " + action + " with can only contain one wildcard!");
+        }
+    }
+
+    private void validateDefinitePaths(String key, String value, String action) {
+        if (!JsonPath.isPathDefinite(key) || !JsonPath.isPathDefinite(value)) {
+            throw new IllegalArgumentException("JSON paths for " + action + " must point to a single item!");
+        }
+    }
+
+    private int countWildcards(String path) {
+        return path.split("\\[\\*]", -1).length - 1;
     }
 }
