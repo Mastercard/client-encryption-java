@@ -1,20 +1,18 @@
+name: broken links?
 'on':
   push:
     branches:
       - "**"
   schedule:
     - cron: 0 16 * * *
-  workflow_dispatch:
-name: broken links?
+  workflow_dispatch:  
 jobs:
   linkChecker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Link Checker
-        id: lc
-        uses: peter-evans/link-checker@v1.2.2
+        uses: lycheeverse/lychee-action@7cd0af4c74a61395d455af97419279d86aafaede
         with:
-          args: -v -r * -x (mvnrepository)
-      - name: Fail?
-        run: 'exit ${{ steps.lc.outputs.exit_code }}'
+          fail: true
