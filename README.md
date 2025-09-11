@@ -4,7 +4,7 @@
 [![](https://github.com/Mastercard/client-encryption-java/workflows/Build%20&%20Test/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3A%22Build+%26+Test%22)
 [![](https://sonarcloud.io/api/project_badges/measure?project=Mastercard_client-encryption-java&metric=alert_status)](https://sonarcloud.io/dashboard?id=Mastercard_client-encryption-java)
 [![](https://github.com/Mastercard/client-encryption-java/workflows/broken%20links%3F/badge.svg)](https://github.com/Mastercard/client-encryption-java/actions?query=workflow%3A%22broken+links%3F%22)
-[![](https://img.shields.io/maven-central/v/com.mastercard.developer/client-encryption.svg)](https://search.maven.org/artifact/com.mastercard.developer/client-encryption/)
+[![](https://img.shields.io/maven-central/v/com.mastercard.developer/client-encryption.svg)](https://central.sonatype.com/artifact/com.mastercard.developer/client-encryption?smo=true)
 [![](https://www.javadoc.io/badge/com.mastercard.developer/client-encryption.svg?color=blue)](https://www.javadoc.io/doc/com.mastercard.developer/client-encryption)
 [![](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/Mastercard/client-encryption-java/blob/master/LICENSE)
 
@@ -65,17 +65,17 @@ dependencies {
 ```
 
 #### Other Dependency Managers
-See: https://search.maven.org/artifact/com.mastercard.developer/client-encryption
+See: https://search..org/artifact/com.mastercard.developer/client-encryption
 
 ### Selecting a JSON Engine <a name="selecting-a-json-engine"></a>
 
 This library requires one of the following dependencies to be added to your classpath:
 
-* [Jackson](https://search.maven.org/artifact/com.fasterxml.jackson.core/jackson-databind) 2.5.0+
-* [Google Gson](https://search.maven.org/artifact/com.google.code.gson/gson) 2.3.1+
-* [Json-smart](https://search.maven.org/artifact/net.minidev/json-smart) 2.5.2+
-* [Jettison](https://search.maven.org/artifact/org.codehaus.jettison/jettison) 1.0+
-* [Org JSON](https://search.maven.org/artifact/org.json/json) 20070829+
+* [Jackson](https://central.sonatype.com/artifact/com.fasterxml.jackson.core/jackson-databind?smo=true) 2.5.0+
+* [Google Gson](https://central.sonatype.com/artifact/com.google.code.gson/gson?smo=true) 2.3.1+
+* [Json-smart](https://central.sonatype.com/artifact/net.minidev/json-smart?smo=true) 2.5.2+
+* [Jettison](https://central.sonatype.com/artifact/org.codehaus.jettison/jettison?smo=true) 1.0+
+* [Org JSON](https://central.sonatype.com/artifact/org.json/json?smo=true) 20070829+
 
 You can either let the library choose for you, or force the one to be used by calling `withJsonEngine` on the `JsonParser` class.
 Example:
