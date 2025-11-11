@@ -6,7 +6,7 @@
 
     <groupId>com.mastercard.developer</groupId>
     <artifactId>client-encryption</artifactId>
-    <version>1.8.7</version>
+    <version>1.8.8</version>
     <packaging>jar</packaging>
     <description>Library for Mastercard API compliant payload encryption/decryption</description>
     <url>https://github.com/Mastercard/client-encryption-java</url>
@@ -266,6 +266,14 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
                 </configuration>
             </plugin>
         </plugins>
