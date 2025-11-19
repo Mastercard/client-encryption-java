@@ -1,4 +1,4 @@
-# Use Eclipse Temurin JDK 11 as base
+# Use Eclipse Temurin JDK 17 as base
 FROM eclipse-temurin:17-jdk
 
 # Install Maven
@@ -68,7 +68,7 @@ RUN mkdir -p /root/.m2 && \
   \
           <activeProfile>mastercard-base</activeProfile> \
           </activeProfiles> \
-</settings>" > /root/.m2/settings.xml \
+</settings>" > /root/.m2/settings.xml
 
 # Set working directory
 WORKDIR /app
