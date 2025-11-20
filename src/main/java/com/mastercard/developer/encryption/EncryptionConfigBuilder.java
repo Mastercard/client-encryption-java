@@ -24,6 +24,7 @@ abstract class EncryptionConfigBuilder {
     protected String encryptedValueFieldName;
 
     protected Integer ivSize = 16;
+    protected Boolean enableCbcHmacVerification = false;
 
     void computeEncryptionKeyFingerprintWhenNeeded() throws EncryptionException {
         try {

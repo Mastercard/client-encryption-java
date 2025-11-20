@@ -54,6 +54,14 @@ public abstract class EncryptionConfig {
     Integer ivSize = 16;
 
     /**
+     * Enable HMAC authentication tag verification for AES-CBC mode (A128CBC-HS256).
+     * When true, authentication tags are verified during decryption.
+     * Default is false for backward compatibility with systems that don't compute HMAC tags.
+     * Set to true to enable proper HMAC verification according to JWE spec.
+     */
+    Boolean enableCbcHmacVerification = false;
+
+    /**
      * A list of JSON paths to encrypt in request payloads.
      * Example:
      * <pre>
@@ -116,4 +124,6 @@ public abstract class EncryptionConfig {
     }
 
     public Integer getIVSize() { return ivSize; }
+
+    public Boolean getEnableCbcHmacVerification() { return enableCbcHmacVerification; }
 }

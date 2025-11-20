@@ -178,6 +178,37 @@ JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
     .build();
 ```
 
+**AES-CBC HMAC Authentication (A128CBC-HS256)**
+
+For enhanced security when using AES-CBC mode (A128CBC-HS256), you can enable HMAC authentication tag verification. This ensures data authenticity and integrity according to the JWE specification (RFC 7516).
+
+By default, HMAC verification is **disabled** for backward compatibility. To enable it:
+
+```java
+JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+    .withEncryptionCertificate(encryptionCertificate)
+    .withDecryptionKey(decryptionKey)
+    .withEnableCbcHmacVerification(true)  // Enable HMAC authentication
+    .build();
+```
+
+**When to enable HMAC verification:**
+- ✅ New integrations with systems that properly implement JWE A128CBC-HS256
+- ✅ When security and data authenticity are critical
+- ✅ When working with compliant JWE encryption sources
+
+**When to keep it disabled (default):**
+- ⚠️ Legacy systems that don't compute HMAC tags correctly
+- ⚠️ Maintaining backward compatibility with existing deployments
+- ⚠️ Encryption sources that don't fully follow the JWE specification
+
+**Technical Details:**
+When enabled, the library:
+- Splits the 256-bit Content Encryption Key (CEK) into a 128-bit HMAC key and 128-bit AES key
+- Computes HMAC-SHA256 over: AAD || IV || Ciphertext || AL (AAD length in bits)
+- Verifies the authentication tag (first 128 bits of HMAC output) before decryption
+- Throws an `EncryptionException` if the authentication tag is invalid
+
 ##### • Performing JWE Encryption <a name="performing-jwe-encryption"></a>
 
 Call `JweEncryption.encryptPayload` with a JSON request payload and a `JweConfig` instance.

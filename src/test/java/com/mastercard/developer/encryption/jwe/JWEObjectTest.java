@@ -21,6 +21,26 @@ public class JWEObjectTest {
         assertEquals("bar", decryptedPayload);
     }
 
+    @Test
+    public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsCbcEncryptedAndHmacVerificationDisabled() throws Exception {
+        JweObject jweObject = TestUtils.getTestCbcJweObject();
+        String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder()
+                .withEnableCbcHmacVerification(false)
+                .build());
+
+        assertEquals("bar", decryptedPayload);
+    }
+
+    @Test
+    public void testDecrypt_ShouldReturnDecryptedPayload_WhenPayloadIsCbcEncryptedAndHmacVerificationExplicitlyEnabled() throws Exception {
+        JweObject jweObject = TestUtils.getTestCbcJweObject();
+        String decryptedPayload = jweObject.decrypt(TestUtils.getTestJweConfigBuilder()
+                .withEnableCbcHmacVerification(true)
+                .build());
+
+        assertEquals("bar", decryptedPayload);
+    }
+
     private static Stream<Arguments> aesGcmJweObjects() {
         return ImmutableList.of(
                         TestUtils.getTestAes128GcmJweObject(),

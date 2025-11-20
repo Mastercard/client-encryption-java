@@ -49,7 +49,7 @@ public class JweObject {
         if (AES_GCM_ENCRYPTION_METHODS.contains(encryptionMethod)) {
             plainText = AESGCM.decrypt(cek, this);
         } else if (encryptionMethod.equals(A128CBC_HS256)) {
-            plainText = AESCBC.decrypt(cek, this);
+            plainText = AESCBC.decrypt(cek, this, config.getEnableCbcHmacVerification());
         } else {
             throw new EncryptionException(String.format("Encryption method %s not supported", encryptionMethod));
         }
