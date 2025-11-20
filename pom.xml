@@ -224,6 +224,10 @@
                         </goals>
                         <configuration>
                             <skip>${gpg.signature.skip}</skip>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
                         </configuration>
                     </execution>
                 </executions>
