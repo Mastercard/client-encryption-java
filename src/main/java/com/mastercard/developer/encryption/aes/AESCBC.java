@@ -28,6 +28,9 @@ public class AESCBC {
     public static byte[] decrypt(Key secretKey, JweObject object, boolean enableHmacVerification) throws GeneralSecurityException, EncryptionException {
         byte[] cek = secretKey.getEncoded();
 
+       if(cek.length != 32) {
+          throw new IllegalArgumentException("CEK should be of length 32")
+       }
         // For A128CBC-HS256: First 16 bytes are HMAC key, second 16 bytes are AES key
         int keyLength = cek.length / 2;
         SecretKeySpec aesKey = new SecretKeySpec(cek, keyLength, keyLength, "AES");
