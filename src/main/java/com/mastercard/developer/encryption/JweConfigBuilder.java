@@ -34,6 +34,7 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         config.encryptedValueFieldName = this.encryptedValueFieldName == null ? "encryptedData" : this.encryptedValueFieldName;
         config.scheme = EncryptionConfig.Scheme.JWE;
         config.ivSize = ivSize;
+        config.enableCbcHmacVerification = enableCbcHmacVerification;
         return config;
     }
 
@@ -105,6 +106,17 @@ public class JweConfigBuilder extends EncryptionConfigBuilder {
         }
         throw new IllegalArgumentException("Supported IV Sizes are either 12 or 16!");
     }
+    /**
+     * See: {@link EncryptionConfig#enableCbcHmacVerification}.
+     * Enable or disable HMAC authentication tag verification for AES-CBC mode (A128CBC-HS256).
+     * Default is false (disabled) for backward compatibility.
+     * Set to true to enable proper HMAC verification according to JWE spec.
+     */
+    public JweConfigBuilder withEnableCbcHmacVerification(Boolean enableCbcHmacVerification) {
+        this.enableCbcHmacVerification = enableCbcHmacVerification;
+        return this;
+    }
+
 
     private void checkParameterValues() {
         if (decryptionKey == null && encryptionCertificate == null && encryptionKey == null) {
