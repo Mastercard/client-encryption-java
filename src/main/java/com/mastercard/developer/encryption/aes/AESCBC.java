@@ -21,6 +21,7 @@ public class AESCBC {
     private AESCBC() {
     }
 
+    @java.lang.SuppressWarnings("java:S5542")
     private static final String CIPHER = "AES/CBC/PKCS5Padding";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
