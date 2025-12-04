@@ -21,7 +21,7 @@ public class AESCBC {
     private AESCBC() {
     }
 
-    @java.lang.SuppressWarnings("java:S5542")
+
     private static final String CIPHER = "AES/CBC/PKCS5Padding";
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
@@ -54,6 +54,7 @@ public class AESCBC {
         return cipher(aesKey, new IvParameterSpec(iv), cipherText, Cipher.DECRYPT_MODE);
     }
 
+    @java.lang.SuppressWarnings("java:S5542")
     public static byte[] cipher(Key key, AlgorithmParameterSpec iv, byte[] bytes, int mode) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance(CIPHER);
         cipher.init(mode, key, iv);
