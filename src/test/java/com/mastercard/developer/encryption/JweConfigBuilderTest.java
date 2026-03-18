@@ -194,6 +194,35 @@ public class JweConfigBuilderTest {
     }
 
     @Test
+    public void testBuild_ShouldDisableCbcHmacVerificationByDefault() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .build();
+        Assert.assertFalse("HMAC verification should be disabled by default for backward compatibility", config.getEnableCbcHmacVerification());
+    }
+
+    @Test
+    public void testBuild_ShouldAllowDisablingCbcHmacVerification() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEnableCbcHmacVerification(false)
+                .build();
+        Assert.assertFalse("HMAC verification should be disabled when explicitly set to false", config.getEnableCbcHmacVerification());
+    }
+
+    @Test
+    public void testBuild_ShouldAllowEnablingCbcHmacVerificationExplicitly() throws Exception {
+        JweConfig config = JweConfigBuilder.aJweEncryptionConfig()
+                .withEncryptionCertificate(TestUtils.getTestEncryptionCertificate())
+                .withDecryptionKey(TestUtils.getTestDecryptionKey())
+                .withEnableCbcHmacVerification(true)
+                .build();
+        Assert.assertTrue("HMAC verification should be enabled when explicitly set to true", config.getEnableCbcHmacVerification());
+    }
+
+    @Test
     public void testBuild_ShouldThrowIllegalArgumentException_WhenMultipleWildcardsOnEncryptionPaths() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("JSON paths for encryption with can only contain one wildcard!");
