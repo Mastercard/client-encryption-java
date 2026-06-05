@@ -16,5 +16,5 @@ jobs:
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411
         with:
           fail: true
-          args: --exclude sonatype.com 
+          exclude: sonatype.com 
 
