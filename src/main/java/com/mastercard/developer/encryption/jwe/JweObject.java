@@ -54,7 +54,7 @@ public class JweObject {
             throw new EncryptionException(String.format("Encryption method %s not supported", encryptionMethod));
         }
 
-        return new String(plainText);
+        return new String(plainText, StandardCharsets.UTF_8);
     }
 
     public static String encrypt(JweConfig config, String payload, JweHeader header) throws EncryptionException, GeneralSecurityException {
@@ -63,11 +63,11 @@ public class JweObject {
         String encryptedKey = EncodingUtils.base64UrlEncode(encryptedSecretKeyBytes);
 
         byte[] iv = AESEncryption.generateIv(config.getIVSize()).getIV();
-        byte[] payloadBytes = payload.getBytes();
+        byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
         GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
 
         String headerString = header.toJson();
-        String encodedHeader = EncodingUtils.base64UrlEncode(headerString.getBytes());
+        String encodedHeader = EncodingUtils.base64UrlEncode(headerString.getBytes(StandardCharsets.UTF_8));
 
         byte[] aad = encodedHeader.getBytes(StandardCharsets.US_ASCII);
 

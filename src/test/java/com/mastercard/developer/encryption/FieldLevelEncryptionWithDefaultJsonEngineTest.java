@@ -16,6 +16,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 
 import static com.mastercard.developer.encryption.FieldLevelEncryptionConfig.FieldValueEncoding;
@@ -44,7 +45,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         SecretKey symmetricKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, SYMMETRIC_KEY_TYPE);
 
         // WHEN
-        byte[] encryptedBytes = AESCBC.cipher(symmetricKey, ivParameterSpec, dataValue.getBytes(), Cipher.ENCRYPT_MODE);
+        byte[] encryptedBytes = AESCBC.cipher(symmetricKey, ivParameterSpec, dataValue.getBytes(StandardCharsets.UTF_8), Cipher.ENCRYPT_MODE);
 
         // THEN
         byte[] expectedEncryptedBytes = base64Decode("Y6X9YneTS4VuPETceBmvclrDoCqYyBgZgJUdnlZ8/0g=");
@@ -66,7 +67,7 @@ public class FieldLevelEncryptionWithDefaultJsonEngineTest {
         byte[] decryptedBytes = AESCBC.cipher(symmetricKey, ivParameterSpec, base64Decode(encryptedDataValue), Cipher.DECRYPT_MODE);
 
         // THEN
-        byte[] expectedBytes = "some data ù€@".getBytes();
+        byte[] expectedBytes = "some data ù€@".getBytes(StandardCharsets.UTF_8);
         assertArrayEquals(expectedBytes, decryptedBytes);
     }
 
